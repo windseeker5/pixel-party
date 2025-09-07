@@ -149,7 +149,7 @@ class BigScreenState(rx.State):
         if self.is_slideshow_active and len(self.photos) > 0:
             self.next_photo()
     
-    def update_volume(self, value: List[float]):
+    def update_volume(self, value: list[int | float]):
         """Update music volume."""
         if value:
             self.volume = value[0] / 100

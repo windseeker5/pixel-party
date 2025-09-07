@@ -2,7 +2,7 @@
 
 import reflex as rx
 from components.mobile import mobile_interface, MobileState
-from components.big_screen import big_screen_layout, BigScreenState
+from components.advanced_big_screen import advanced_big_screen_layout, AdvancedBigScreenState
 from database.models import init_database
 
 class State(rx.State):
@@ -16,8 +16,8 @@ def index() -> rx.Component:
 
 
 def big_screen() -> rx.Component:
-    """Big screen slideshow interface."""
-    return big_screen_layout()
+    """Advanced big screen slideshow interface."""
+    return advanced_big_screen_layout()
 
 
 def admin() -> rx.Component:
@@ -70,6 +70,16 @@ app = rx.App(
     ),
     stylesheets=[
         "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap",
+        "https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css",
+        "https://unpkg.com/aos@2.3.1/dist/aos.css",
+        "https://unpkg.com/swiper@11/swiper-bundle.min.css",
+    ],
+    
+    # Add external JavaScript libraries
+    head_components=[
+        rx.script(src="https://unpkg.com/aos@2.3.1/dist/aos.js"),
+        rx.script(src="https://unpkg.com/swiper@11/swiper-bundle.min.js"),
+        rx.script(src="/assets/animations.js", defer=True),
     ],
 )
 

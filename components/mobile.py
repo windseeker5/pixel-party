@@ -2,6 +2,15 @@
 
 import reflex as rx
 from typing import List, Optional
+import os
+from pathlib import Path
+import uuid
+from PIL import Image
+from sqlmodel import Session
+from database.models import Photos, Guests, MusicQueue, get_session
+from utils.music_library import music_search
+from utils.ollama_client import ollama_client
+from utils.youtube_fallback import music_resolver
 
 
 class MobileState(rx.State):
@@ -28,7 +37,16 @@ class MobileState(rx.State):
     
     # UI state
     show_success_message: bool = False
-    current_view: str = "welcome"  # welcome, upload, success
+    current_view: str = "welcome"  # welcome, upload, success, music
+    
+    # Music search state
+    music_query: str = ""
+    music_search_results: List[dict] = []
+    suggested_songs: List[dict] = []
+    is_searching_music: bool = False
+    music_search_type: str = "mood"  # mood, title, artist
+    current_mood: str = ""
+    ollama_connected: bool = False
     
     def set_guest_name(self, name: str):
         """Set the guest name and create session."""
@@ -71,6 +89,96 @@ class MobileState(rx.State):
     def can_submit(self) -> bool:
         """Check if user can submit more content."""
         return self.total_submissions < self.max_submissions
+    
+    async def handle_upload(self, files: List[rx.UploadFile]):
+        """Handle file upload with progress tracking."""
+        if not files:
+            return
+        
+        self.is_uploading = True
+        self.upload_error = ""
+        
+        # Create uploads directory
+        upload_dir = Path("uploaded_content")
+        upload_dir.mkdir(exist_ok=True)
+        
+        for i, file in enumerate(files):
+            try:
+                # Update progress
+                self.upload_progress = int((i + 1) / len(files) * 100)
+                
+                # Generate unique filename
+                file_extension = Path(file.filename).suffix.lower()
+                unique_filename = f"{uuid.uuid4()}{file_extension}"
+                file_path = upload_dir / unique_filename
+                
+                # Save file
+                with open(file_path, "wb") as f:
+                    f.write(await file.read())
+                
+                # Resize if image
+                if file_extension in ['.jpg', '.jpeg', '.png', '.gif']:
+                    self._resize_image(file_path)
+                
+                # Save to database
+                self._save_to_database(str(file_path), file.filename)
+                
+                self.total_submissions += 1
+                
+            except Exception as e:
+                self.upload_error = f"Upload failed: {str(e)}"
+                self.is_uploading = False
+                return
+        
+        self.is_uploading = False
+        self.show_success()
+    
+    def _resize_image(self, file_path: Path):
+        """Resize image to max 1920x1080."""
+        try:
+            with Image.open(file_path) as img:
+                # Convert RGBA to RGB if necessary
+                if img.mode == 'RGBA':
+                    img = img.convert('RGB')
+                
+                # Calculate resize dimensions
+                max_width, max_height = 1920, 1080
+                img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
+                
+                # Save optimized image
+                img.save(file_path, optimize=True, quality=85)
+        except Exception as e:
+            print(f"Error resizing image {file_path}: {e}")
+    
+    def _save_to_database(self, file_path: str, original_filename: str):
+        """Save photo info to database."""
+        try:
+            with get_session() as session:
+                # Create or get guest record
+                guest = session.query(Guests).filter(Guests.name == self.guest_name).first()
+                if not guest:
+                    guest = Guests(name=self.guest_name, session_id=str(uuid.uuid4()))
+                    session.add(guest)
+                    session.commit()
+                    session.refresh(guest)
+                
+                # Create photo record
+                photo = Photos(
+                    filename=Path(file_path).name,
+                    original_filename=original_filename,
+                    file_path=file_path,
+                    wish_message=self.wish_message or "",
+                    guest_id=guest.id,
+                    guest_name=self.guest_name,
+                    file_size=Path(file_path).stat().st_size,
+                    display_duration=8  # 8 seconds default
+                )
+                
+                session.add(photo)
+                session.commit()
+                
+        except Exception as e:
+            print(f"Error saving to database: {e}")
 
 
 def welcome_screen() -> rx.Component:
@@ -149,45 +257,77 @@ def file_upload_component() -> rx.Component:
                 spacing="2"
             ),
             
-            # Upload area
-            rx.box(
-                rx.vstack(
-                    rx.cond(
-                        MobileState.is_uploading,
-                        rx.vstack(
-                            rx.spinner(size="3"),
-                            rx.text("Uploading...", size="3"),
-                            rx.progress(value=MobileState.upload_progress, width="100%"),
-                            spacing="2",
-                            align="center"
-                        ),
-                        rx.vstack(
-                            rx.icon("cloud_upload", size=32, color="gray.500"),
-                            rx.text(
-                                "Tap to select or drag files here",
-                                size="3",
-                                color="gray.600"
-                            ),
-                            rx.text(
-                                "Max 50MB • Photos & Videos",
-                                size="2",
-                                color="gray.500"
-                            ),
-                            spacing="2",
-                            align="center"
-                        )
+            # Upload area with actual file input
+            rx.cond(
+                MobileState.is_uploading,
+                # Upload progress display
+                rx.box(
+                    rx.vstack(
+                        rx.spinner(size="3"),
+                        rx.text("Uploading...", size="3"),
+                        rx.progress(value=MobileState.upload_progress, width="100%"),
+                        spacing="2",
+                        align="center"
                     ),
-                    align="center",
-                    justify="center",
-                    min_height="120px"
+                    border="2px dashed",
+                    border_color="blue.400",
+                    border_radius="md",
+                    padding="4",
+                    width="100%",
+                    min_height="120px",
+                    display="flex",
+                    align_items="center",
+                    justify_content="center"
                 ),
-                border="2px dashed",
-                border_color="gray.300",
-                border_radius="md",
-                padding="4",
-                width="100%",
-                _hover={"border_color": "blue.400"},
-                cursor="pointer"
+                # File upload component
+                rx.upload(
+                    rx.vstack(
+                        rx.icon("cloud_upload", size=32, color="gray.500"),
+                        rx.text(
+                            "Tap to select or drag files here",
+                            size="3",
+                            color="gray.600"
+                        ),
+                        rx.text(
+                            "Max 50MB • Photos & Videos",
+                            size="2",
+                            color="gray.500"
+                        ),
+                        spacing="2",
+                        align="center"
+                    ),
+                    id="upload",
+                    border="2px dashed",
+                    border_color="gray.300",
+                    border_radius="md",
+                    padding="4",
+                    width="100%",
+                    min_height="120px",
+                    multiple=True,
+                    accept={
+                        "image/*": [".jpg", ".jpeg", ".png", ".gif", ".bmp"],
+                        "video/*": [".mp4", ".mov", ".avi", ".mkv", ".webm"]
+                    },
+                    max_files=5,
+                    max_size="50MB",
+                    disabled=MobileState.is_uploading
+                )
+            ),
+            
+            # Upload trigger button
+            rx.cond(
+                ~MobileState.is_uploading & (rx.selected_files("upload").length() > 0),
+                rx.button(
+                    rx.hstack(
+                        rx.icon("upload", size=16),
+                        rx.text(f"Upload {rx.selected_files('upload').length()} Files"),
+                        spacing="2"
+                    ),
+                    on_click=MobileState.handle_upload(rx.selected_files("upload")),
+                    size="3",
+                    width="100%",
+                    color_scheme="green"
+                )
             ),
             
             # Error message
