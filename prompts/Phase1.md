@@ -1,4 +1,4 @@
-Based on the PROJECT_REQUIREMENTS.md PRD document, create the foundational Reflex application for the birthday party memory app with:
+Based on the PRD.md PRD document, create the foundational Reflex application for the birthday party memory app with:
 
 1. **Initial Reflex Project Setup:**
    - Set up proper Reflex project structure

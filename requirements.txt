@@ -1,0 +1,18 @@
+# Birthday Party Memory & Music App Dependencies
+# Core Reflex framework
+reflex>=0.4.0
+
+# Image processing and file handling
+Pillow>=10.0.0
+
+# Database (SQLite is built into Python)
+# No additional SQLite packages needed
+
+# Audio/video processing
+yt-dlp>=2023.7.6
+mutagen>=1.47.0
+
+# Additional dependencies that may be needed
+requests>=2.31.0
+python-multipart>=0.0.6
+aiofiles>=23.2.1
