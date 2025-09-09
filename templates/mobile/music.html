@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suggest Music - Birthday Party</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- daisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.24/dist/full.min.css" rel="stylesheet">
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="bg-base-100">
+    <div class="min-h-screen p-4">
+        <div class="max-w-md mx-auto">
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title">Suggest a Song for Valérie</h2>
+                    
+                    <form method="POST" action="/mobile/suggest_music" class="space-y-4">
+                        <!-- Search Input -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Search for a song</span>
+                            </label>
+                            <input type="text" name="search_query" 
+                                   placeholder="Happy Birthday, ABBA, celebration songs..." 
+                                   class="input input-bordered w-full" required>
+                            <input type="hidden" name="search_type" value="mood">
+                        </div>
+                        
+                        <!-- Quick suggestions -->
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-outline" onclick="setQuery('Happy Birthday')">Happy Birthday</button>
+                            <button type="button" class="btn btn-sm btn-outline" onclick="setQuery('celebration songs')">Party Songs</button>
+                            <button type="button" class="btn btn-sm btn-outline" onclick="setQuery('80s hits')">80s Hits</button>
+                        </div>
+                        
+                        <div class="card-actions justify-between">
+                            <a href="/mobile/upload" class="btn btn-outline">Back</a>
+                            <button type="submit" class="btn btn-primary">Add Song</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setQuery(query) {
+            document.querySelector('input[name="search_query"]').value = query;
+            document.querySelector('input[value="mood"]').checked = true;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie'
+PASS: Guest name validation
+PASS: File exists - GOPR1771 (1)-poster.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message']
+Files keys: ['photo']
+guest_name: 'Test User'
+PASS: Guest name validation
+PASS: File exists - test_photo.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Kenny'
+PASS: Guest name validation
+PASS: File exists - test_photo.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message']
+Files keys: ['photo']
+guest_name: 'Test User Kenny'
+PASS: Guest name validation
+PASS: File exists - test_image.jpg
+PASS: File type allowed

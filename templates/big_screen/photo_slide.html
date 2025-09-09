@@ -1,0 +1,21 @@
+{% if photos %}
+{% for photo in photos[:1] %}
+<div class="photo-slide animate-fade-in">
+    <img src="{{ photo.url }}" alt="Photo by {{ photo.guest_name }}" class="w-full h-full object-contain">
+    <div class="wish-overlay overlay-gradient">
+        <div class="wish-content">
+            <div class="text-2xl font-bold mb-2 text-birthday-gold">{{ photo.guest_name }}</div>
+            <div class="wish-message text-shadow">{{ photo.wish_message }}</div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="flex items-center justify-center h-96 bg-gradient-to-br from-birthday-pink/20 to-birthday-purple/20 rounded-xl">
+    <div class="text-center animate-pulse">
+        <div class="text-8xl mb-4">📸</div>
+        <h2 class="text-3xl font-bold mb-2">Waiting for Photos</h2>
+        <p class="text-xl text-gray-300">Photos will appear here as guests share their memories!</p>
+    </div>
+</div>
+{% endif %}

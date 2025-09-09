@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share a Memory - Birthday Party</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- daisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.24/dist/full.min.css" rel="stylesheet">
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="bg-base-100">
+    <div class="min-h-screen p-4">
+        <div class="max-w-md mx-auto">
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title">Share a Memory for Valérie</h2>
+                    
+                    <form action="/mobile/submit_memory" 
+                          method="POST"
+                          enctype="multipart/form-data"
+                          class="space-y-4">
+                        <!-- Name -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Your Name</span>
+                            </label>
+                            <input type="text" name="guest_name" value="{{ guest_name or '' }}" 
+                                   class="input input-bordered" {{ 'readonly' if guest_name else '' }}>
+                        </div>
+                        
+                        <!-- Photo Upload -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Add Photo or Video</span>
+                            </label>
+                            
+                            <!-- Hidden file input -->
+                            <input type="file" id="photo-input" name="photo" accept="image/*,video/*" 
+                                   class="hidden" required onchange="previewFile(this)">
+                            
+                            <!-- Custom upload area -->
+                            <div id="upload-area" 
+                                 class="border-2 border-dashed border-base-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
+                                 onclick="document.getElementById('photo-input').click()">
+                                <div class="flex flex-col items-center space-y-2">
+                                    <svg class="w-12 h-12 text-base-content opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                    </svg>
+                                    <div class="text-lg font-medium">Tap to add photo or video</div>
+                                    <div class="text-sm opacity-70">Or drag and drop here</div>
+                                </div>
+                            </div>
+                            
+                            <div id="file-preview" class="mt-4"></div>
+                        </div>
+                        
+                        <!-- Birthday Wish -->
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Birthday Wish</span>
+                                <span class="label-text-alt">Max 180 chars</span>
+                            </label>
+                            <textarea name="wish_message" 
+                                      class="textarea textarea-bordered h-24" 
+                                      placeholder="Happy Birthday Valérie! Remember that time we..." 
+                                      maxlength="180"
+                                      required></textarea>
+                        </div>
+                        
+                        <!-- Optional Music Suggestion -->
+                        <div class="form-control">
+                            <div class="flex items-center justify-between">
+                                <label class="label">
+                                    <span class="label-text">Suggest a Song (Optional)</span>
+                                </label>
+                                <button type="button" id="toggle-music" class="btn btn-xs btn-ghost">
+                                    Add Song
+                                </button>
+                            </div>
+                            
+                            <!-- Music search section (hidden by default) -->
+                            <div id="music-section" class="hidden space-y-3 mt-2">
+                                <input type="text" id="music-search" 
+                                       placeholder="Search for a song or describe mood..." 
+                                       class="input input-bordered w-full"
+                                       onkeyup="searchMusic(this.value)"
+                                       name="query">
+                                
+                                <!-- Search results -->
+                                <div id="music-results" class="space-y-2 max-h-40 overflow-y-auto"></div>
+                                
+                                <!-- Selected song display -->
+                                <div id="selected-song" class="hidden">
+                                    <div class="alert alert-success">
+                                        <span id="selected-song-text"></span>
+                                        <button type="button" onclick="clearSelectedSong()" class="btn btn-xs btn-ghost">Remove</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden input for selected song (must be inside form for HTMX) -->
+                                <input type="hidden" name="selected_song" id="selected-song-input" value="">
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="card-actions justify-end">
+                            <button type="submit" class="btn btn-primary w-full" id="submit-btn">
+                                Submit Memory
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // File preview function
+        function previewFile(input) {
+            const preview = document.getElementById('file-preview');
+            const uploadArea = document.getElementById('upload-area');
+            const file = input.files[0];
+            
+            if (file) {
+                // Hide upload area and show preview
+                uploadArea.style.display = 'none';
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let previewHTML = '';
+                    if (file.type.startsWith('image/')) {
+                        previewHTML = `
+                            <div class="text-center">
+                                <img src="${e.target.result}" class="w-full max-w-xs mx-auto rounded-lg shadow-lg mb-2" alt="Preview">
+                                <button type="button" onclick="clearFile()" class="btn btn-sm btn-outline">Change Photo</button>
+                            </div>
+                        `;
+                    } else if (file.type.startsWith('video/')) {
+                        previewHTML = `
+                            <div class="text-center">
+                                <video src="${e.target.result}" class="w-full max-w-xs mx-auto rounded-lg shadow-lg mb-2" controls></video>
+                                <button type="button" onclick="clearFile()" class="btn btn-sm btn-outline">Change Video</button>
+                            </div>
+                        `;
+                    }
+                    preview.innerHTML = previewHTML;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                clearFile();
+            }
+        }
+        
+        // Clear file function
+        function clearFile() {
+            const input = document.getElementById('photo-input');
+            const preview = document.getElementById('file-preview');
+            const uploadArea = document.getElementById('upload-area');
+            
+            input.value = '';
+            preview.innerHTML = '';
+            uploadArea.style.display = 'block';
+        }
+        
+        // Music search functionality
+        let searchTimeout;
+        
+        function toggleMusicSection() {
+            const musicSection = document.getElementById('music-section');
+            const toggleBtn = document.getElementById('toggle-music');
+            
+            if (musicSection.classList.contains('hidden')) {
+                musicSection.classList.remove('hidden');
+                toggleBtn.textContent = 'Cancel';
+                toggleBtn.classList.add('btn-error');
+            } else {
+                musicSection.classList.add('hidden');
+                toggleBtn.textContent = 'Add Song';
+                toggleBtn.classList.remove('btn-error');
+                clearSearchResults();
+                clearSelectedSong();
+            }
+        }
+        
+        // Music search functionality
+        let searchTimeout;
+        
+        function searchMusic(query) {
+            clearTimeout(searchTimeout);
+            
+            if (!query || query.length < 2) {
+                clearSearchResults();
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                fetch('/mobile/search_music', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ query: query })
+                })
+                .then(response => response.json())
+                .then(data => displaySearchResults(data.results || []))
+                .catch(error => {
+                    console.error('Search error:', error);
+                    displaySearchResults([]);
+                });
+            }, 300);
+        }
+        
+        function displaySearchResults(results) {
+            const resultsContainer = document.getElementById('music-results');
+            
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<div class="text-sm opacity-70 p-2">No results found</div>';
+                return;
+            }
+            
+            const resultHTML = results.map(song => `
+                <div class="card bg-base-200 cursor-pointer hover:bg-base-300 transition-colors" 
+                     onclick="selectSong('${song.title}', '${song.artist}', '${song.source}', '${song.file_path}')">
+                    <div class="card-body p-3">
+                        <div class="text-sm font-medium">${song.title}</div>
+                        <div class="text-xs opacity-70">${song.artist}${song.album ? ` - ${song.album}` : ''}</div>
+                        <div class="badge badge-xs ${song.source === 'local' ? 'badge-success' : 'badge-info'}">${song.source}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            resultsContainer.innerHTML = resultHTML;
+        }
+        
+        // Simplified selectSong function
+        function selectSong(title, artist, source, file_path) {
+            const selectedSongDiv = document.getElementById('selected-song');
+            const selectedSongText = document.getElementById('selected-song-text');
+            const selectedSongInput = document.getElementById('selected-song-input');
+            
+            selectedSongText.textContent = `${title} - ${artist}`;
+            selectedSongInput.value = JSON.stringify({ title, artist, source, file_path });
+            
+            selectedSongDiv.classList.remove('hidden');
+            clearSearchResults();
+            
+            // Hide search input
+            document.getElementById('music-search').value = '';
+        }
+        
+        function clearSelectedSong() {
+            document.getElementById('selected-song').classList.add('hidden');
+            document.getElementById('selected-song-input').value = '';
+        }
+        
+        function clearSearchResults() {
+            document.getElementById('music-results').innerHTML = '';
+        }
+
+
+        // Initialize drag and drop when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add toggle button event listener
+            document.getElementById('toggle-music').addEventListener('click', toggleMusicSection);
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('photo-input');
+            
+            if (!uploadArea || !fileInput) return;
+            
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            // Highlight drop area when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            // Handle dropped files
+            uploadArea.addEventListener('drop', handleDrop, false);
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            function highlight(e) {
+                uploadArea.classList.add('border-primary', 'bg-primary/5');
+            }
+            
+            function unhighlight(e) {
+                uploadArea.classList.remove('border-primary', 'bg-primary/5');
+            }
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    previewFile(fileInput);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

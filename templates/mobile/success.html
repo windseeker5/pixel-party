@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Memory Shared! - {{ config.PARTY_TITLE or 'Birthday Celebration' }}{% endblock %}
+
+{% block content %}
+    <div class="flex items-center justify-center">
+        <div class="card bg-white shadow-xl w-full max-w-md">
+            <div class="card-body text-center">
+                <!-- Success Icon -->
+                <div class="mx-auto w-20 h-20 bg-success rounded-full flex items-center justify-center mb-6">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                
+                <h2 class="card-title justify-center text-2xl mb-4">Memory Shared!</h2>
+                
+                <p class="text-lg mb-6">Your photo and birthday wish have been successfully shared! 🎉</p>
+                
+                {% if music_added %}
+                <div class="alert alert-info mb-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                    </svg>
+                    <span>Your song suggestion has also been added to the playlist!</span>
+                </div>
+                {% endif %}
+                
+                <p class="opacity-70 mb-8">Your memory will appear on the big screen soon and will be part of the digital memory book.</p>
+                
+                <div class="card-actions justify-center space-x-4">
+                    <a href="/mobile/main" class="btn btn-outline">
+                        Share Another Memory
+                    </a>
+                    <button onclick="window.close()" class="btn btn-primary">
+                        Done
+                    </button>
+                </div>
+                
+                <!-- Auto-close timer -->
+                <div class="mt-6 text-sm opacity-50">
+                    This window will close automatically in <span id="countdown">10</span> seconds
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Auto-close countdown
+    let seconds = 10;
+    const countdown = document.getElementById('countdown');
+    
+    const timer = setInterval(() => {
+        seconds--;
+        countdown.textContent = seconds;
+        
+        if (seconds <= 0) {
+            clearInterval(timer);
+            window.close();
+        }
+    }, 1000);
+    
+    // If window.close() doesn't work (blocked), redirect to big screen
+    setTimeout(() => {
+        if (!window.closed) {
+            window.location.href = '/';
+        }
+    }, 10500);
+</script>
+{% endblock %}

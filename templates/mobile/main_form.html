@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Share Memory - {{ config.PARTY_TITLE or 'Birthday Celebration' }}{% endblock %}
+
+{% block content %}
+<div class="card bg-white shadow-xl">
+    <div class="card-body">
+        <div class="flex items-center justify-center mb-6">
+            <h2 class="card-title text-2xl text-birthday-pink">Share a Memory for {{ host_name }}</h2>
+            <div class="ml-3" 
+                 hx-get="/mobile/ollama_status" 
+                 hx-trigger="load"
+                 hx-target="this">
+                <div class="tooltip" data-tip="Checking AI connection...">
+                    <div class="w-3 h-3 rounded-full bg-gray-500 animate-pulse"></div>
+                </div>
+            </div>
+        </div>
+        
+        <form hx-post="/mobile/submit_memory" 
+              hx-encoding="multipart/form-data"
+              hx-target="body"
+              hx-swap="outerHTML"
+              hx-indicator="#submit-spinner"
+              class="space-y-4">
+            
+            <!-- Name -->
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-medium">Your Name</span>
+                </label>
+                <input type="text" name="guest_name" value="{{ guest_name or '' }}" 
+                       placeholder="Enter your name..."
+                       class="input input-bordered focus:input-primary" required>
+            </div>
+            
+            <!-- Photo Upload -->
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-medium">Add Photo or Video</span>
+                </label>
+                <input type="file" name="photo" accept="image/*,video/*" 
+                       class="file-input file-input-bordered file-input-primary" required>
+                <div class="label">
+                    <span class="label-text-alt">Max file size: 50MB</span>
+                </div>
+            </div>
+            
+            <!-- Birthday Wish -->
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-medium">Birthday Wish</span>
+                    <span class="label-text-alt">Max 180 chars</span>
+                </label>
+                <textarea name="wish_message" 
+                          class="textarea textarea-bordered textarea-primary h-24" 
+                          placeholder="Happy Birthday {{ host_name }}! Remember that time we..." 
+                          maxlength="180"
+                          required></textarea>
+            </div>
+            
+            <!-- Optional Music Suggestion -->
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-medium">Suggest a Song (Optional)</span>
+                </label>
+                <div class="collapse collapse-arrow bg-base-200">
+                    <input type="checkbox" class="peer" /> 
+                    <div class="collapse-title text-sm font-medium">
+                        Add a song to the party playlist 🎵
+                    </div>
+                    <div class="collapse-content">
+                        <div class="space-y-3">
+                            <input type="text" 
+                                   placeholder="Search for a song or describe mood..." 
+                                   class="input input-bordered w-full"
+                                   hx-post="/mobile/search_music"
+                                   hx-trigger="keyup changed delay:500ms"
+                                   hx-target="#music-results"
+                                   name="query">
+                            
+                            <!-- Search results -->
+                            <div id="music-results" class="space-y-1 max-h-64 overflow-y-auto"></div>
+                            
+                            <!-- Selected song display -->
+                            <div id="selected-song" class="hidden">
+                                <div class="alert alert-success">
+                                    <span id="selected-song-text"></span>
+                                    <button type="button" 
+                                            onclick="document.getElementById('selected-song').classList.add('hidden'); document.getElementById('selected-song-input').value='';"
+                                            class="btn btn-xs btn-ghost">Remove</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden input for selected song -->
+                            <input type="hidden" name="selected_song" id="selected-song-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="card-actions justify-end">
+                <button type="submit" class="btn btn-success w-full">
+                    <span class="htmx-indicator loading loading-spinner loading-sm" id="submit-spinner"></span>
+                    Submit Memory
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Simple function to select song from HTMX search results
+    function selectSong(title, artist, source, file_path) {
+        const selectedSongDiv = document.getElementById('selected-song');
+        const selectedSongText = document.getElementById('selected-song-text');
+        const selectedSongInput = document.getElementById('selected-song-input');
+        
+        selectedSongText.textContent = `${title} - ${artist}`;
+        selectedSongInput.value = JSON.stringify({ title, artist, source, file_path: file_path || '' });
+        
+        selectedSongDiv.classList.remove('hidden');
+        
+        // Clear search results
+        document.getElementById('music-results').innerHTML = '';
+    }
+</script>
+
+{% endblock %}

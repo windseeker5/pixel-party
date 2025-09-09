@@ -1,0 +1,17 @@
+<!-- Photo display component for HTMX updates -->
+<div class="relative w-full h-full min-h-96">
+    <img src="/media/photos/{{ photo.filename }}" 
+         alt="Birthday Memory from {{ photo.guest_name }}"
+         class="w-full h-full object-cover rounded-2xl">
+    
+    {% if photo.wish_message %}
+    <div class="wish-overlay">
+        <div class="wish-text">
+            "{{ photo.wish_message }}"
+        </div>
+        <div class="submitter-info">
+            - {{ photo.guest_name }}, {{ photo.uploaded_at.strftime('%I:%M %p') }}
+        </div>
+    </div>
+    {% endif %}
+</div>

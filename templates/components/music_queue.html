@@ -1,0 +1,21 @@
+<!-- Music queue component -->
+{% if music_queue %}
+    <div class="space-y-2">
+        {% for song in music_queue %}
+        <div class="flex items-center space-x-3 bg-white bg-opacity-10 rounded p-2">
+            <!-- Music icon -->
+            <div class="w-8 h-8 bg-purple-500 rounded flex items-center justify-center text-xs flex-shrink-0">
+                🎵
+            </div>
+            <!-- Song info -->
+            <div class="flex-1 text-xs overflow-hidden">
+                <div class="font-semibold truncate">{{ song.song_title or song.title or 'Unknown Song' }}</div>
+                <div class="opacity-75 truncate">{{ song.artist or 'Unknown Artist' }}</div>
+                <div class="opacity-50 truncate">by {{ song.guest_name or 'Unknown' }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-sm opacity-75">No music requests yet...</div>
+{% endif %}

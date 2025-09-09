@@ -1,0 +1,22 @@
+<!-- Photo queue component -->
+{% if photos %}
+    <div class="space-y-2">
+        {% for photo in photos %}
+        <div class="flex items-center space-x-3 bg-white bg-opacity-10 rounded p-2">
+            <!-- Photo thumbnail -->
+            <div class="w-10 h-10 rounded overflow-hidden bg-base-300 flex-shrink-0">
+                <img src="/media/photos/{{ photo.filename }}" 
+                     alt="Memory by {{ photo.guest_name }}"
+                     class="w-full h-full object-cover">
+            </div>
+            <!-- Photo info -->
+            <div class="flex-1 text-xs">
+                <div class="font-semibold">{{ photo.guest_name }}</div>
+                <div class="opacity-75">{{ photo.uploaded_at.strftime('%I:%M %p') }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-sm opacity-75">No photos yet...</div>
+{% endif %}
