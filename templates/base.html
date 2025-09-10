@@ -12,8 +12,7 @@
     <!-- HTMX for dynamic interactions -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     
-    <!-- Heroicons for beautiful icons -->
-    <script src="https://unpkg.com/heroicons@2.0.18/24/outline/index.js"></script>
+    <!-- Note: Using inline SVG icons instead of Heroicons CDN to avoid MIME type issues -->
     
     <!-- Custom Tailwind config and styles -->
     <script>
@@ -97,15 +96,126 @@
             color: #EF4444;
         }
         
-        /* Custom file input styling */
-        .file-input-custom {
+        /* Classy Professional Drop Zone Styling */
+        .photo-dropzone-empty,
+        .photo-dropzone-filled {
+            height: 192px; /* Reduced by 20% (240px → 192px) */
+            border: 2px dashed #4b5563;
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.02); /* Barely visible, elegant */
+            cursor: pointer;
+            transition: all 0.2s ease; /* Snappier feel */
             position: relative;
             overflow: hidden;
         }
         
-        .file-input-custom input[type=file] {
+        .photo-dropzone-empty:hover {
+            border-color: #6366f1;
+            background: rgba(255, 255, 255, 0.04); /* Subtle brightness increase */
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2); /* Gentle glow */
+        }
+        
+        .photo-dropzone-empty:active {
+            border-color: #4f46e5;
+            background: rgba(255, 255, 255, 0.06);
+        }
+        
+        .photo-dropzone-filled {
+            border: 2px solid #6b7280; /* Subtle gray when filled */
+            background: transparent;
+            height: 192px; /* Same reduced height */
+        }
+        
+        .photo-dropzone-filled:hover {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.15); /* Very subtle */
+        }
+        
+        .dropzone-content-empty {
             position: absolute;
-            left: -9999px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Force exact center */
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .dropzone-content-empty svg {
+            display: block;
+            margin: 0 auto 0.5rem auto;
+        }
+        
+        .dropzone-content-preview {
+            position: relative;
+            width: 100%;
+            height: 192px; /* Match reduced container height */
+            padding: 0; /* Remove padding so photo fills completely */
+        }
+        
+        .dropzone-content-preview img,
+        .dropzone-content-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Fill entire space, crop if necessary */
+            border-radius: 0.75rem; /* Match container radius */
+        }
+        
+        /* Drag and drop states - Subtle */
+        .photo-dropzone-dragover {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.05); /* Very subtle green tint */
+            box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.2);
+        }
+        
+        /* Preview overlay controls */
+        .dropzone-content-preview .absolute {
+            border-radius: 0.75rem;
+        }
+        
+        .dropzone-content-preview:hover .transform {
+            transform: translateY(0);
+        }
+        
+        /* Smooth transitions for state changes */
+        #photo-dropzone * {
+            transition: all 0.3s ease;
+        }
+        
+        /* Mobile touch improvements */
+        @media (max-width: 768px) {
+            .photo-dropzone-empty,
+            .photo-dropzone-filled {
+                height: 160px; /* Reduced by 20% (200px → 160px) */
+            }
+            
+            .dropzone-content-empty {
+                padding: 0; /* No padding on mobile either */
+                gap: 0.375rem;
+            }
+            
+            .dropzone-content-preview {
+                height: 160px; /* Match reduced container height on mobile */
+                padding: 0; /* No padding on mobile either */
+            }
+        }
+        
+        /* Focus outline standardization - Use theme blue */
+        input:focus,
+        textarea:focus,
+        select:focus,
+        button:focus,
+        .photo-dropzone-empty:focus,
+        .photo-dropzone-filled:focus {
+            outline: 2px solid #6366f1;
+            outline-offset: 2px;
+        }
+        
+        /* File validation error state - Subtle */
+        .photo-dropzone-error {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.05); /* Very subtle red tint */
+            box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.2);
+            animation: shake 0.5s ease-in-out;
         }
         
         /* HTMX loading indicators */

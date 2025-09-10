@@ -34,7 +34,7 @@
                        class="input input-bordered focus:input-primary" required>
             </div>
             
-            <!-- Photo Upload -->
+            <!-- Photo Upload Drop Zone -->
             <div class="form-control">
                 <label class="label">
                     <span class="label-text font-medium flex items-center">
@@ -45,13 +45,67 @@
                         Add Photo or Video
                     </span>
                 </label>
+                
+                <!-- Hidden file input -->
                 <input type="file" name="photo" accept="image/*,video/*" 
-                       class="file-input file-input-bordered file-input-primary w-full" 
-                       onchange="previewFile(this, 'file-preview')" required>
+                       id="photo-input" class="hidden" 
+                       onchange="handleFileSelect(this)" required>
+                
+                <!-- Drop Zone -->
+                <div id="photo-dropzone" 
+                     class="photo-dropzone-empty"
+                     onclick="document.getElementById('photo-input').click()"
+                     ondragover="handleDragOver(event)"
+                     ondragleave="handleDragLeave(event)"
+                     ondrop="handleDrop(event)">
+                    
+                    <!-- Empty State -->
+                    <div id="dropzone-empty" class="dropzone-content-empty">
+                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <p class="text-gray-600 font-medium text-center leading-relaxed">
+                            Tap to add photo or video<br>
+                            <span class="text-sm">Or drag and drop</span>
+                        </p>
+                    </div>
+                    
+                    <!-- Preview State -->
+                    <div id="dropzone-preview" class="dropzone-content-preview hidden">
+                        <div id="preview-container" class="relative w-full h-full">
+                            <!-- Preview content will be inserted here -->
+                        </div>
+                        
+                        <!-- Overlay Controls -->
+                        <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 flex items-end justify-center">
+                            <div class="transform translate-y-full group-hover:translate-y-0 transition-transform duration-200 pb-4">
+                                <div class="flex space-x-2">
+                                    <button type="button" 
+                                            onclick="changePhoto(event)"
+                                            class="btn btn-sm btn-primary">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                        </svg>
+                                        Change
+                                    </button>
+                                    <button type="button" 
+                                            onclick="removePhoto(event)"
+                                            class="btn btn-sm btn-error">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="label">
                     <span class="label-text-alt">Max file size: 50MB</span>
                 </div>
-                <div id="file-preview" class="mt-2"></div>
             </div>
             
             <!-- Birthday Wish -->
@@ -290,24 +344,154 @@
         }
     }
     
-    // File preview function
-    function previewFile(input, previewId) {
-        const preview = document.getElementById(previewId);
+    // Professional Drop Zone Functionality
+    function handleFileSelect(input) {
         const file = input.files[0];
-        
         if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                if (file.type.startsWith('image/')) {
-                    preview.innerHTML = `<img src="${e.target.result}" class="max-h-32 rounded-lg shadow-sm border">`;
-                } else if (file.type.startsWith('video/')) {
-                    preview.innerHTML = `<video controls class="max-h-32 rounded-lg shadow-sm border"><source src="${e.target.result}" type="${file.type}"></video>`;
-                }
-            };
-            reader.readAsDataURL(file);
-        } else {
-            preview.innerHTML = '';
+            if (validateFile(file)) {
+                showPreview(file);
+            } else {
+                // Reset file input if invalid
+                input.value = '';
+            }
         }
+    }
+    
+    function validateFile(file) {
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        const allowedTypes = ['image/', 'video/'];
+        
+        if (file.size > maxSize) {
+            showError('File size must be less than 50MB');
+            return false;
+        }
+        
+        if (!allowedTypes.some(type => file.type.startsWith(type))) {
+            showError('Please select an image or video file');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    function showPreview(file) {
+        const dropzone = document.getElementById('photo-dropzone');
+        const emptyState = document.getElementById('dropzone-empty');
+        const previewState = document.getElementById('dropzone-preview');
+        const previewContainer = document.getElementById('preview-container');
+        
+        // Switch to filled state
+        dropzone.className = 'photo-dropzone-filled group';
+        emptyState.classList.add('hidden');
+        previewState.classList.remove('hidden');
+        
+        // Create preview content
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (file.type.startsWith('image/')) {
+                previewContainer.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover rounded-lg">
+                `;
+            } else if (file.type.startsWith('video/')) {
+                previewContainer.innerHTML = `
+                    <video src="${e.target.result}" class="w-full h-full object-cover rounded-lg" controls>
+                        <source src="${e.target.result}" type="${file.type}">
+                        Your browser does not support the video tag.
+                    </video>
+                `;
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    function changePhoto(event) {
+        event.stopPropagation();
+        document.getElementById('photo-input').click();
+    }
+    
+    function removePhoto(event) {
+        event.stopPropagation();
+        
+        const dropzone = document.getElementById('photo-dropzone');
+        const emptyState = document.getElementById('dropzone-empty');
+        const previewState = document.getElementById('dropzone-preview');
+        const previewContainer = document.getElementById('preview-container');
+        const fileInput = document.getElementById('photo-input');
+        
+        // Reset file input
+        fileInput.value = '';
+        
+        // Switch back to empty state
+        dropzone.className = 'photo-dropzone-empty';
+        emptyState.classList.remove('hidden');
+        previewState.classList.add('hidden');
+        previewContainer.innerHTML = '';
+        
+        // Clear any error states
+        clearError();
+    }
+    
+    function showError(message) {
+        const dropzone = document.getElementById('photo-dropzone');
+        dropzone.classList.add('photo-dropzone-error');
+        
+        // Show error message (could be enhanced with a toast notification)
+        alert(message);
+        
+        // Remove error state after animation
+        setTimeout(() => {
+            dropzone.classList.remove('photo-dropzone-error');
+        }, 500);
+    }
+    
+    function clearError() {
+        const dropzone = document.getElementById('photo-dropzone');
+        dropzone.classList.remove('photo-dropzone-error');
+    }
+    
+    // Drag and Drop Support
+    function handleDragOver(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const dropzone = document.getElementById('photo-dropzone');
+        
+        // Only add dragover class if in empty state
+        if (dropzone.classList.contains('photo-dropzone-empty')) {
+            dropzone.classList.add('photo-dropzone-dragover');
+        }
+    }
+    
+    function handleDragLeave(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const dropzone = document.getElementById('photo-dropzone');
+        dropzone.classList.remove('photo-dropzone-dragover');
+    }
+    
+    function handleDrop(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const dropzone = document.getElementById('photo-dropzone');
+        dropzone.classList.remove('photo-dropzone-dragover');
+        
+        const files = event.dataTransfer.files;
+        if (files.length > 0) {
+            const fileInput = document.getElementById('photo-input');
+            
+            // Create a new FileList to assign to the input
+            const dt = new DataTransfer();
+            dt.items.add(files[0]);
+            fileInput.files = dt.files;
+            
+            // Handle the file
+            handleFileSelect(fileInput);
+        }
+    }
+    
+    // Legacy file preview function (kept for compatibility)
+    function previewFile(input, previewId) {
+        handleFileSelect(input);
     }
 </script>
 
