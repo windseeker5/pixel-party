@@ -4,18 +4,23 @@
 
 {% block content %}
     <div class="flex items-center justify-center">
-        <div class="card bg-white shadow-xl w-full max-w-md">
+        <div class="card bg-base-100 shadow-xl w-full max-w-md">
             <div class="card-body text-center">
-                <!-- Success Icon -->
-                <div class="mx-auto w-20 h-20 bg-success rounded-full flex items-center justify-center mb-6">
-                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                <!-- Success Icon with Animation -->
+                <div class="mx-auto w-20 h-20 bg-success rounded-full flex items-center justify-center mb-6 animate-bounce">
+                    <svg class="w-12 h-12 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="success-check">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" class="checkmark-draw"></path>
                     </svg>
                 </div>
                 
-                <h2 class="card-title justify-center text-2xl mb-4">Memory Shared!</h2>
+                <h2 class="card-title justify-center text-2xl mb-4 text-success">Memory Shared!</h2>
                 
-                <p class="text-lg mb-6">Your photo and birthday wish have been successfully shared! 🎉</p>
+                <p class="text-lg mb-6 flex items-center justify-center">
+                    <svg class="w-6 h-6 mr-2 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Your photo and birthday wish have been successfully shared!
+                </p>
                 
                 {% if music_added %}
                 <div class="alert alert-info mb-6">
@@ -39,7 +44,7 @@
                 
                 <!-- Auto-close timer -->
                 <div class="mt-6 text-sm opacity-50">
-                    This window will close automatically in <span id="countdown">10</span> seconds
+                    Returning to form in <span id="countdown" class="font-bold text-primary">15</span> seconds
                 </div>
             </div>
         </div>
@@ -47,10 +52,87 @@
 
 {% endblock %}
 
+{% block extra_head %}
+<style>
+    /* Checkmark draw animation */
+    .checkmark-draw {
+        stroke-dasharray: 100;
+        stroke-dashoffset: 100;
+        animation: checkmark-draw 1s ease-in-out forwards;
+    }
+    
+    @keyframes checkmark-draw {
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+    
+    /* Success bounce animation */
+    .success-bounce {
+        animation: success-bounce 0.6s ease-in-out;
+    }
+    
+    @keyframes success-bounce {
+        0%, 20%, 50%, 80%, 100% { 
+            transform: translateY(0); 
+        }
+        40% { 
+            transform: translateY(-30px); 
+        }
+        60% { 
+            transform: translateY(-15px); 
+        }
+    }
+    
+    /* Confetti effect */
+    .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: #FFD700;
+        animation: confetti-fall 3s ease-out infinite;
+    }
+    
+    @keyframes confetti-fall {
+        0% { 
+            transform: translateY(-100vh) rotate(0deg); 
+            opacity: 1; 
+        }
+        100% { 
+            transform: translateY(100vh) rotate(360deg); 
+            opacity: 0; 
+        }
+    }
+</style>
+{% endblock %}
+
 {% block extra_scripts %}
 <script>
+    // Add confetti effect
+    function createConfetti() {
+        const colors = ['#FFD700', '#FF1493', '#9333EA', '#00FF00'];
+        
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animationDelay = Math.random() * 2 + 's';
+            confetti.style.animationDuration = (Math.random() * 2 + 3) + 's';
+            document.body.appendChild(confetti);
+            
+            // Remove confetti after animation
+            setTimeout(() => {
+                confetti.remove();
+            }, 5000);
+        }
+    }
+    
+    // Trigger confetti on page load
+    createConfetti();
+    
     // Auto-close countdown
-    let seconds = 10;
+    let seconds = 15;
     const countdown = document.getElementById('countdown');
     
     const timer = setInterval(() => {
@@ -59,15 +141,8 @@
         
         if (seconds <= 0) {
             clearInterval(timer);
-            window.close();
+            window.location.href = '/mobile/main';
         }
     }, 1000);
-    
-    // If window.close() doesn't work (blocked), redirect to big screen
-    setTimeout(() => {
-        if (!window.closed) {
-            window.location.href = '/';
-        }
-    }, 10500);
 </script>
 {% endblock %}

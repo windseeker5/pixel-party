@@ -23,7 +23,7 @@ class Config:
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
     
     # Music library settings
-    MUSIC_LIBRARY_PATH = Path('/mnt/media/MUSIC')  # Source library
+    MUSIC_LIBRARY_PATH = Path('/home/kdresdell/Music')  # Source library
     MUSIC_COPY_FOLDER = BASE_DIR / 'media' / 'music'        # Destination for selected songs
     SUPPORTED_AUDIO_FORMATS = {'.mp3', '.flac', '.m4a', '.ogg', '.wav', '.aac'}
     

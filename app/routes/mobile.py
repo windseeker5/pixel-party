@@ -2,6 +2,7 @@
 
 import os
 import uuid
+import threading
 from datetime import datetime
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session, jsonify
 from werkzeug.utils import secure_filename
@@ -10,6 +11,26 @@ from app import db
 from app.models import Guest, Photo, MusicQueue, get_setting
 
 mobile_bp = Blueprint('mobile', __name__)
+
+
+def download_youtube_async(video_url, title, artist, app):
+    """Download YouTube audio in background thread."""
+    with app.app_context():
+        try:
+            from app.services.youtube_service import get_youtube_service
+            youtube_service = get_youtube_service()
+            
+            current_app.logger.info(f"🎵 Background downloading: {title} by {artist}")
+            copied_filename = youtube_service.download_audio(video_url, title, artist)
+            
+            if copied_filename:
+                current_app.logger.info(f"✅ Background download complete: {copied_filename}")
+                # TODO: Add to music queue database here if needed
+            else:
+                current_app.logger.error(f"❌ Background download failed: {video_url}")
+                
+        except Exception as e:
+            current_app.logger.error(f"❌ Background YouTube download error: {e}")
 
 
 @mobile_bp.route('/')
@@ -256,9 +277,19 @@ def submit_memory():
                         artist = song_data.get('artist', '')
                         
                         if file_path:
-                            # file_path is relative to music library root
-                            library_root = Path(current_app.config['MUSIC_LIBRARY_PATH'])
-                            source_path = library_root / file_path
+                            # Handle both absolute and relative paths
+                            if file_path.startswith('/mnt/media/MUSIC'):
+                                # Translate old mounted path to current music location
+                                relative_path = file_path.replace('/mnt/media/MUSIC/', '')
+                                library_root = Path(current_app.config['MUSIC_LIBRARY_PATH'])
+                                source_path = library_root / relative_path
+                            elif file_path.startswith('/'):
+                                # Already absolute path
+                                source_path = Path(file_path)
+                            else:
+                                # Relative path to music library root
+                                library_root = Path(current_app.config['MUSIC_LIBRARY_PATH'])
+                                source_path = library_root / file_path
                             
                             current_app.logger.info(f"MUSIC DEBUG: Attempting to copy from {source_path}")
                             
@@ -283,6 +314,31 @@ def submit_memory():
                             
                     except Exception as e:
                         current_app.logger.error(f"Music copy failed: {e}")
+                        
+                elif song_data.get('source') == 'youtube':
+                    # Start YouTube download in background
+                    try:
+                        video_url = song_data.get('url', '')
+                        title = song_data.get('title', '')
+                        artist = song_data.get('artist', '')
+                        
+                        current_app.logger.info(f"🚀 Starting background YouTube download: {title} by {artist}")
+                        
+                        if video_url and title:
+                            # Start download in background thread
+                            download_thread = threading.Thread(
+                                target=download_youtube_async,
+                                args=(video_url, title, artist, current_app._get_current_object())
+                            )
+                            download_thread.daemon = True
+                            download_thread.start()
+                            
+                            current_app.logger.info(f"✅ Background download started for: {title} by {artist}")
+                        else:
+                            current_app.logger.error(f"Missing YouTube URL or title for download")
+                            
+                    except Exception as e:
+                        current_app.logger.error(f"Failed to start YouTube download: {e}")
                 
                 music_request = MusicQueue(
                     guest_id=guest.id,
@@ -367,24 +423,84 @@ def search_music():
                 'source': 'local'
             })
         
-        # Return local results if found
+        # Always try to reach 10 total suggestions by adding YouTube results
+        target_total = 10
+        local_count = len(formatted_results)
+        
+        if local_count < target_total:
+            try:
+                from app.services.youtube_service import get_youtube_service
+                youtube_service = get_youtube_service()
+                
+                # Calculate how many more results we need
+                youtube_needed = target_total - local_count
+                
+                # Search YouTube for music (get more than needed in case of duplicates)
+                youtube_results = youtube_service.search_youtube(search_query, max_results=youtube_needed + 3)
+                
+                # Format YouTube results and avoid duplicates with local results
+                local_song_keys = set()
+                for local_result in formatted_results:
+                    key = f"{local_result['title'].lower()}|||{local_result['artist'].lower()}"
+                    local_song_keys.add(key)
+                
+                youtube_added = 0
+                for result in youtube_results:
+                    # Check if this YouTube song is already in local results
+                    youtube_key = f"{result['title'].lower()}|||{result['artist'].lower()}"
+                    
+                    if youtube_key not in local_song_keys and youtube_added < youtube_needed:
+                        formatted_results.append({
+                            'title': result['title'],
+                            'artist': result['artist'],
+                            'album': result.get('album', ''),
+                            'duration': result['duration_formatted'],
+                            'url': result['url'],  # Store YouTube URL for download
+                            'source': 'youtube'
+                        })
+                        local_song_keys.add(youtube_key)  # Track to avoid future duplicates
+                        youtube_added += 1
+                    
+            except Exception as e:
+                current_app.logger.error(f"YouTube search error: {e}")
+        
+        # Return results (local or YouTube)
         if formatted_results:
             if is_htmx_request():
                 # Return HTML for HTMX
                 html_results = ""
                 for song in formatted_results:
-                    # Escape single quotes for JavaScript
-                    title_escaped = song['title'].replace("'", "\\'")
-                    artist_escaped = song['artist'].replace("'", "\\'")
-                    file_path_escaped = song['file_path'].replace("'", "\\'")
+                    # Use HTML escaping for display
+                    import html
+                    title_display = html.escape(song['title'])
+                    artist_display = html.escape(song['artist'])
+                    album_display = html.escape(song.get('album', ''))
                     
                     html_results += f'''
-                    <div class="card bg-base-200 cursor-pointer hover:bg-base-300 transition-colors" 
-                         onclick="selectSong('{title_escaped}', '{artist_escaped}', '{song['source']}', '{file_path_escaped}')">
+                    <div class="card bg-base-200 shadow-sm border border-base-300 hover:shadow-md transition-all duration-200">
                         <div class="card-body p-3">
-                            <div class="text-sm font-medium">{song['title']}</div>
-                            <div class="text-xs opacity-70">{song['artist']}{' - ' + song['album'] if song['album'] else ''}</div>
-                            <div class="badge badge-xs {'badge-success' if song['source'] == 'local' else 'badge-info'}">{song['source']}</div>
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium text-base-content">{title_display}</div>
+                                    <div class="text-xs opacity-70 mt-1">{artist_display}{' • ' + album_display if album_display else ''}</div>
+                                    <div class="flex items-center gap-2 mt-2">
+                                        <div class="badge badge-xs {'badge-success' if song['source'] == 'local' else 'badge-info'}">{song['source']}</div>
+                                        <div class="text-xs opacity-60">{song['duration']}</div>
+                                    </div>
+                                </div>
+                                <button type="button" 
+                                        class="btn btn-primary btn-sm ml-3 select-song-btn"
+                                        data-title="{html.escape(song['title'])}"
+                                        data-artist="{html.escape(song['artist'])}"
+                                        data-source="{song['source']}"
+                                        data-file-path="{html.escape(song.get('file_path', ''))}"
+                                        data-url="{html.escape(song.get('url', ''))}">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    Select
+                                </button>
+                            </div>
                         </div>
                     </div>
                     '''
@@ -419,12 +535,26 @@ def search_music():
                         artist_escaped = song['artist'].replace("'", "\\'")
                         
                         html_results += f'''
-                        <div class="card bg-base-200 cursor-pointer hover:bg-base-300 transition-colors" 
-                             onclick="selectSong('{title_escaped}', '{artist_escaped}', '{song['source']}', '')">
+                        <div class="card bg-base-200 shadow-sm border border-base-300 hover:shadow-md transition-all duration-200">
                             <div class="card-body p-3">
-                                <div class="text-sm font-medium">{song['title']}</div>
-                                <div class="text-xs opacity-70">{song['artist']}{' - ' + song['album'] if song['album'] else ''}</div>
-                                <div class="badge badge-xs badge-warning">AI suggestion</div>
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <div class="text-sm font-medium text-base-content">{song['title']}</div>
+                                        <div class="text-xs opacity-70 mt-1">{song['artist']}{' • ' + song['album'] if song['album'] else ''}</div>
+                                        <div class="flex items-center gap-2 mt-2">
+                                            <div class="badge badge-xs badge-warning">AI suggestion</div>
+                                            <div class="text-xs opacity-60">{song['duration']}</div>
+                                        </div>
+                                    </div>
+                                    <button type="button" 
+                                            class="btn btn-primary btn-sm ml-3"
+                                            onclick="selectSong('{title_escaped}', '{artist_escaped}', '{song['source']}', '')">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                        Select
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         '''
@@ -450,12 +580,26 @@ def search_music():
             artist_escaped = fallback_results[0]['artist'].replace("'", "\\'")
             
             html_result = f'''
-            <div class="card bg-base-200 cursor-pointer hover:bg-base-300 transition-colors" 
-                 onclick="selectSong('{title_escaped}', '{artist_escaped}', 'request', '')">
+            <div class="card bg-base-200 shadow-sm border border-base-300 hover:shadow-md transition-all duration-200">
                 <div class="card-body p-3">
-                    <div class="text-sm font-medium">{fallback_results[0]['title']}</div>
-                    <div class="text-xs opacity-70">{fallback_results[0]['artist']}</div>
-                    <div class="badge badge-xs badge-secondary">Manual request</div>
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="text-sm font-medium text-base-content">{fallback_results[0]['title']}</div>
+                            <div class="text-xs opacity-70 mt-1">{fallback_results[0]['artist']}</div>
+                            <div class="flex items-center gap-2 mt-2">
+                                <div class="badge badge-xs badge-secondary">Manual request</div>
+                                <div class="text-xs opacity-60">{fallback_results[0]['duration']}</div>
+                            </div>
+                        </div>
+                        <button type="button" 
+                                class="btn btn-primary btn-sm ml-3"
+                                onclick="selectSong('{title_escaped}', '{artist_escaped}', 'request', '')">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Select
+                        </button>
+                    </div>
                 </div>
             </div>
             '''

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug PixelParty Music Search</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.24/dist/full.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="min-h-screen bg-base-200 p-4">
+    <div class="max-w-md mx-auto">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-center">🔧 Debug Music Search</h2>
+                
+                <!-- Test Search -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Search Query:</span>
+                    </label>
+                    <input type="text" 
+                           placeholder="Type: bob si" 
+                           class="input input-bordered w-full"
+                           hx-post="http://127.0.0.1:5001/mobile/search_music"
+                           hx-trigger="input delay:500ms, keyup delay:500ms"
+                           hx-target="#debug-results"
+                           hx-include="this"
+                           hx-indicator="#debug-spinner"
+                           name="query"
+                           autocomplete="off">
+                </div>
+                
+                <!-- Loading Indicator -->
+                <div id="debug-spinner" class="htmx-indicator text-center py-2">
+                    <span class="loading loading-spinner loading-sm"></span>
+                    <span class="text-sm opacity-70 ml-2">Searching...</span>
+                </div>
+                
+                <!-- Results -->
+                <div id="debug-results" class="space-y-2 max-h-64 overflow-y-auto border-2 border-dashed border-base-300 p-2 min-h-[100px]">
+                    <div class="text-center text-sm opacity-60">Results will appear here...</div>
+                </div>
+                
+                <!-- Test Button Selection -->
+                <div id="selected-song" class="hidden">
+                    <div class="alert alert-success">
+                        <span id="selected-song-text"></span>
+                    </div>
+                </div>
+                
+                <input type="hidden" id="selected-song-input">
+            </div>
+        </div>
+        
+        <!-- Debug Info -->
+        <div class="card bg-base-100 shadow-xl mt-4">
+            <div class="card-body">
+                <h3 class="card-title text-sm">Debug Info:</h3>
+                <div class="text-xs space-y-1">
+                    <div>Server: <span class="text-success">http://127.0.0.1:5001</span></div>
+                    <div>HTMX: <span id="htmx-status" class="text-warning">Loading...</span></div>
+                    <div>Time: <span id="current-time"></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update time
+        setInterval(() => {
+            document.getElementById('current-time').textContent = new Date().toLocaleTimeString();
+        }, 1000);
+        
+        // Check HTMX
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('htmx-status').textContent = typeof htmx !== 'undefined' ? 'Loaded' : 'Missing';
+            document.getElementById('htmx-status').className = typeof htmx !== 'undefined' ? 'text-success' : 'text-error';
+            
+            // Event delegation for Select buttons
+            document.body.addEventListener('click', function(e) {
+                if (e.target.matches('.select-song-btn') || e.target.closest('.select-song-btn')) {
+                    e.preventDefault();
+                    const button = e.target.matches('.select-song-btn') ? e.target : e.target.closest('.select-song-btn');
+                    
+                    const title = button.dataset.title;
+                    const artist = button.dataset.artist;
+                    const source = button.dataset.source;
+                    const filePath = button.dataset.filePath;
+                    
+                    console.log('🎵 Button clicked:', { title, artist, source, filePath });
+                    
+                    // Show selection
+                    const selectedDiv = document.getElementById('selected-song');
+                    const selectedText = document.getElementById('selected-song-text');
+                    const selectedInput = document.getElementById('selected-song-input');
+                    
+                    selectedText.textContent = `Selected: ${title} - ${artist}`;
+                    selectedInput.value = JSON.stringify({ title, artist, source, file_path: filePath });
+                    selectedDiv.classList.remove('hidden');
+                    
+                    // Clear search
+                    document.querySelector('input[name="query"]').value = '';
+                    document.getElementById('debug-results').innerHTML = '<div class="text-center text-sm opacity-60">Song selected! Search again...</div>';
+                }
+            });
+        });
+        
+        // HTMX debug
+        document.body.addEventListener('htmx:beforeRequest', function(e) {
+            console.log('🔄 HTMX Request:', e.detail);
+        });
+        
+        document.body.addEventListener('htmx:afterRequest', function(e) {
+            console.log('✅ HTMX Response:', e.detail.xhr.status, e.detail.xhr.responseText.length, 'chars');
+        });
+    </script>
+</body>
+</html>

@@ -1,32 +1,108 @@
 
 === SUBMISSION ATTEMPT ===
-Form keys: ['guest_name', 'wish_message', 'selected_song']
-Files keys: ['photo']
-guest_name: 'Marie'
-PASS: Guest name validation
-PASS: File exists - GOPR1771 (1)-poster.jpg
-PASS: File type allowed
-
-=== SUBMISSION ATTEMPT ===
-Form keys: ['guest_name', 'wish_message']
-Files keys: ['photo']
-guest_name: 'Test User'
-PASS: Guest name validation
-PASS: File exists - test_photo.jpg
-PASS: File type allowed
-
-=== SUBMISSION ATTEMPT ===
-Form keys: ['guest_name', 'wish_message', 'selected_song']
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
 Files keys: ['photo']
 guest_name: 'Kenny'
 PASS: Guest name validation
-PASS: File exists - test_photo.jpg
+PASS: File exists - IMG_1537.JPG
 PASS: File type allowed
 
 === SUBMISSION ATTEMPT ===
-Form keys: ['guest_name', 'wish_message']
+Form keys: ['guest_name', 'wish_message', 'selected_song']
+Files keys: []
+guest_name: 'Test User'
+PASS: Guest name validation
+FAIL: File validation - file=None, filename=None
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'selected_song']
+Files keys: []
+guest_name: 'Test User'
+PASS: Guest name validation
+FAIL: File validation - file=None, filename=None
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'selected_song']
+Files keys: []
+guest_name: 'Test User'
+PASS: Guest name validation
+FAIL: File validation - file=None, filename=None
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'selected_song']
+Files keys: []
+guest_name: 'Test User'
+PASS: Guest name validation
+FAIL: File validation - file=None, filename=None
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
 Files keys: ['photo']
-guest_name: 'Test User Kenny'
+guest_name: 'Test User'
 PASS: Guest name validation
 PASS: File exists - test_image.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Test Music Copy'
+PASS: Guest name validation
+PASS: File exists - test_music_copy.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'YouTube Test User'
+PASS: Guest name validation
+PASS: File exists - test_youtube_download.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'YouTube Download Test'
+PASS: Guest name validation
+PASS: File exists - test_youtube_final.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'YouTube Test User'
+PASS: Guest name validation
+PASS: File exists - test_youtube_download.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Test User'
+PASS: Guest name validation
+PASS: File exists - test_image.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Test User Final'
+PASS: Guest name validation
+PASS: File exists - test_image.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Test User'
+PASS: Guest name validation
+PASS: File exists - test_image.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie'
+PASS: Guest name validation
+PASS: File exists - IMG_1288.JPG
 PASS: File type allowed

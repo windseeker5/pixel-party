@@ -2,12 +2,11 @@
 
 ## Project Overview
 
-**Project Name:** Birthday Memory & Music Experience  
-**Duration:** 2-day birthday celebration  
-**Target User:** 50th birthday party guests (all ages, non-technical)  
+**Project Name:** PixelParty (Birthday Memory & Music Experience )  
+**Target User:** 50th birthday party guests/users (all ages, non-technical)  
 **Platform:** Raspberry Pi 4 with big screen display + mobile web interface  
 **Framework:** Flask (Python backend) + HTMX (dynamic frontend) + daisyUI (beautiful components)  
-**Timeline:** [Insert your deadline here]
+
 
 ## Project Vision
 
@@ -115,12 +114,20 @@ Create an interactive party experience where guests can easily share photos, wis
 │                         │
 │  Your Name:             │
 │  [daisyUI input]        │
-│                         │
+│        
+│  Photo - video          │
 │  [daisyUI file-input]   │
 │                         │
 │  Your Birthday Wish:    │
 │  [daisyUI textarea]     │
 │  (Max 180 chars)        │
+│                         │
+│  Music suggestion:      │
+│                         │
+│  [daisyUI input]        │
+│                         │
+│  [Search Results...]    │
+│                         │
 │                         │
 │  [daisyUI btn-primary]  │
 └─────────────────────────┘
@@ -135,34 +142,12 @@ Create an interactive party experience where guests can easily share photos, wis
 - **Single tap photo/video selection**
 - **Max file size:** 50MB per upload
 - **Auto-resize images:** 1920x1080 max for big screen display
-
-#### 1.3 Music Suggestion
-```
-┌─────────────────────────┐
-│  Suggest Music          │
-├─────────────────────────┤
-│                         │
-│  Search by:             │
-│  [daisyUI tabs]         │
-│  • Mood (LLM powered)   │
-│  • Song name            │
-│  • Artist               │
-│  • Album                │
-│                         │
-│  [daisyUI input]        │
-│                         │
-│  [Search Results...]    │
-│                         │
-│  [daisyUI btn-primary]  │
-└─────────────────────────┘
-```
-
-**Requirements:**
-- Search local library first (20GB collection)
-- LLM mood-based suggestions via Ollama
-- YouTube fallback with yt-dlp audio download
-- Preview functionality (30-second clips)
-- Queue position feedback
+- **Search local library first (20GB collection)
+- **LLM mood-based suggestions via Ollama
+- **YouTube fallback with yt-dlp audio download
+- **Preview functionality (30-second clips)
+- **Queue position feedback
+- **Thank you confirmation message after a post 
 
 ### 2. Big Screen Display
 

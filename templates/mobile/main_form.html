@@ -3,7 +3,7 @@
 {% block title %}Share Memory - {{ config.PARTY_TITLE or 'Birthday Celebration' }}{% endblock %}
 
 {% block content %}
-<div class="card bg-white shadow-xl">
+<div class="card bg-base-100 shadow-xl">
     <div class="card-body">
         <div class="flex items-center justify-center mb-6">
             <h2 class="card-title text-2xl text-birthday-pink">Share a Memory for {{ host_name }}</h2>
@@ -37,73 +37,114 @@
             <!-- Photo Upload -->
             <div class="form-control">
                 <label class="label">
-                    <span class="label-text font-medium">Add Photo or Video</span>
+                    <span class="label-text font-medium flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Add Photo or Video
+                    </span>
                 </label>
                 <input type="file" name="photo" accept="image/*,video/*" 
-                       class="file-input file-input-bordered file-input-primary" required>
+                       class="file-input file-input-bordered file-input-primary w-full" 
+                       onchange="previewFile(this, 'file-preview')" required>
                 <div class="label">
                     <span class="label-text-alt">Max file size: 50MB</span>
                 </div>
+                <div id="file-preview" class="mt-2"></div>
             </div>
             
             <!-- Birthday Wish -->
             <div class="form-control">
                 <label class="label">
-                    <span class="label-text font-medium">Birthday Wish</span>
-                    <span class="label-text-alt">Max 180 chars</span>
+                    <span class="label-text font-medium flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                        Birthday Wish
+                    </span>
+                    <span class="label-text-alt" id="char-counter">0/180</span>
                 </label>
                 <textarea name="wish_message" 
                           class="textarea textarea-bordered textarea-primary h-24" 
                           placeholder="Happy Birthday {{ host_name }}! Remember that time we..." 
                           maxlength="180"
+                          oninput="updateCharCounter(this, 'char-counter', 180)"
                           required></textarea>
             </div>
             
             <!-- Optional Music Suggestion -->
             <div class="form-control">
                 <label class="label">
-                    <span class="label-text font-medium">Suggest a Song (Optional)</span>
+                    <span class="label-text font-medium flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                        </svg>
+                        Suggest a Song (Optional)
+                    </span>
                 </label>
                 <div class="collapse collapse-arrow bg-base-200">
                     <input type="checkbox" class="peer" /> 
-                    <div class="collapse-title text-sm font-medium">
-                        Add a song to the party playlist 🎵
+                    <div class="collapse-title text-sm font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Add a song to the party playlist
                     </div>
                     <div class="collapse-content">
                         <div class="space-y-3">
                             <input type="text" 
-                                   placeholder="Search for a song or describe mood..." 
+                                   placeholder="Search by mood, song title, or artist..." 
                                    class="input input-bordered w-full"
                                    hx-post="/mobile/search_music"
-                                   hx-trigger="keyup changed delay:500ms"
+                                   hx-trigger="input delay:300ms, keyup delay:300ms"
                                    hx-target="#music-results"
-                                   name="query">
+                                   hx-include="this"
+                                   hx-indicator="#search-spinner"
+                                   hx-swap="innerHTML"
+                                   hx-sync="this:replace"
+                                   name="query"
+                                   autocomplete="off">
+                            
+                            <!-- Search loading indicator -->
+                            <div id="search-spinner" class="htmx-indicator text-center py-2">
+                                <span class="loading loading-spinner loading-sm"></span>
+                                <span class="text-sm opacity-70 ml-2">Searching music...</span>
+                            </div>
                             
                             <!-- Search results -->
                             <div id="music-results" class="space-y-1 max-h-64 overflow-y-auto"></div>
-                            
-                            <!-- Selected song display -->
-                            <div id="selected-song" class="hidden">
-                                <div class="alert alert-success">
-                                    <span id="selected-song-text"></span>
-                                    <button type="button" 
-                                            onclick="document.getElementById('selected-song').classList.add('hidden'); document.getElementById('selected-song-input').value='';"
-                                            class="btn btn-xs btn-ghost">Remove</button>
-                                </div>
-                            </div>
                             
                             <!-- Hidden input for selected song -->
                             <input type="hidden" name="selected_song" id="selected-song-input">
                         </div>
                     </div>
                 </div>
+                
+                <!-- Selected song display (outside collapsible) -->
+                <div id="selected-song" class="hidden mt-3">
+                    <div class="alert alert-success">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                        </svg>
+                        <span id="selected-song-text"></span>
+                        <button type="button" 
+                                onclick="document.getElementById('selected-song').classList.add('hidden'); document.getElementById('selected-song-input').value='';"
+                                class="btn btn-xs btn-ghost">Remove</button>
+                    </div>
+                </div>
             </div>
             
             <!-- Submit Button -->
             <div class="card-actions justify-end">
-                <button type="submit" class="btn btn-success w-full">
-                    <span class="htmx-indicator loading loading-spinner loading-sm" id="submit-spinner"></span>
-                    Submit Memory
+                <button type="submit" class="btn btn-primary w-full text-lg" id="submit-btn">
+                    <svg class="w-5 h-5 mr-2 htmx-indicator loading loading-spinner loading-sm hidden" id="submit-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <svg class="w-5 h-5 mr-2" id="submit-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    </svg>
+                    <span id="submit-text">Share Memory</span>
                 </button>
             </div>
         </form>
@@ -111,19 +152,162 @@
 </div>
 
 <script>
-    // Simple function to select song from HTMX search results
-    function selectSong(title, artist, source, file_path) {
+    // Fix for empty selected-song div issue - AGGRESSIVE approach to ensure it always works
+    function fixEmptySelectedSongDiv() {
         const selectedSongDiv = document.getElementById('selected-song');
-        const selectedSongText = document.getElementById('selected-song-text');
+        if (selectedSongDiv && selectedSongDiv.innerHTML.trim() === '') {
+            console.log('🔧 Fixing empty selected-song div...');
+            selectedSongDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                    </svg>
+                    <span id="selected-song-text"></span>
+                    <button type="button" 
+                            onclick="document.getElementById('selected-song').classList.add('hidden'); document.getElementById('selected-song-input').value='';"
+                            class="btn btn-xs btn-ghost">Remove</button>
+                </div>
+            `;
+            return true;
+        }
+        return false;
+    }
+
+    // AGGRESSIVE FIX: Run immediately and on multiple events
+    fixEmptySelectedSongDiv();
+    setTimeout(fixEmptySelectedSongDiv, 50);
+    setTimeout(fixEmptySelectedSongDiv, 200);
+    setTimeout(fixEmptySelectedSongDiv, 500);
+    
+    // Run on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixEmptySelectedSongDiv);
+    }
+    
+    // Run when user starts using music section
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.type === 'checkbox') {
+            setTimeout(fixEmptySelectedSongDiv, 10);
+        }
+    });
+    
+    // Run before any search happens
+    document.addEventListener('input', function(e) {
+        if (e.target && e.target.name === 'query') {
+            fixEmptySelectedSongDiv();
+        }
+    });
+
+    // Event delegation for dynamically added Select buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.addEventListener('click', function(e) {
+            if (e.target.matches('.select-song-btn') || e.target.closest('.select-song-btn')) {
+                e.preventDefault();
+                const button = e.target.matches('.select-song-btn') ? e.target : e.target.closest('.select-song-btn');
+                
+                const title = button.dataset.title;
+                const artist = button.dataset.artist;
+                const source = button.dataset.source;
+                const filePath = button.dataset.filePath;
+                const url = button.dataset.url;
+                
+                console.log('Button clicked:', { title, artist, source, filePath, url });
+                selectSong(title, artist, source, filePath, url);
+            }
+        });
+    });
+    
+    // Function to select song from HTMX search results - DEFENSIVE VERSION
+    function selectSong(title, artist, source, file_path, url) {
+        const selectedSongDiv = document.getElementById('selected-song');
+        let selectedSongText = document.getElementById('selected-song-text');
         const selectedSongInput = document.getElementById('selected-song-input');
+        const searchInput = document.querySelector('input[name="query"]');
         
+        // DEFENSIVE: Check if elements exist, create if missing
+        if (!selectedSongDiv) {
+            console.error('selected-song div not found');
+            return;
+        }
+        
+        if (!selectedSongInput) {
+            console.error('selected-song-input not found');
+            return;
+        }
+        
+        // DEFENSIVE: If selectedSongText doesn't exist, ensure the div has proper content
+        if (!selectedSongText) {
+            console.log('🔧 selected-song-text not found, rebuilding div content...');
+            selectedSongDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                    </svg>
+                    <span id="selected-song-text"></span>
+                    <button type="button" 
+                            onclick="document.getElementById('selected-song').classList.add('hidden'); document.getElementById('selected-song-input').value='';"
+                            class="btn btn-xs btn-ghost">Remove</button>
+                </div>
+            `;
+            selectedSongText = document.getElementById('selected-song-text');
+        }
+        
+        // Update selected song display
         selectedSongText.textContent = `${title} - ${artist}`;
-        selectedSongInput.value = JSON.stringify({ title, artist, source, file_path: file_path || '' });
+        selectedSongInput.value = JSON.stringify({ 
+            title, 
+            artist, 
+            source, 
+            file_path: file_path || '', 
+            url: url || '' 
+        });
         
+        // Show selected song
         selectedSongDiv.classList.remove('hidden');
         
-        // Clear search results
-        document.getElementById('music-results').innerHTML = '';
+        // Clear search input and results
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        const resultsDiv = document.getElementById('music-results');
+        if (resultsDiv) {
+            resultsDiv.innerHTML = '';
+        }
+        
+        console.log('Song selected:', { title, artist, source, file_path, url });
+    }
+    
+    // Character counter for wish message
+    function updateCharCounter(textarea, counterId, maxLength) {
+        const counter = document.getElementById(counterId);
+        const currentLength = textarea.value.length;
+        counter.textContent = `${currentLength}/${maxLength}`;
+        
+        if (currentLength > maxLength * 0.9) {
+            counter.classList.add('text-warning');
+        } else {
+            counter.classList.remove('text-warning');
+        }
+    }
+    
+    // File preview function
+    function previewFile(input, previewId) {
+        const preview = document.getElementById(previewId);
+        const file = input.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (file.type.startsWith('image/')) {
+                    preview.innerHTML = `<img src="${e.target.result}" class="max-h-32 rounded-lg shadow-sm border">`;
+                } else if (file.type.startsWith('video/')) {
+                    preview.innerHTML = `<video controls class="max-h-32 rounded-lg shadow-sm border"><source src="${e.target.result}" type="${file.type}"></video>`;
+                }
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.innerHTML = '';
+        }
     }
 </script>
 

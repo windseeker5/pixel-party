@@ -61,9 +61,27 @@ class MusicLibrary(db.Model):
     album = db.Column(db.String(200), nullable=True)
     genre = db.Column(db.String(100), nullable=True)
     duration = db.Column(db.Integer, nullable=True)  # seconds
-    file_path = db.Column(db.String(500), nullable=False, unique=True)
+    file_path = db.Column(db.String(500), nullable=False, unique=True, index=True)
     file_size = db.Column(db.Integer, default=0)
     indexed_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    
+    # Lowercase fields for case-insensitive search
+    title_lower = db.Column(db.String(200), nullable=True, index=True)
+    artist_lower = db.Column(db.String(200), nullable=True, index=True)
+    album_lower = db.Column(db.String(200), nullable=True, index=True)
+    genre_lower = db.Column(db.String(100), nullable=True, index=True)
+    
+    # File modification tracking for incremental updates
+    file_modified_at = db.Column(db.DateTime, nullable=True)
+    
+    # Index status tracking
+    index_status = db.Column(db.String(20), default='indexed')  # 'indexed', 'error', 'missing'
+    index_error = db.Column(db.Text, nullable=True)
+    
+    # Composite index for search performance
+    __table_args__ = (
+        db.Index('idx_music_search', 'title_lower', 'artist_lower', 'album_lower'),
+    )
 
 
 class Settings(db.Model):
