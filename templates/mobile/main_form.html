@@ -2,12 +2,132 @@
 
 {% block title %}Share Memory - {{ config.PARTY_TITLE or 'Birthday Celebration' }}{% endblock %}
 
+{% block extra_head %}
+<!-- Google Fonts for beautiful title -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+
+<style>
+    /* Birthday Title Styles */
+    .birthday-title-container {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        height: 70px;
+        line-height: 70px;
+        position: relative;
+    }
+    
+    .title-name {
+        font-family: 'Dancing Script', cursive;
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #FF1493 0%, #FF69B4 50%, #FFB6C1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 30px rgba(255, 20, 147, 0.3);
+        animation: subtle-glow 3s ease-in-out infinite alternate;
+    }
+    
+    .title-age {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF69B4 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+        animation: pulse-fifty 2s ease-in-out infinite;
+        position: relative;
+    }
+    
+    .heart-decoration {
+        position: absolute;
+        color: #FF69B4;
+        font-size: 1.2rem;
+        animation: float-heart 3s ease-in-out infinite;
+    }
+    
+    .heart-decoration::before {
+        content: '♥';
+        position: absolute;
+        left: -20px;
+        top: -10px;
+        font-size: 0.8rem;
+        color: #FFB6C1;
+        animation: float-heart 3s ease-in-out infinite 0.5s;
+    }
+    
+    .heart-decoration::after {
+        content: '♥';
+        position: absolute;
+        right: -25px;
+        top: 5px;
+        font-size: 1rem;
+        color: #FF1493;
+        animation: float-heart 3s ease-in-out infinite 1s;
+    }
+    
+    /* Animations */
+    @keyframes subtle-glow {
+        0% {
+            filter: brightness(1) drop-shadow(0 0 10px rgba(255, 20, 147, 0.5));
+        }
+        100% {
+            filter: brightness(1.1) drop-shadow(0 0 20px rgba(255, 20, 147, 0.7));
+        }
+    }
+    
+    @keyframes pulse-fifty {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+    
+    @keyframes float-heart {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+        25% {
+            transform: translateY(-5px) rotate(-5deg);
+        }
+        75% {
+            transform: translateY(3px) rotate(5deg);
+        }
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 400px) {
+        .title-name {
+            font-size: 2rem;
+        }
+        .title-age {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
-        <div class="flex items-center justify-center mb-6">
-            <h2 class="card-title text-2xl text-birthday-pink">Share a Memory for {{ host_name }}</h2>
-            <div class="ml-3" 
+        <div class="flex items-center justify-between mb-6">
+            <!-- Beautiful Birthday Title -->
+            <div class="flex-1 flex justify-center">
+                <div class="birthday-title-container">
+                    <span class="title-name">Valérie</span>
+                    <span class="title-age">50</span>
+                    <span class="heart-decoration">♥</span>
+                </div>
+            </div>
+            <!-- Ollama status indicator positioned absolutely -->
+            <div class="absolute right-8" 
                  hx-get="/mobile/ollama_status" 
                  hx-trigger="load"
                  hx-target="this">
@@ -149,7 +269,7 @@
                         <div class="space-y-3">
                             <input type="text" 
                                    placeholder="Search by mood, song title, or artist..." 
-                                   class="input input-bordered w-full"
+                                   class="input input-bordered input-secondary w-full border-pink-500 focus:border-pink-500"
                                    hx-post="/mobile/search_music"
                                    hx-trigger="input delay:300ms, keyup delay:300ms"
                                    hx-target="#music-results"
@@ -167,7 +287,7 @@
                             </div>
                             
                             <!-- Search results -->
-                            <div id="music-results" class="space-y-1 max-h-64 overflow-y-auto"></div>
+                            <div id="music-results" class="space-y-1 max-h-96 overflow-y-auto"></div>
                             
                             <!-- Hidden input for selected song -->
                             <input type="hidden" name="selected_song" id="selected-song-input">

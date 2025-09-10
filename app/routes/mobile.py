@@ -409,7 +409,7 @@ def search_music():
         from utils.music_library import music_search
         
         # Try different search types - search for "Bob Dylan" should find Bob Dylan songs!
-        search_results = music_search.search_all(search_query, limit=10)
+        search_results = music_search.search_all(search_query, limit=20)
         
         # Format results properly
         formatted_results = []
@@ -423,8 +423,8 @@ def search_music():
                 'source': 'local'
             })
         
-        # Always try to reach 10 total suggestions by adding YouTube results
-        target_total = 10
+        # Always try to reach 20 total suggestions by adding YouTube results
+        target_total = 20
         local_count = len(formatted_results)
         
         if local_count < target_total:
@@ -478,27 +478,26 @@ def search_music():
                     
                     html_results += f'''
                     <div class="card bg-base-200 shadow-sm border border-base-300 hover:shadow-md transition-all duration-200">
-                        <div class="card-body p-3">
+                        <div class="card-body p-2">
                             <div class="flex justify-between items-start">
                                 <div class="flex-1">
                                     <div class="text-sm font-medium text-base-content">{title_display}</div>
                                     <div class="text-xs opacity-70 mt-1">{artist_display}{' • ' + album_display if album_display else ''}</div>
                                     <div class="flex items-center gap-2 mt-2">
-                                        <div class="badge badge-xs {'badge-success' if song['source'] == 'local' else 'badge-info'}">{song['source']}</div>
+                                        <div class="badge badge-xs rounded-none {'badge-success' if song['source'] == 'local' else 'badge-error text-white'}">{'local' if song['source'] == 'local' else 'youtube'}</div>
                                         <div class="text-xs opacity-60">{song['duration']}</div>
                                     </div>
                                 </div>
                                 <button type="button" 
-                                        class="btn btn-primary btn-sm ml-3 select-song-btn"
+                                        class="btn btn-success btn-sm btn-circle ml-3 select-song-btn"
                                         data-title="{html.escape(song['title'])}"
                                         data-artist="{html.escape(song['artist'])}"
                                         data-source="{song['source']}"
                                         data-file-path="{html.escape(song.get('file_path', ''))}"
                                         data-url="{html.escape(song.get('url', ''))}">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                     </svg>
-                                    Select
                                 </button>
                             </div>
                         </div>
@@ -542,17 +541,16 @@ def search_music():
                                         <div class="text-sm font-medium text-base-content">{song['title']}</div>
                                         <div class="text-xs opacity-70 mt-1">{song['artist']}{' • ' + song['album'] if song['album'] else ''}</div>
                                         <div class="flex items-center gap-2 mt-2">
-                                            <div class="badge badge-xs badge-warning">AI suggestion</div>
+                                            <div class="badge badge-xs badge-warning rounded-none">AI suggestion</div>
                                             <div class="text-xs opacity-60">{song['duration']}</div>
                                         </div>
                                     </div>
                                     <button type="button" 
-                                            class="btn btn-primary btn-sm ml-3"
+                                            class="btn btn-success btn-sm btn-circle ml-3"
                                             onclick="selectSong('{title_escaped}', '{artist_escaped}', '{song['source']}', '')">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                         </svg>
-                                        Select
                                     </button>
                                 </div>
                             </div>
@@ -587,14 +585,14 @@ def search_music():
                             <div class="text-sm font-medium text-base-content">{fallback_results[0]['title']}</div>
                             <div class="text-xs opacity-70 mt-1">{fallback_results[0]['artist']}</div>
                             <div class="flex items-center gap-2 mt-2">
-                                <div class="badge badge-xs badge-secondary">Manual request</div>
+                                <div class="badge badge-xs badge-secondary rounded-none">Manual request</div>
                                 <div class="text-xs opacity-60">{fallback_results[0]['duration']}</div>
                             </div>
                         </div>
                         <button type="button" 
-                                class="btn btn-primary btn-sm ml-3"
+                                class="btn btn-success btn-sm btn-circle ml-3"
                                 onclick="selectSong('{title_escaped}', '{artist_escaped}', 'request', '')">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                             Select
