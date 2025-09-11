@@ -1,17 +1,97 @@
-<!-- Photo display component for HTMX updates -->
-<div class="relative w-full h-full min-h-96">
+<!-- Photo Display with Ken Burns effect and text overlay -->
+<div class="relative w-full h-full overflow-hidden rounded-2xl bg-black">
+    <!-- Photo with Ken Burns effect -->
     <img src="/media/photos/{{ photo.filename }}" 
-         alt="Birthday Memory from {{ photo.guest_name }}"
-         class="w-full h-full object-cover rounded-2xl">
+         alt="Photo from {{ photo.guest_name }}"
+         class="absolute inset-0 w-full h-full object-cover ken-burns-animation">
     
+    <!-- TikTok-style text overlay -->
     {% if photo.wish_message %}
     <div class="wish-overlay">
         <div class="wish-text">
             "{{ photo.wish_message }}"
         </div>
         <div class="submitter-info">
-            - {{ photo.guest_name }}, {{ photo.uploaded_at.strftime('%I:%M %p') }}
+            - {{ photo.guest_name }}
         </div>
     </div>
     {% endif %}
 </div>
+
+<style>
+/* Ken Burns effect - subtle zoom and pan */
+@keyframes kenBurns {
+    0% {
+        transform: scale(1.0) translate(0, 0);
+    }
+    50% {
+        transform: scale(1.1) translate(-2%, -2%);
+    }
+    100% {
+        transform: scale(1.2) translate(2%, 2%);
+    }
+}
+
+.ken-burns-animation {
+    animation: kenBurns 8s ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+/* Text overlay animation */
+.wish-overlay {
+    position: absolute;
+    bottom: 15%;
+    left: 15%;
+    right: 15%;
+    max-height: 25vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    border-radius: 15px;
+    padding: 20px 25px;
+    color: white;
+    font-size: clamp(1.2rem, 2.5vw, 2rem);
+    text-align: center;
+    line-height: 1.3;
+    animation: slideInFromBottom 0.8s ease-out, fadeOutText 1s ease-in 7s;
+    animation-fill-mode: forwards;
+}
+
+.wish-text {
+    font-weight: 400;
+    margin-bottom: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.submitter-info {
+    font-size: 0.8em;
+    color: #FFD700;
+    font-style: italic;
+    opacity: 0.9;
+}
+
+@keyframes slideInFromBottom {
+    0% {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Fade out animation for text before photo changes */
+@keyframes fadeOutText {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+</style>

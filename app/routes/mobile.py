@@ -469,22 +469,25 @@ def search_music():
             if is_htmx_request():
                 # Return HTML for HTMX
                 html_results = ""
-                for song in formatted_results:
+                for idx, song in enumerate(formatted_results):
                     # Use HTML escaping for display
                     import html
                     title_display = html.escape(song['title'])
                     artist_display = html.escape(song['artist'])
                     album_display = html.escape(song.get('album', ''))
                     
+                    # Alternate background colors for better distinction
+                    bg_class = "bg-base-200" if idx % 2 == 0 else "bg-base-300 bg-opacity-50"
+                    
                     html_results += f'''
-                    <div class="card bg-base-200 shadow-sm border border-base-300 hover:shadow-md transition-all duration-200">
+                    <div class="card {bg_class} shadow-sm border border-base-300 hover:shadow-md transition-all duration-200">
                         <div class="card-body p-2">
-                            <div class="flex justify-between items-start">
+                            <div class="flex justify-between items-center">
                                 <div class="flex-1">
                                     <div class="text-sm font-medium text-base-content">{title_display}</div>
                                     <div class="text-xs opacity-70 mt-1">{artist_display}{' • ' + album_display if album_display else ''}</div>
                                     <div class="flex items-center gap-2 mt-2">
-                                        <div class="badge badge-xs rounded-none {'badge-success' if song['source'] == 'local' else 'badge-error text-white'}">{'local' if song['source'] == 'local' else 'youtube'}</div>
+                                        <div class="badge badge-sm {'badge-info' if song['source'] == 'local' else 'badge-error text-white'}" style="border-radius: 4px;">{'local' if song['source'] == 'local' else 'youtube'}</div>
                                         <div class="text-xs opacity-60">{song['duration']}</div>
                                     </div>
                                 </div>
@@ -536,12 +539,12 @@ def search_music():
                         html_results += f'''
                         <div class="card bg-base-200 shadow-sm border border-base-300 hover:shadow-md transition-all duration-200">
                             <div class="card-body p-3">
-                                <div class="flex justify-between items-start">
+                                <div class="flex justify-between items-center">
                                     <div class="flex-1">
                                         <div class="text-sm font-medium text-base-content">{song['title']}</div>
                                         <div class="text-xs opacity-70 mt-1">{song['artist']}{' • ' + song['album'] if song['album'] else ''}</div>
                                         <div class="flex items-center gap-2 mt-2">
-                                            <div class="badge badge-xs badge-warning rounded-none">AI suggestion</div>
+                                            <div class="badge badge-sm badge-warning" style="border-radius: 4px;">AI suggestion</div>
                                             <div class="text-xs opacity-60">{song['duration']}</div>
                                         </div>
                                     </div>
@@ -585,7 +588,7 @@ def search_music():
                             <div class="text-sm font-medium text-base-content">{fallback_results[0]['title']}</div>
                             <div class="text-xs opacity-70 mt-1">{fallback_results[0]['artist']}</div>
                             <div class="flex items-center gap-2 mt-2">
-                                <div class="badge badge-xs badge-secondary rounded-none">Manual request</div>
+                                <div class="badge badge-sm badge-secondary" style="border-radius: 4px;">Manual request</div>
                                 <div class="text-xs opacity-60">{fallback_results[0]['duration']}</div>
                             </div>
                         </div>

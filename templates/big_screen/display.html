@@ -3,142 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Big Screen Display - Birthday Party</title>
+    <title>Happy 50th Birthday Valérie!</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- daisyUI -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.24/dist/full.min.css" rel="stylesheet">
-    <!-- Heroicons -->
-    <script src="https://unpkg.com/heroicons@2.0.16/24/outline/index.js" type="module"></script>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Google Fonts for elegant script -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Tangerine:wght@400;700&family=Allura&display=swap" rel="stylesheet">
     
     <style>
-        .wish-overlay {
-            position: absolute;
-            bottom: 15%;
-            left: 15%;
-            right: 15%;
-            max-height: 25vh;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
-            border-radius: 15px;
-            padding: 20px 25px;
-            color: white;
-            font-size: clamp(1.2rem, 2.5vw, 2rem);
-            text-align: center;
-            line-height: 1.3;
-            animation: slideInFromBottom 0.8s ease-out;
-        }
-
-        .wish-text {
-            font-weight: 400;
-            margin-bottom: 8px;
+        /* Remove all margins and padding for full screen */
+        body, html {
+            margin: 0;
+            padding: 0;
             overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
+            height: 100vh;
+            width: 100vw;
         }
-
-        .submitter-info {
-            font-size: 0.8em;
-            color: #FFD700;
-            font-style: italic;
-            opacity: 0.9;
+        
+        /* Elegant script font for title */
+        .birthday-title {
+            font-family: 'Allura', cursive;
+            background: linear-gradient(135deg, #ff6b9d, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-
-        @keyframes slideInFromBottom {
-            0% {
-                transform: translateY(100px);
-                opacity: 0;
-            }
-            100% {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        
+        /* Animated background for welcome screen */
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .animated-gradient {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        /* Full screen photo container */
+        .photo-container {
+            height: calc(100vh - 100px);
+        }
+        
+        /* Compact volume slider */
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+            width: 60px;
+        }
+        
+        .volume-slider::-webkit-slider-track {
+            background: rgba(255, 255, 255, 0.1);
+            height: 3px;
+            border-radius: 2px;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ff6b9d;
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            margin-top: -4px;
+        }
+        
+        .volume-slider::-moz-range-track {
+            background: rgba(255, 255, 255, 0.1);
+            height: 3px;
+            border-radius: 2px;
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            background: #ff6b9d;
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            border: none;
+        }
+        
+        /* Mini control buttons */
+        .mini-control {
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        
+        .mini-control:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
-<body class="bg-base-100">
-    <!-- Main Big Screen Layout -->
-    <div class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <div class="navbar bg-base-100 shadow-lg">
+<body class="bg-gray-900 m-0 p-0">
+    <!-- Main Big Screen Layout - Full Screen -->
+    <div class="min-h-screen h-screen w-screen flex flex-col m-0 p-0">
+        <!-- Compact Dark Header -->
+        <div class="navbar bg-gray-800 text-white shadow-lg border-b border-gray-700 px-6 py-2 min-h-0 h-14">
             <div class="flex-1">
-                <h1 class="text-3xl font-bold">Happy Birthday Valérie!</h1>
+                <h1 class="birthday-title text-6xl font-bold leading-tight">
+                    Happy 50th Birthday Valérie!
+                </h1>
             </div>
             <div class="flex-none">
-                <div class="badge badge-lg" id="current-time"></div>
+                <div class="badge badge-lg bg-gray-700 text-pink-300 border-pink-400" id="current-time"></div>
             </div>
         </div>
 
-        <!-- Main Content Area -->
-        <div class="flex-1 grid grid-cols-4 gap-4 p-4">
+        <!-- Main Content Area - Full Width -->
+        <div class="flex-1 grid grid-cols-4 gap-3 p-3">
             <!-- Photo Display - 75% width -->
-            <div class="col-span-3" id="photo-display" 
-                 hx-get="/api/current_photo" 
-                 hx-trigger="every 8s"
-                 hx-target="#photo-content">
+            <div class="col-span-3 photo-container" id="photo-display">
                 
                 <!-- Welcome Screen (shown when no photos) -->
-                <div id="welcome-screen" class="hero min-h-full bg-gradient-to-br from-primary to-secondary rounded-2xl">
+                <div id="welcome-screen" class="hero h-full animated-gradient rounded-xl shadow-2xl">
                     <div class="hero-content text-center">
                         <div class="max-w-md">
-                            <h1 class="text-5xl font-bold text-white mb-8">Welcome!</h1>
-                            <h2 class="text-3xl text-white mb-8">Happy Birthday Valérie!</h2>
-                            <p class="text-xl text-white mb-12">Share your photos and wishes</p>
+                            <div class="text-6xl mb-4">🎊</div>
+                            <h1 class="text-5xl font-bold text-white mb-3 drop-shadow-lg animate-pulse">
+                                Welcome to Valérie's
+                            </h1>
+                            <h2 class="text-4xl font-bold text-yellow-300 mb-6 drop-shadow-lg">
+                                50th Birthday Party!
+                            </h2>
+                            <p class="text-xl text-white mb-8 drop-shadow">
+                                Share your photos, wishes, and music
+                            </p>
                             
-                            <!-- QR Code -->
-                            <div class="card bg-white p-8 mb-8">
-                                <div id="qr-code" class="mx-auto"></div>
-                                <p class="text-black mt-4 font-bold">Scan to join the party!</p>
+                            <!-- Smaller QR Code Card -->
+                            <div class="card bg-white/95 backdrop-blur p-6 shadow-2xl">
+                                <h3 class="text-lg font-bold text-gray-800 mb-3">Join the Celebration!</h3>
+                                <div id="qr-code" class="mx-auto mb-3"></div>
+                                <p class="text-gray-700 font-semibold text-sm">Scan with your phone camera</p>
+                                <p class="text-xs text-gray-500 mt-1" id="mobile-url"></p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Photo Content (populated via HTMX) -->
-                <div id="photo-content" class="hidden">
+                <div id="photo-content" class="hidden h-full" 
+                     hx-get="/api/current_photo" 
+                     hx-trigger="every 8s"
+                     hx-swap="innerHTML">
                     <!-- Photos will be loaded here -->
                 </div>
             </div>
 
             <!-- Sidebar - 25% width -->
-            <div class="col-span-1 space-y-4">
-                <!-- Now Playing -->
+            <div class="col-span-1 space-y-3 overflow-y-auto">
+                <!-- Compact Music Player matching other cards -->
                 <div class="card bg-base-200 shadow-xl">
-                    <div class="card-body">
-                        <h2 class="card-title">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                            </svg>
-                            Now Playing
-                        </h2>
-                        <!-- Music Player -->
-                        <div id="music-player">
-                            <div id="current-song-info">
-                                <div class="text-sm font-semibold" id="song-title">No song loaded</div>
-                                <div class="text-xs opacity-75" id="song-artist">-</div>
-                            </div>
-                            <audio id="audio-player" controls style="width: 100%; margin-top: 8px;">
-                                Your browser does not support the audio element.
-                            </audio>
-                            <div class="flex justify-center gap-2 mt-2">
-                                <button class="btn btn-sm" onclick="previousSong()">Previous</button>
-                                <button class="btn btn-sm btn-primary" onclick="togglePlay()">Play/Pause</button>
-                                <button class="btn btn-sm" onclick="nextSong()">Next</button>
+                    <div class="card-body p-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <h2 class="card-title text-base flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                                </svg>
+                                Now Playing
+                            </h2>
+                            <!-- Small QR Code placeholder for when photos start -->
+                            <div id="mini-qr-container" class="hidden">
+                                <div id="mini-qr" class="w-12 h-12 bg-white p-1 rounded"></div>
                             </div>
                         </div>
+                        
+                        <!-- Song Info - Compact -->
+                        <div class="mb-2">
+                            <div class="text-sm font-medium truncate" id="song-title">Ready to Party!</div>
+                            <div class="text-xs opacity-60 truncate" id="song-artist">Add songs from your phone</div>
+                        </div>
+                        
+                        <!-- Mini Progress Bar -->
+                        <div class="w-full bg-gray-700 rounded-full h-1 mb-2">
+                            <div class="bg-pink-500 h-1 rounded-full transition-all" id="progress-bar" style="width: 0%"></div>
+                        </div>
+                        
+                        <!-- Compact Controls in one line -->
+                        <div class="flex items-center justify-between gap-1">
+                            <!-- Play controls -->
+                            <div class="flex items-center gap-1">
+                                <button class="mini-control" onclick="previousSong()">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                                    </svg>
+                                </button>
+                                <button class="mini-control" onclick="togglePlay()">
+                                    <svg id="play-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                    <svg id="pause-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                                    </svg>
+                                </button>
+                                <button class="mini-control" onclick="nextSong()">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <!-- Volume -->
+                            <div class="flex items-center gap-1">
+                                <svg class="w-3 h-3 opacity-50" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                                </svg>
+                                <input type="range" class="volume-slider" id="volume-control" 
+                                       min="0" max="100" value="70" onchange="setVolume(this.value)">
+                            </div>
+                            
+                            <!-- Time -->
+                            <div class="text-xs opacity-50">
+                                <span id="current-time-display">0:00</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden audio element -->
+                        <audio id="audio-player" class="hidden"></audio>
                     </div>
                 </div>
 
-                <!-- Photo Queue -->
+                <!-- Photo Queue (keeping as is) -->
                 <div class="card bg-base-200 shadow-xl">
-                    <div class="card-body">
-                        <h2 class="card-title">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="card-body p-3">
+                        <h2 class="card-title text-base">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                             Photo Queue
@@ -149,11 +249,11 @@
                     </div>
                 </div>
 
-                <!-- Music Queue -->
+                <!-- Music Queue (keeping as is) -->
                 <div class="card bg-base-200 shadow-xl">
-                    <div class="card-body">
-                        <h2 class="card-title">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="card-body p-3">
+                        <h2 class="card-title text-base">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
                             </svg>
                             Music Queue
@@ -166,26 +266,20 @@
             </div>
         </div>
 
-        <!-- Footer -->
-        <footer class="footer footer-center p-4 bg-base-200">
-            <div class="flex justify-center space-x-8 text-lg">
-                <div class="flex items-center space-x-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Minimal Dark Footer - No Guests -->
+        <footer class="footer footer-center p-2 bg-gray-800 text-gray-400 border-t border-gray-700">
+            <div class="flex justify-center space-x-6 text-xs">
+                <div class="flex items-center space-x-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                     <span id="photo-count">0 Photos</span>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex items-center space-x-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                     </svg>
                     <span id="music-count">0 Songs</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                    </svg>
-                    <span id="guest-count">0 Guests</span>
                 </div>
             </div>
         </footer>
@@ -195,8 +289,14 @@
     <script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
     
     <script>
+        let audioPlayer = null;
+        let hasPhotos = false;
+        
         document.addEventListener('DOMContentLoaded', function() {
-            // Generate QR code
+            // Initialize audio player
+            audioPlayer = document.getElementById('audio-player');
+            
+            // Generate QR code with network IP
             generateQRCode();
             
             // Update clock
@@ -206,15 +306,55 @@
             // Update stats
             updateStats();
             setInterval(updateStats, 5000);
+            
+            // Check for photos to start slideshow
+            checkForPhotos();
+            
+            // Load music queue and current song
+            loadMusicQueue();
+            loadCurrentSong();
+            setInterval(() => {
+                loadMusicQueue();
+            }, 10000);
+            
+            // Setup audio player event listeners
+            setupAudioPlayer();
         });
         
         function generateQRCode() {
-            const qr = qrcode(4, 'L');
-            const url = window.location.origin + '/mobile';
-            qr.addData(url);
-            qr.make();
-            
-            document.getElementById('qr-code').innerHTML = qr.createImgTag(8);
+            // Fetch network info to get correct IP address
+            fetch('/api/network_info')
+                .then(response => response.json())
+                .then(data => {
+                    const qr = qrcode(4, 'L');
+                    const url = data.mobile_url;
+                    qr.addData(url);
+                    qr.make();
+                    
+                    // Generate main QR code for welcome screen (smaller size)
+                    const qrElement = document.getElementById('qr-code');
+                    if (qrElement) {
+                        qrElement.innerHTML = qr.createImgTag(6); // Reduced from 8
+                    }
+                    
+                    // Generate mini QR for music player (when photos start)
+                    const miniQrElement = document.getElementById('mini-qr');
+                    if (miniQrElement) {
+                        const miniQr = qrcode(4, 'L');
+                        miniQr.addData(url);
+                        miniQr.make();
+                        miniQrElement.innerHTML = miniQr.createImgTag(2);
+                    }
+                    
+                    // Display URL
+                    const urlElement = document.getElementById('mobile-url');
+                    if (urlElement) {
+                        urlElement.textContent = url;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching network info:', error);
+                });
         }
         
         function updateClock() {
@@ -233,31 +373,94 @@
                 .then(data => {
                     document.getElementById('photo-count').textContent = `${data.photos || 0} Photos`;
                     document.getElementById('music-count').textContent = `${data.music_requests || 0} Songs`;
-                    document.getElementById('guest-count').textContent = `${data.guests || 0} Guests`;
                 })
                 .catch(error => console.error('Error updating stats:', error));
         }
         
-        // Handle photo slideshow
-        document.body.addEventListener('htmx:afterSwap', function(event) {
-            if (event.detail.target.id === 'photo-content') {
-                // Hide welcome screen and show photo content
-                document.getElementById('welcome-screen').classList.add('hidden');
-                document.getElementById('photo-content').classList.remove('hidden');
+        function checkForPhotos() {
+            fetch('/api/photos')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.photos && data.photos.length > 0) {
+                        if (!hasPhotos) {
+                            hasPhotos = true;
+                            // Hide welcome screen and show photo content
+                            document.getElementById('welcome-screen').classList.add('hidden');
+                            document.getElementById('photo-content').classList.remove('hidden');
+                            
+                            // Show mini QR code in music player
+                            document.getElementById('mini-qr-container').classList.remove('hidden');
+                            
+                            // Start the HTMX polling if not already started
+                            const photoContent = document.getElementById('photo-content');
+                            if (!photoContent.hasAttribute('hx-trigger')) {
+                                htmx.process(photoContent);
+                            }
+                        }
+                    }
+                })
+                .catch(error => console.error('Error checking for photos:', error));
+        }
+        
+        // Check for photos every 5 seconds
+        setInterval(checkForPhotos, 5000);
+
+        // Compact Music Player Functions
+        function setupAudioPlayer() {
+            audioPlayer.addEventListener('timeupdate', updateProgress);
+            audioPlayer.addEventListener('ended', nextSong);
+            audioPlayer.addEventListener('play', () => updatePlayButton(true));
+            audioPlayer.addEventListener('pause', () => updatePlayButton(false));
+            
+            // Set initial volume
+            audioPlayer.volume = 0.7;
+        }
+        
+        function updateProgress() {
+            if (audioPlayer && audioPlayer.duration) {
+                const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                document.getElementById('progress-bar').style.width = progress + '%';
+                
+                const current = formatTime(audioPlayer.currentTime);
+                document.getElementById('current-time-display').textContent = current;
             }
-        });
-
-        // Music player functionality
-        let currentSongIndex = 0;
-        let musicQueue = [];
-        const audioPlayer = document.getElementById('audio-player');
-
+        }
+        
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        function updatePlayButton(isPlaying) {
+            document.getElementById('play-icon').classList.toggle('hidden', isPlaying);
+            document.getElementById('pause-icon').classList.toggle('hidden', !isPlaying);
+        }
+        
+        function togglePlay() {
+            if (audioPlayer.src) {
+                if (audioPlayer.paused) {
+                    audioPlayer.play();
+                } else {
+                    audioPlayer.pause();
+                }
+            } else {
+                // Load and play the first song in queue
+                loadCurrentSong();
+            }
+        }
+        
+        function setVolume(value) {
+            if (audioPlayer) {
+                audioPlayer.volume = value / 100;
+            }
+        }
+        
         function loadMusicQueue() {
             fetch('/api/music_queue')
                 .then(response => response.json())
                 .then(data => {
-                    musicQueue = data.queue || [];
-                    updateMusicQueueDisplay();
+                    // Queue is handled by HTMX
                 })
                 .catch(error => console.error('Error loading music queue:', error));
         }
@@ -267,35 +470,26 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        document.getElementById('song-title').textContent = 'No song loaded';
-                        document.getElementById('song-artist').textContent = '-';
+                        document.getElementById('song-title').textContent = 'Ready to Party!';
+                        document.getElementById('song-artist').textContent = 'Add songs from your phone';
                         audioPlayer.src = '';
                     } else {
                         document.getElementById('song-title').textContent = data.title || 'Unknown Song';
                         document.getElementById('song-artist').textContent = data.artist || 'Unknown Artist';
                         
-                        if (data.file_url && audioPlayer.src !== data.file_url) {
+                        if (data.file_url && audioPlayer.src !== window.location.origin + data.file_url) {
                             audioPlayer.src = data.file_url;
+                            audioPlayer.load();
+                            // Auto-play when loading a new song
+                            audioPlayer.play().catch(e => {
+                                console.log('Auto-play prevented:', e);
+                            });
                         }
                     }
                 })
                 .catch(error => console.error('Error loading current song:', error));
         }
         
-        function updateMusicQueueDisplay() {
-            // Update the queue display in the sidebar if needed
-            // This is handled by HTMX, but we can trigger a refresh if needed
-        }
-
-
-        function togglePlay() {
-            if (audioPlayer.paused) {
-                audioPlayer.play();
-            } else {
-                audioPlayer.pause();
-            }
-        }
-
         function nextSong() {
             fetch('/api/music/next', {
                 method: 'POST',
@@ -311,13 +505,17 @@
                     
                     if (data.file_url) {
                         audioPlayer.src = data.file_url;
-                        audioPlayer.play();
+                        audioPlayer.load();
+                        audioPlayer.play().catch(e => {
+                            console.log('Auto-play prevented:', e);
+                        });
                     }
                     
-                    // Refresh the queue display
                     loadMusicQueue();
                 } else {
-                    console.log('No next song:', data.error);
+                    document.getElementById('song-title').textContent = 'Ready to Party!';
+                    document.getElementById('song-artist').textContent = 'Add songs from your phone';
+                    audioPlayer.src = '';
                 }
             })
             .catch(error => console.error('Error going to next song:', error));
@@ -338,10 +536,12 @@
                     
                     if (data.file_url) {
                         audioPlayer.src = data.file_url;
-                        audioPlayer.play();
+                        audioPlayer.load();
+                        audioPlayer.play().catch(e => {
+                            console.log('Auto-play prevented:', e);
+                        });
                     }
                     
-                    // Refresh the queue display
                     loadMusicQueue();
                 } else {
                     console.log('No previous song:', data.error);
@@ -349,19 +549,6 @@
             })
             .catch(error => console.error('Error going to previous song:', error));
         }
-
-        // Auto-play next song when current ends
-        audioPlayer.addEventListener('ended', function() {
-            nextSong();
-        });
-
-        // Load music queue and current song on start and refresh every 10 seconds
-        loadMusicQueue();
-        loadCurrentSong();
-        setInterval(() => {
-            loadMusicQueue();
-            loadCurrentSong();
-        }, 10000);
     </script>
 </body>
 </html>

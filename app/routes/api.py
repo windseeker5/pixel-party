@@ -5,6 +5,7 @@ from app.models import Photo, MusicQueue, get_setting
 from app import db
 from datetime import datetime
 from pathlib import Path
+from app.utils.network_utils import get_network_ip, get_server_url
 
 api_bp = Blueprint('api', __name__)
 
@@ -92,6 +93,20 @@ def stats():
     }
     
     return jsonify(stats)
+
+
+@api_bp.route('/network_info')
+def network_info():
+    """Get network information for QR code generation."""
+    port = request.environ.get('SERVER_PORT', 5000)
+    network_ip = get_network_ip()
+    mobile_url = f"http://{network_ip}:{port}/mobile"
+    
+    return jsonify({
+        'network_ip': network_ip,
+        'mobile_url': mobile_url,
+        'port': port
+    })
 
 
 @api_bp.route('/reset_test_data', methods=['POST'])

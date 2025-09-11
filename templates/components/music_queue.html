@@ -1,21 +1,42 @@
-<!-- Music queue component -->
+<!-- Music queue component with enhanced styling -->
 {% if music_queue %}
     <div class="space-y-2">
-        {% for song in music_queue %}
-        <div class="flex items-center space-x-3 bg-white bg-opacity-10 rounded p-2">
-            <!-- Music icon -->
-            <div class="w-8 h-8 bg-purple-500 rounded flex items-center justify-center text-xs flex-shrink-0">
-                🎵
+        {% for song in music_queue[:5] %}
+        <div class="flex items-center space-x-3 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-lg p-2 hover:from-purple-600/30 hover:to-pink-600/30 transition-colors">
+            <!-- Queue position -->
+            <div class="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                {{ loop.index }}
             </div>
             <!-- Song info -->
-            <div class="flex-1 text-xs overflow-hidden">
-                <div class="font-semibold truncate">{{ song.song_title or song.title or 'Unknown Song' }}</div>
-                <div class="opacity-75 truncate">{{ song.artist or 'Unknown Artist' }}</div>
-                <div class="opacity-50 truncate">by {{ song.guest_name or 'Unknown' }}</div>
+            <div class="flex-1 overflow-hidden">
+                <div class="font-semibold text-sm truncate">{{ song.song_title or 'Unknown Song' }}</div>
+                <div class="text-xs opacity-90 truncate">{{ song.artist or 'Unknown Artist' }}</div>
+                <div class="text-xs opacity-60 truncate">Requested by {{ song.guest_name or 'Anonymous' }}</div>
             </div>
+            <!-- Play indicator for first song -->
+            {% if loop.first %}
+            <div class="flex-shrink-0">
+                <div class="animate-pulse">
+                    <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"></path>
+                    </svg>
+                </div>
+            </div>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
+    {% if music_queue|length > 5 %}
+    <div class="text-xs text-center mt-2 opacity-75">
+        +{{ music_queue|length - 5 }} more songs in queue
+    </div>
+    {% endif %}
 {% else %}
-    <div class="text-sm opacity-75">No music requests yet...</div>
+    <div class="text-center py-4">
+        <svg class="w-12 h-12 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+        </svg>
+        <div class="text-sm opacity-75">No music requests yet</div>
+        <div class="text-xs opacity-50 mt-1">Waiting for song suggestions...</div>
+    </div>
 {% endif %}

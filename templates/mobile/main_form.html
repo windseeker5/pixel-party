@@ -6,7 +6,7 @@
 <!-- Google Fonts for beautiful title -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@600&display=swap" rel="stylesheet">
 
 <style>
     /* Birthday Title Styles */
@@ -21,7 +21,7 @@
     
     .title-name {
         font-family: 'Dancing Script', cursive;
-        font-size: 2.5rem;
+        font-size: 3.75rem;
         font-weight: 700;
         background: linear-gradient(135deg, #FF1493 0%, #FF69B4 50%, #FFB6C1 100%);
         -webkit-background-clip: text;
@@ -32,15 +32,10 @@
     }
     
     .title-age {
-        font-family: 'Montserrat', sans-serif;
+        font-family: 'Inter', 'Source Sans Pro', sans-serif;
         font-size: 3rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF69B4 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        text-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
-        animation: pulse-fifty 2s ease-in-out infinite;
+        font-weight: 600;
+        color: #4B5563;
         position: relative;
     }
     
@@ -49,13 +44,16 @@
         color: #FF69B4;
         font-size: 1.2rem;
         animation: float-heart 3s ease-in-out infinite;
+        right: -40px;
+        top: 50%;
+        transform: translateY(-50%);
     }
     
     .heart-decoration::before {
         content: '♥';
         position: absolute;
-        left: -20px;
-        top: -10px;
+        right: 25px;
+        top: -15px;
         font-size: 0.8rem;
         color: #FFB6C1;
         animation: float-heart 3s ease-in-out infinite 0.5s;
@@ -64,8 +62,8 @@
     .heart-decoration::after {
         content: '♥';
         position: absolute;
-        right: -25px;
-        top: 5px;
+        right: 10px;
+        top: 20px;
         font-size: 1rem;
         color: #FF1493;
         animation: float-heart 3s ease-in-out infinite 1s;
@@ -81,14 +79,6 @@
         }
     }
     
-    @keyframes pulse-fifty {
-        0%, 100% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.05);
-        }
-    }
     
     @keyframes float-heart {
         0%, 100% {
@@ -105,7 +95,7 @@
     /* Mobile responsiveness */
     @media (max-width: 400px) {
         .title-name {
-            font-size: 2rem;
+            font-size: 3rem;
         }
         .title-age {
             font-size: 2.5rem;
@@ -311,7 +301,7 @@
             
             <!-- Submit Button -->
             <div class="card-actions justify-end">
-                <button type="submit" class="btn btn-primary w-full text-lg" id="submit-btn">
+                <button type="submit" class="btn btn-info w-full text-lg" id="submit-btn">
                     <svg class="w-5 h-5 mr-2 htmx-indicator loading loading-spinner loading-sm hidden" id="submit-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
