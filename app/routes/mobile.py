@@ -144,7 +144,7 @@ def submit_memory():
     with open('submission_debug.log', 'a') as f:
         f.write(f"PASS: Guest name validation\n")
     
-    # Create or get guest if not in session
+    # Create or get guest
     if 'guest_id' not in session:
         session_id = str(uuid.uuid4())
         guest = Guest.query.filter_by(name=guest_name).first()
@@ -158,6 +158,14 @@ def submit_memory():
         session['guest_id'] = guest.id
         session['guest_name'] = guest.name
         session['session_id'] = guest.session_id
+    else:
+        # Get existing guest from session
+        guest = Guest.query.get(session['guest_id'])
+        if not guest:
+            # Session is invalid, clear it and redirect
+            session.clear()
+            flash('Session expired. Please enter your name again.', 'error')
+            return redirect(url_for('mobile.main_form'))
     
     # Get form data
     wish_message = request.form.get('wish_message', '').strip()
@@ -309,11 +317,15 @@ def submit_memory():
                                 current_app.logger.info(f"SUCCESS: Copied {source_path.name} -> {dest_path.name}")
                             else:
                                 current_app.logger.error(f"Source file not found: {source_path}")
+                                # Don't fail the entire upload, just skip the music
+                                current_app.logger.warning(f"Continuing without music due to missing file")
                         else:
                             current_app.logger.error(f"No file_path provided for local song: {title} by {artist}")
                             
                     except Exception as e:
                         current_app.logger.error(f"Music copy failed: {e}")
+                        # Don't fail the entire upload, just skip the music
+                        current_app.logger.warning(f"Continuing without music due to error: {e}")
                         
                 elif song_data.get('source') == 'youtube':
                     # Start YouTube download in background
@@ -340,15 +352,17 @@ def submit_memory():
                     except Exception as e:
                         current_app.logger.error(f"Failed to start YouTube download: {e}")
                 
-                music_request = MusicQueue(
-                    guest_id=guest.id,
-                    song_title=song_data.get('title', ''),
-                    artist=song_data.get('artist', ''),
-                    album=song_data.get('album', ''),
-                    filename=copied_filename,  # Store copied filename
-                    source=song_data.get('source', 'request')
-                )
-                db.session.add(music_request)
+                # Only create music request if we have valid data
+                if song_data.get('title'):
+                    music_request = MusicQueue(
+                        guest_id=guest.id,
+                        song_title=song_data.get('title', ''),
+                        artist=song_data.get('artist', ''),
+                        album=song_data.get('album', ''),
+                        filename=copied_filename,  # Store copied filename (may be None)
+                        source=song_data.get('source', 'request')
+                    )
+                    db.session.add(music_request)
             except Exception as e:
                 current_app.logger.error(f"Error adding selected song: {e}")
         

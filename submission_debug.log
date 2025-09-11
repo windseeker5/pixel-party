@@ -122,3 +122,59 @@ guest_name: 'Marie'
 PASS: Guest name validation
 PASS: File exists - 1000001610.jpg
 PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+PASS: File exists - IMG_1288.JPG
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+PASS: File exists - IMG_1288.JPG
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+PASS: File exists - IMG_1288.JPG
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+PASS: File exists - 1000000597.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie'
+PASS: Guest name validation
+PASS: File exists - 1000001610.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Nsks'
+PASS: Guest name validation
+PASS: File exists - 1000002601.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'dsqedw'
+PASS: Guest name validation
+PASS: File exists - IMG_1288.JPG
+PASS: File type allowed

@@ -3,6 +3,7 @@
 import subprocess
 import threading
 import time
+import datetime
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, Response
 from app import db
 from app.models import Photo, MusicQueue, Guest, Settings, update_setting, MusicLibrary
@@ -208,3 +209,97 @@ def clear_music_index():
         flash(f'Error clearing index: {str(e)}', 'error')
     
     return redirect(url_for('admin.music_dashboard'))
+
+
+@admin_bp.route('/export')
+def memory_book():
+    """Display the memory book with all photos, wishes, and music."""
+    # Get all photos with their associated music
+    photos = Photo.query.order_by(Photo.uploaded_at.asc()).all()
+    
+    # For each photo, find the associated music from the same guest at similar time
+    memories = []
+    for photo in photos:
+        # Get music request from same guest around the same time (within 10 minutes)
+        music = None
+        if photo.guest_id:
+            music_query = MusicQueue.query.filter_by(guest_id=photo.guest_id)
+            # Get music within 10 minutes of photo upload
+            time_window = 600  # 10 minutes in seconds
+            start_time = photo.uploaded_at - datetime.timedelta(seconds=time_window)
+            end_time = photo.uploaded_at + datetime.timedelta(seconds=time_window)
+            music = music_query.filter(
+                MusicQueue.submitted_at >= start_time,
+                MusicQueue.submitted_at <= end_time
+            ).first()
+        
+        memories.append({
+            'photo': photo,
+            'music': music
+        })
+    
+    return render_template('admin/memory_book.html', memories=memories)
+
+
+@admin_bp.route('/export/standalone')
+def export_standalone():
+    """Export standalone HTML memory book for USB."""
+    import os
+    import shutil
+    from urllib.parse import quote
+    
+    # Get all photos with their associated music
+    photos = Photo.query.order_by(Photo.uploaded_at.asc()).all()
+    
+    # Create export directory
+    export_dir = 'export'
+    os.makedirs(export_dir, exist_ok=True)
+    os.makedirs(f'{export_dir}/photos', exist_ok=True)
+    os.makedirs(f'{export_dir}/music', exist_ok=True)
+    
+    # Prepare memories data and copy files
+    memories = []
+    for photo in photos:
+        # Copy photo file
+        photo_src = f'media/photos/{photo.filename}'
+        photo_dest = f'{export_dir}/photos/{photo.filename}'
+        if os.path.exists(photo_src):
+            shutil.copy2(photo_src, photo_dest)
+        
+        # Get associated music
+        music = None
+        if photo.guest_id:
+            music_query = MusicQueue.query.filter_by(guest_id=photo.guest_id)
+            time_window = 600  # 10 minutes
+            start_time = photo.uploaded_at - datetime.timedelta(seconds=time_window)
+            end_time = photo.uploaded_at + datetime.timedelta(seconds=time_window)
+            music = music_query.filter(
+                MusicQueue.submitted_at >= start_time,
+                MusicQueue.submitted_at <= end_time
+            ).first()
+            
+            # Copy music file if exists
+            if music and music.filename:
+                music_src = f'media/music/{music.filename}'
+                music_dest = f'{export_dir}/music/{music.filename}'
+                if os.path.exists(music_src):
+                    shutil.copy2(music_src, music_dest)
+        
+        memories.append({
+            'photo': photo,
+            'music': music
+        })
+    
+    # Generate standalone HTML
+    html_content = render_template('admin/memory_book_standalone.html', memories=memories)
+    
+    # Save standalone HTML file
+    with open(f'{export_dir}/index.html', 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    
+    # Copy database backup
+    if os.path.exists('party.db'):
+        shutil.copy2('party.db', f'{export_dir}/party_database.db')
+    
+    flash(f'Memory book exported to {export_dir}/ directory!', 'success')
+    return redirect(url_for('admin.memory_book'))

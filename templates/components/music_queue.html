@@ -2,27 +2,30 @@
 {% if music_queue %}
     <div class="space-y-2">
         {% for song in music_queue[:5] %}
-        <div class="flex items-center space-x-3 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-lg p-2 hover:from-purple-600/30 hover:to-pink-600/30 transition-colors">
+        <div class="flex items-center space-x-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-lg p-1.5 hover:from-purple-600/30 hover:to-pink-600/30 transition-colors {% if loop.first %}ring-2 ring-purple-400 shadow-lg{% endif %}">
             <!-- Queue position -->
-            <div class="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+            <div class="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
                 {{ loop.index }}
             </div>
             <!-- Song info -->
             <div class="flex-1 overflow-hidden">
-                <div class="font-semibold text-sm truncate">{{ song.song_title or 'Unknown Song' }}</div>
-                <div class="text-xs opacity-90 truncate">{{ song.artist or 'Unknown Artist' }}</div>
-                <div class="text-xs opacity-60 truncate">Requested by {{ song.guest_name or 'Anonymous' }}</div>
+                <div class="font-semibold text-xs truncate">{{ song.song_title or 'Unknown Song' }}</div>
+                <div class="text-xs opacity-70 truncate">{{ song.artist or 'Unknown Artist' }}</div>
             </div>
-            <!-- Play indicator for first song -->
-            {% if loop.first %}
-            <div class="flex-shrink-0">
+            <!-- Submitter name - bigger and aligned right like photo queue -->
+            <div class="flex-shrink-0 text-right">
+                <div class="font-semibold text-sm">{{ song.guest_name or 'Anonymous' }}</div>
+            </div>
+            <!-- Reserved space for indicator (always present for alignment) -->
+            <div class="flex-shrink-0 w-4 flex justify-center">
+                {% if loop.first %}
                 <div class="animate-pulse">
-                    <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"></path>
                     </svg>
                 </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
         {% endfor %}
     </div>

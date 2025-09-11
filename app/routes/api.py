@@ -53,9 +53,27 @@ def photos():
 @api_bp.route('/photo_queue')
 @api_bp.route('/photos/queue')
 def photo_queue():
-    """Get photo queue for sidebar."""
-    photos = Photo.query.order_by(Photo.uploaded_at.desc()).limit(6).all()
-    return render_template('components/photo_queue.html', photos=photos)
+    """Get photo queue for sidebar with currently displaying photo first."""
+    import time
+    
+    # Get all photos in the same order as slideshow (oldest first)
+    all_photos = Photo.query.order_by(Photo.uploaded_at.asc()).all()
+    
+    if not all_photos:
+        return render_template('components/photo_queue.html', photos=[])
+    
+    # Calculate which photo is currently being displayed (same logic as current_photo)
+    current_time = int(time.time())
+    slideshow_duration = 8  # seconds per photo
+    current_index = (current_time // slideshow_duration) % len(all_photos)
+    
+    # Reorder photos so current photo is first, then the next ones in sequence
+    reordered_photos = []
+    for i in range(min(6, len(all_photos))):  # Show up to 6 photos
+        photo_index = (current_index + i) % len(all_photos)
+        reordered_photos.append(all_photos[photo_index])
+    
+    return render_template('components/photo_queue.html', photos=reordered_photos)
 
 
 @api_bp.route('/music_queue')
