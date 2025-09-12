@@ -13,23 +13,44 @@ from app.models import Guest, Photo, MusicQueue, get_setting
 mobile_bp = Blueprint('mobile', __name__)
 
 
-def download_youtube_async(video_url, title, artist, app):
+def download_youtube_async(video_url, title, artist, app, music_request_id):
     """Download YouTube audio in background thread."""
     with app.app_context():
+        from app import db
+        from app.models import MusicQueue
+        
         try:
+            # Update status to downloading
+            music_request = MusicQueue.query.get(music_request_id)
+            if music_request:
+                music_request.status = 'downloading'
+                db.session.commit()
+            
             from app.services.youtube_service import get_youtube_service
             youtube_service = get_youtube_service()
             
             current_app.logger.info(f"🎵 Background downloading: {title} by {artist}")
             copied_filename = youtube_service.download_audio(video_url, title, artist)
             
-            if copied_filename:
+            if copied_filename and music_request:
+                # Update database entry with filename and status
+                music_request.filename = copied_filename
+                music_request.status = 'ready'
+                db.session.commit()
                 current_app.logger.info(f"✅ Background download complete: {copied_filename}")
-                # TODO: Add to music queue database here if needed
-            else:
+            elif music_request:
+                # Mark as error
+                music_request.status = 'error'
+                db.session.commit()
                 current_app.logger.error(f"❌ Background download failed: {video_url}")
                 
         except Exception as e:
+            # Mark as error
+            if music_request_id:
+                music_request = MusicQueue.query.get(music_request_id)
+                if music_request:
+                    music_request.status = 'error'
+                    db.session.commit()
             current_app.logger.error(f"❌ Background YouTube download error: {e}")
 
 
@@ -274,6 +295,7 @@ def submit_memory():
                 
                 # Copy music file from library to project music folder
                 copied_filename = None
+                youtube_download_needed = False
                 if song_data.get('source') == 'local':
                     try:
                         import shutil
@@ -336,33 +358,50 @@ def submit_memory():
                         
                         current_app.logger.info(f"🚀 Starting background YouTube download: {title} by {artist}")
                         
-                        if video_url and title:
-                            # Start download in background thread
-                            download_thread = threading.Thread(
-                                target=download_youtube_async,
-                                args=(video_url, title, artist, current_app._get_current_object())
-                            )
-                            download_thread.daemon = True
-                            download_thread.start()
-                            
-                            current_app.logger.info(f"✅ Background download started for: {title} by {artist}")
+                        if video_url and title and song_data.get('source') == 'youtube':
+                            # We'll start the download after creating the database entry
+                            youtube_download_needed = True
+                            youtube_data = (video_url, title, artist)
                         else:
                             current_app.logger.error(f"Missing YouTube URL or title for download")
+                            youtube_download_needed = False
                             
                     except Exception as e:
                         current_app.logger.error(f"Failed to start YouTube download: {e}")
                 
                 # Only create music request if we have valid data
                 if song_data.get('title'):
+                    # Set initial status based on source and whether we have a file
+                    if song_data.get('source') == 'local':
+                        status = 'ready' if copied_filename else 'error'
+                    else:
+                        status = 'pending'  # YouTube will be set to downloading then ready/error
+                    
                     music_request = MusicQueue(
                         guest_id=guest.id,
                         song_title=song_data.get('title', ''),
                         artist=song_data.get('artist', ''),
                         album=song_data.get('album', ''),
                         filename=copied_filename,  # Store copied filename (may be None)
-                        source=song_data.get('source', 'request')
+                        source=song_data.get('source', 'request'),
+                        status=status
                     )
                     db.session.add(music_request)
+                    db.session.flush()  # Get the ID without committing
+                    
+                    # Start YouTube download if needed (after we have the ID)
+                    if 'youtube_download_needed' in locals() and youtube_download_needed:
+                        try:
+                            download_thread = threading.Thread(
+                                target=download_youtube_async,
+                                args=(youtube_data[0], youtube_data[1], youtube_data[2], current_app._get_current_object(), music_request.id)
+                            )
+                            download_thread.daemon = True
+                            download_thread.start()
+                            current_app.logger.info(f"✅ Background download started for: {youtube_data[1]} by {youtube_data[2]}")
+                        except Exception as e:
+                            current_app.logger.error(f"Failed to start YouTube download thread: {e}")
+                            
             except Exception as e:
                 current_app.logger.error(f"Error adding selected song: {e}")
         
@@ -720,7 +759,8 @@ def suggest_music():
                 artist=result['artist'],
                 album=result['album'],
                 filename=copied_filename,  # Store the copied filename
-                source="local"
+                source="local",
+                status='ready' if copied_filename else 'error'
             )
         else:
             # Create generic request for manual review
@@ -729,7 +769,8 @@ def suggest_music():
                 song_title=f"Request: {search_query}",
                 artist=f"Search by {search_type}",
                 album="User Request",
-                source="request"
+                source="request",
+                status="pending"
             )
         
         db.session.add(music_request)

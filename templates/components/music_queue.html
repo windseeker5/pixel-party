@@ -1,7 +1,7 @@
 <!-- Music queue component with enhanced styling -->
 {% if music_queue %}
     <div class="space-y-2">
-        {% for song in music_queue[:5] %}
+        {% for song in music_queue[:3] %}
         <div class="flex items-center space-x-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-lg p-1.5 hover:from-purple-600/30 hover:to-pink-600/30 transition-colors {% if loop.first %}ring-2 ring-purple-400 shadow-lg{% endif %}">
             <!-- Queue position -->
             <div class="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
@@ -12,9 +12,30 @@
                 <div class="font-semibold text-xs truncate">{{ song.song_title or 'Unknown Song' }}</div>
                 <div class="text-xs opacity-70 truncate">{{ song.artist or 'Unknown Artist' }}</div>
             </div>
-            <!-- Submitter name - bigger and aligned right like photo queue -->
+            <!-- Right side: Submitter name and badges -->
             <div class="flex-shrink-0 text-right">
                 <div class="font-semibold text-sm">{{ song.guest_name or 'Anonymous' }}</div>
+                <!-- Status and source indicators on right -->
+                <div class="flex items-center justify-end gap-1 mt-1">
+                    <!-- Status indicator -->
+                    {% if song.status == 'downloading' %}
+                    <div class="badge badge-xs badge-warning text-white" style="border-radius: 3px; font-size: 8px;">
+                        downloading...
+                    </div>
+                    {% elif song.status == 'error' %}
+                    <div class="badge badge-xs badge-error text-white" style="border-radius: 3px; font-size: 8px;">
+                        error
+                    </div>
+                    {% elif song.status == 'pending' %}
+                    <div class="badge badge-xs badge-neutral" style="border-radius: 3px; font-size: 8px;">
+                        pending
+                    </div>
+                    {% endif %}
+                    <!-- Source badge -->
+                    <div class="badge badge-xs {% if song.source == 'local' %}badge-info{% else %}badge-error text-white{% endif %}" style="border-radius: 3px; font-size: 8px;">
+                        {{ song.source }}
+                    </div>
+                </div>
             </div>
             <!-- Reserved space for indicator (always present for alignment) -->
             <div class="flex-shrink-0 w-4 flex justify-center">
@@ -29,9 +50,9 @@
         </div>
         {% endfor %}
     </div>
-    {% if music_queue|length > 5 %}
+    {% if music_queue|length > 3 %}
     <div class="text-xs text-center mt-2 opacity-75">
-        +{{ music_queue|length - 5 }} more songs in queue
+        +{{ music_queue|length - 3 }} more songs in queue
     </div>
     {% endif %}
 {% else %}

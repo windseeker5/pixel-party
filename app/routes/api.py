@@ -161,9 +161,14 @@ def reset_test_data():
 
 @api_bp.route('/music/current')
 def get_current_song():
-    """Get currently playing song."""
-    # Get the first song that hasn't been played yet
-    current_song = MusicQueue.query.filter_by(played_at=None).order_by(MusicQueue.submitted_at.asc()).first()
+    """Get currently playing song (only ready songs with files)."""
+    # Get the first ready song that hasn't been played yet
+    current_song = MusicQueue.query.filter_by(
+        played_at=None, 
+        status='ready'
+    ).filter(
+        MusicQueue.filename.isnot(None)
+    ).order_by(MusicQueue.submitted_at.asc()).first()
     
     if current_song and current_song.filename:
         # Construct file URL
@@ -176,24 +181,35 @@ def get_current_song():
             'album': current_song.album,
             'file_url': file_url,
             'source': current_song.source,
+            'status': current_song.status,
             'submitted_at': current_song.submitted_at.isoformat() if current_song.submitted_at else None
         })
     
-    return jsonify({'error': 'No song currently playing'})
+    return jsonify({'error': 'No ready song available'})
 
 
 @api_bp.route('/music/next', methods=['POST'])
 def next_song():
-    """Mark current song as played and get next song."""
-    # Mark current song as played
-    current_song = MusicQueue.query.filter_by(played_at=None).order_by(MusicQueue.submitted_at.asc()).first()
+    """Mark current song as played and get next ready song."""
+    # Mark current ready song as played
+    current_song = MusicQueue.query.filter_by(
+        played_at=None, 
+        status='ready'
+    ).filter(
+        MusicQueue.filename.isnot(None)
+    ).order_by(MusicQueue.submitted_at.asc()).first()
     
     if current_song:
         current_song.played_at = datetime.utcnow()
         db.session.commit()
     
-    # Get next song
-    next_song = MusicQueue.query.filter_by(played_at=None).order_by(MusicQueue.submitted_at.asc()).first()
+    # Get next ready song
+    next_song = MusicQueue.query.filter_by(
+        played_at=None, 
+        status='ready'
+    ).filter(
+        MusicQueue.filename.isnot(None)
+    ).order_by(MusicQueue.submitted_at.asc()).first()
     
     if next_song and next_song.filename:
         file_url = f"/media/music/{next_song.filename}"
@@ -205,17 +221,23 @@ def next_song():
             'album': next_song.album,
             'file_url': file_url,
             'source': next_song.source,
+            'status': next_song.status,
             'submitted_at': next_song.submitted_at.isoformat() if next_song.submitted_at else None
         })
     
-    return jsonify({'error': 'No next song available'})
+    return jsonify({'error': 'No next ready song available'})
 
 
 @api_bp.route('/music/previous', methods=['POST'])  
 def previous_song():
-    """Get previous song (last played song)."""
-    # Get the most recently played song
-    previous_song = MusicQueue.query.filter(MusicQueue.played_at.is_not(None)).order_by(MusicQueue.played_at.desc()).first()
+    """Get previous song (last played ready song)."""
+    # Get the most recently played ready song with a file
+    previous_song = MusicQueue.query.filter(
+        MusicQueue.played_at.is_not(None),
+        MusicQueue.status == 'ready'
+    ).filter(
+        MusicQueue.filename.isnot(None)
+    ).order_by(MusicQueue.played_at.desc()).first()
     
     if previous_song and previous_song.filename:
         # Mark it as unplayed so it can be played again
@@ -231,18 +253,19 @@ def previous_song():
             'album': previous_song.album,
             'file_url': file_url,
             'source': previous_song.source,
+            'status': previous_song.status,
             'submitted_at': previous_song.submitted_at.isoformat() if previous_song.submitted_at else None
         })
     
-    return jsonify({'error': 'No previous song available'})
+    return jsonify({'error': 'No previous ready song available'})
 
 
 @api_bp.route('/music/play/<int:song_id>', methods=['POST'])
 def play_song(song_id):
-    """Play a specific song by ID."""
+    """Play a specific song by ID (only if ready)."""
     song = MusicQueue.query.get_or_404(song_id)
     
-    if song.filename:
+    if song.filename and song.status == 'ready':
         file_url = f"/media/music/{song.filename}"
         
         return jsonify({
@@ -252,7 +275,8 @@ def play_song(song_id):
             'album': song.album,
             'file_url': file_url,
             'source': song.source,
+            'status': song.status,
             'submitted_at': song.submitted_at.isoformat() if song.submitted_at else None
         })
     
-    return jsonify({'error': 'Song file not available'})
+    return jsonify({'error': 'Song file not ready or not available'})

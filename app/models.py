@@ -46,6 +46,7 @@ class MusicQueue(db.Model):
     album = db.Column(db.String(200), nullable=True)
     filename = db.Column(db.String(255), nullable=True)
     source = db.Column(db.String(20), nullable=False)  # 'local' or 'youtube'
+    status = db.Column(db.String(20), default='pending')  # 'pending', 'downloading', 'ready', 'error'
     played_at = db.Column(db.DateTime, nullable=True)
     submitted_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
