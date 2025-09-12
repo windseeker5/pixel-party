@@ -6,7 +6,7 @@
 <!-- Google Fonts for beautiful title -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@600&family=Codystar:wght@300;400&display=swap" rel="stylesheet">
 
 <style>
     /* Birthday Title Styles */
@@ -32,42 +32,32 @@
     }
     
     .title-age {
-        font-family: 'Inter', 'Source Sans Pro', sans-serif;
+        font-family: 'Codystar', sans-serif;
         font-size: 3rem;
-        font-weight: 600;
-        color: #4B5563;
+        font-weight: 300;
+        color: #FACC15;
         position: relative;
     }
     
     .heart-decoration {
-        position: absolute;
+        position: relative;
         color: #FF69B4;
         font-size: 1.2rem;
         animation: float-heart 3s ease-in-out infinite;
-        right: -40px;
-        top: 50%;
-        transform: translateY(-50%);
+        margin-right: 0.5rem;
+        align-self: center;
     }
     
     .heart-decoration::before {
         content: '♥';
         position: absolute;
-        right: 25px;
+        left: 25px;
         top: -15px;
         font-size: 0.8rem;
         color: #FFB6C1;
         animation: float-heart 3s ease-in-out infinite 0.5s;
     }
     
-    .heart-decoration::after {
-        content: '♥';
-        position: absolute;
-        right: 10px;
-        top: 20px;
-        font-size: 1rem;
-        color: #FF1493;
-        animation: float-heart 3s ease-in-out infinite 1s;
-    }
     
     /* Animations */
     @keyframes subtle-glow {
@@ -111,9 +101,9 @@
             <!-- Beautiful Birthday Title -->
             <div class="flex-1 flex justify-center">
                 <div class="birthday-title-container">
+                    <span class="heart-decoration">♥</span>
                     <span class="title-name">Valérie</span>
                     <span class="title-age">50</span>
-                    <span class="heart-decoration">♥</span>
                 </div>
             </div>
             <!-- Ollama status indicator positioned absolutely -->
