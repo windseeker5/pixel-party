@@ -5,13 +5,15 @@
          alt="Photo from {{ photo.guest_name }}"
          class="absolute inset-0 w-full h-full object-cover ken-burns-animation">
     
-    <!-- TikTok-style text overlay -->
+    <!-- TikTok-style text overlay - 3 Rotating Styles -->
     {% if photo.wish_message %}
-    <div class="wish-overlay">
-        <div class="wish-text">
+    <div class="text-overlay-container" data-style="random">
+        <!-- Large Bold Wish Text -->
+        <div class="wish-text-tiktok" data-text="{{ photo.wish_message }}">
             "{{ photo.wish_message }}"
         </div>
-        <div class="submitter-info">
+        <!-- Prominent Sender Name -->
+        <div class="sender-name-tiktok" data-name="{{ photo.guest_name }}">
             - {{ photo.guest_name }}
         </div>
     </div>
@@ -36,162 +38,313 @@
 }
 
 
-/* TikTok-style text overlay with improved animations */
-.wish-overlay {
+/* TikTok-style text overlay container */
+.text-overlay-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    pointer-events: none;
+}
+
+/* Base styles for all TikTok text - SIMPLIFIED FOR TESTING */
+.wish-text-tiktok {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 900;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    line-height: 0.9;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+.sender-name-tiktok {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    color: #FFD700;
     position: absolute;
     bottom: 15%;
-    left: 15%;
-    right: 15%;
-    max-height: 25vh;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(12px) saturate(180%);
-    border-radius: 20px;
-    padding: 24px 30px;
-    color: white;
-    font-size: clamp(1.2rem, 2.5vw, 2rem);
-    text-align: center;
-    line-height: 1.3;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    animation: 
-        slideInBounce 1s cubic-bezier(0.68, -0.55, 0.265, 1.55),
-        pulseGlow 2s ease-in-out 2s,
-        fadeOutSmooth 1.2s ease-in 6.5s;
-    animation-fill-mode: forwards;
+    left: 50%;
+    transform: translateX(-50%);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
 }
 
-.wish-text {
-    font-weight: 500;
-    margin-bottom: 12px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    animation: typeWriter 0.8s ease-in 0.5s both;
+/* STYLE 1: NEON GLOW PULSE */
+.text-overlay-container[data-style="1"] .wish-text-tiktok {
+    font-family: 'Montserrat', 'Arial', sans-serif;
+    color: #FFFFFF;
+    text-shadow: 
+        0 0 5px #FFFFFF,
+        0 0 10px #FFFFFF,
+        0 0 15px #00FFFF,
+        0 0 20px #00FFFF,
+        0 0 35px #00FFFF;
 }
 
-.submitter-info {
-    font-size: 0.75em;
+.text-overlay-container[data-style="1"] .sender-name-tiktok {
+    font-family: 'Montserrat', sans-serif;
     color: #FFD700;
-    font-style: italic;
-    font-weight: 600;
-    opacity: 0.95;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-    animation: slideInName 0.6s ease-out 1.2s both;
+    text-shadow: 
+        0 0 10px #FFD700,
+        0 0 20px #FFD700,
+        0 0 30px #FFD700;
 }
 
-/* TikTok-style entrance animation with bounce */
-@keyframes slideInBounce {
+/* STYLE 2: CHUNKY POP */
+.text-overlay-container[data-style="2"] .wish-text-tiktok {
+    font-family: 'Impact', sans-serif;
+    color: #FFFFFF;
+    -webkit-text-stroke: 2px #000000;
+    text-stroke: 2px #000000;
+    text-shadow: 4px 4px 0px #000000;
+}
+
+.text-overlay-container[data-style="2"] .sender-name-tiktok {
+    font-family: 'Arial', sans-serif;
+    color: #FF1493;
+    text-shadow: 
+        3px 3px 0px #000000,
+        -1px -1px 0px #000000,
+        1px -1px 0px #000000,
+        -1px 1px 0px #000000;
+}
+
+/* STYLE 3: GRADIENT WAVE */
+.text-overlay-container[data-style="3"] .wish-text-tiktok {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(45deg, #FF6B6B, #FFD93D, #6BCF7F, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.8));
+}
+
+.text-overlay-container[data-style="3"] .sender-name-tiktok {
+    font-family: 'Allura', cursive;
+    background: linear-gradient(45deg, #FFD700, #FF6B6B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    right: 10%;
+    left: auto;
+    transform: none;
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.8));
+}
+
+/* STYLE 1: NEON GLOW ANIMATIONS */
+@keyframes neonPulse {
     0% {
-        transform: translateY(150px) scale(0.8);
         opacity: 0;
-    }
-    60% {
-        transform: translateY(-10px) scale(1.02);
-        opacity: 0.9;
-    }
-    80% {
-        transform: translateY(5px) scale(0.98);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-    }
-}
-
-/* Typewriter effect for wish text */
-@keyframes typeWriter {
-    0% {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Name slide-in effect */
-@keyframes slideInName {
-    0% {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    100% {
-        opacity: 0.95;
-        transform: translateX(0);
-    }
-}
-
-/* Subtle glow effect during display */
-@keyframes pulseGlow {
-    0%, 100% {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        transform: translateY(30px) scale(0.9);
+        text-shadow: 
+            0 0 5px #FFFFFF,
+            0 0 10px #FFFFFF,
+            0 0 15px #00FFFF;
     }
     50% {
-        box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2), 0 0 20px rgba(255, 215, 0, 0.1);
+        opacity: 0.8;
+        transform: translateY(0) scale(1.05);
+        text-shadow: 
+            0 0 10px #FFFFFF,
+            0 0 20px #FFFFFF,
+            0 0 30px #00FFFF,
+            0 0 40px #00FFFF,
+            0 0 60px #00FFFF;
     }
-}
-
-/* Smooth fade out with slight upward movement */
-@keyframes fadeOutSmooth {
-    0% {
+    100% {
         opacity: 1;
         transform: translateY(0) scale(1);
+        text-shadow: 
+            0 0 5px #FFFFFF,
+            0 0 10px #FFFFFF,
+            0 0 15px #00FFFF,
+            0 0 20px #00FFFF,
+            0 0 35px #00FFFF,
+            0 0 40px #00FFFF;
     }
-    100% {
-        opacity: 0;
-        transform: translateY(-30px) scale(0.95);
-    }
 }
 
-/* Photo transition effects for smooth swapping */
-.photo-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-.photo-enter {
-    animation: photoFadeIn 0.8s ease-out;
-}
-
-.photo-exit {
-    animation: photoFadeOut 0.6s ease-in;
-}
-
-@keyframes photoFadeIn {
+@keyframes neonNameGlow {
     0% {
         opacity: 0;
-        transform: scale(1.1);
-        filter: blur(2px);
+        transform: translateX(-50%) scale(0.8);
     }
     100% {
         opacity: 1;
-        transform: scale(1.0);
-        filter: blur(0px);
+        transform: translateX(-50%) scale(1);
     }
 }
 
-@keyframes photoFadeOut {
+/* STYLE 2: CHUNKY POP ANIMATIONS */
+@keyframes chunkPop {
     0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.7) rotate(-3deg);
+    }
+    60% {
+        opacity: 0.9;
+        transform: translateY(-10px) scale(1.2) rotate(2deg);
+    }
+    80% {
         opacity: 1;
-        transform: scale(1.0);
+        transform: translateY(5px) scale(0.95) rotate(-1deg);
     }
     100% {
-        opacity: 0;
-        transform: scale(0.95);
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0deg);
     }
 }
 
-/* Add subtle parallax effect to overlay */
-@media (min-width: 1024px) {
-    .wish-overlay {
-        transform: translateZ(0);
-        will-change: transform;
+@keyframes popBounce {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.6) rotate(5deg);
+    }
+    70% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.15) rotate(-2deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1) rotate(0deg);
+    }
+}
+
+/* STYLE 3: GRADIENT WAVE ANIMATIONS */
+@keyframes gradientWave {
+    0% {
+        opacity: 0;
+        transform: translateX(-100px) scale(0.9);
+        filter: blur(3px) drop-shadow(2px 2px 4px rgba(0,0,0,0.8));
+    }
+    60% {
+        opacity: 0.8;
+        transform: translateX(10px) scale(1.02);
+        filter: blur(1px) drop-shadow(2px 2px 4px rgba(0,0,0,0.8));
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0) drop-shadow(2px 2px 4px rgba(0,0,0,0.8));
+    }
+}
+
+@keyframes signatureSlide {
+    0% {
+        opacity: 0;
+        transform: translateX(50px) scale(0.8);
+    }
+    70% {
+        opacity: 0.9;
+        transform: translateX(-5px) scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* Mobile responsiveness for all styles */
+@media (max-width: 768px) {
+    .wish-text-tiktok {
+        font-size: clamp(2rem, 8vw, 3.5rem);
+        letter-spacing: 1px;
+    }
+    
+    .sender-name-tiktok {
+        font-size: clamp(1.5rem, 5vw, 2.5rem);
+        bottom: 12%;
+    }
+    
+    .text-overlay-container[data-style="3"] .sender-name-tiktok {
+        right: 8%;
     }
 }
 </style>
+
+<script>
+console.log('TikTok Script Starting...');
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded');
+    
+    const container = document.querySelector('[data-style="random"]');
+    console.log('Container found:', container);
+    
+    if (!container) {
+        console.error('No container found with [data-style="random"]');
+        return;
+    }
+
+    // 1. SELECT RANDOM STYLE (1, 2, or 3)
+    const randomStyle = Math.floor(Math.random() * 3) + 1;
+    container.setAttribute('data-style', randomStyle);
+    console.log('Random style applied:', randomStyle);
+    
+    // 2. GET ELEMENTS AND TEXT
+    const wishElement = container.querySelector('.wish-text-tiktok');
+    const nameElement = container.querySelector('.sender-name-tiktok');
+    
+    console.log('Wish element:', wishElement);
+    console.log('Name element:', nameElement);
+    
+    if (!wishElement || !nameElement) {
+        console.error('Elements not found');
+        return;
+    }
+    
+    const wishText = '"' + (wishElement.getAttribute('data-text') || 'No message') + '"';
+    const nameText = '- ' + (nameElement.getAttribute('data-name') || 'Anonymous');
+    
+    console.log('Wish text:', wishText);
+    console.log('Name text:', nameText);
+    
+    // 3. TYPING EFFECT FUNCTION
+    function typeText(element, text, speed = 100, callback = null) {
+        console.log('Starting to type:', text);
+        element.innerHTML = '';
+        let i = 0;
+        
+        function typeChar() {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeChar, speed);
+            } else {
+                console.log('Finished typing:', text);
+                if (callback) {
+                    setTimeout(callback, 500);
+                }
+            }
+        }
+        
+        typeChar();
+    }
+    
+    // 4. START ANIMATION SEQUENCE
+    setTimeout(() => {
+        console.log('Starting typing sequence...');
+        // First: Type the wish text
+        typeText(wishElement, wishText, 80, () => {
+            // Then: Type the name
+            typeText(nameElement, nameText, 60);
+        });
+    }, 500);
+});
+
+// Alternative simple approach - no typing, just show text
+setTimeout(() => {
+    const containers = document.querySelectorAll('[data-style]');
+    console.log('Fallback check - containers found:', containers.length);
+    
+    containers.forEach(container => {
+        if (container.getAttribute('data-style') === 'random') {
+            container.setAttribute('data-style', '1'); // Default to style 1
+        }
+    });
+}, 2000);
+</script>

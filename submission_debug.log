@@ -194,3 +194,11 @@ guest_name: 'Marie'
 PASS: Guest name validation
 PASS: File exists - 1000001534.jpg
 PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Elizabeth'
+PASS: Guest name validation
+PASS: File exists - 2014-08-12 14.09.36.jpg
+PASS: File type allowed
