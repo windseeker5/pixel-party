@@ -7,14 +7,16 @@
     
     <!-- Tailwind CSS with daisyUI -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.24/dist/full.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Commented out CDN for production - using daisyUI's built-in Tailwind -->
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     
     <!-- HTMX for dynamic interactions -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     
     <!-- Note: Using inline SVG icons instead of Heroicons CDN to avoid MIME type issues -->
     
-    <!-- Custom Tailwind config and styles -->
+    <!-- Custom Tailwind config (disabled - using daisyUI defaults) -->
+    <!--
     <script>
         tailwind.config = {
             theme: {
@@ -28,6 +30,7 @@
             }
         }
     </script>
+    -->
     
     <style>
         /* Custom animations for birthday theme */

@@ -36,11 +36,86 @@
     }
     
     .current-photo {
-        max-width: 90%;
-        max-height: 90%;
-        object-fit: contain;
-        border-radius: 15px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        max-width: 95%;
+        max-height: 95%;
+        object-fit: cover;
+        border-radius: 20px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        transition: all 0.8s ease-in-out;
+    }
+
+    /* Photo transition container */
+    #photo-display {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Default state for all photos */
+    #photo-display > * {
+        opacity: 0;
+        transform: scale(1.05);
+        filter: blur(2px);
+        animation: photoFadeIn 1.5s ease-out forwards;
+    }
+
+    /* Strong fade-in animation for every new photo */
+    @keyframes photoFadeIn {
+        0% {
+            opacity: 0;
+            transform: scale(1.05) translateY(30px);
+            filter: blur(4px) brightness(0.7);
+        }
+        20% {
+            opacity: 0.2;
+            transform: scale(1.03) translateY(20px);
+            filter: blur(3px) brightness(0.8);
+        }
+        50% {
+            opacity: 0.6;
+            transform: scale(1.01) translateY(10px);
+            filter: blur(1px) brightness(0.9);
+        }
+        80% {
+            opacity: 0.9;
+            transform: scale(1.005) translateY(2px);
+            filter: blur(0.5px) brightness(0.95);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            filter: blur(0) brightness(1);
+        }
+    }
+
+    /* HTMX indicators for debugging */
+    .htmx-request #photo-display {
+        position: relative;
+    }
+
+    .htmx-request #photo-display::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        animation: loadingPulse 1s ease-in-out infinite;
+        z-index: 1000;
+    }
+
+    @keyframes loadingPulse {
+        0%, 100% { 
+            opacity: 0.5; 
+            transform: translate(-50%, -50%) scale(1); 
+        }
+        50% { 
+            opacity: 1; 
+            transform: translate(-50%, -50%) scale(2); 
+        }
     }
     
     .wish-overlay {
@@ -90,6 +165,69 @@
         text-align: center;
         color: white;
         padding: 40px;
+        animation: gentlePulse 3s ease-in-out infinite;
+    }
+
+    /* Gentle pulsing animation for placeholder */
+    @keyframes gentlePulse {
+        0%, 100% {
+            opacity: 0.8;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.02);
+        }
+    }
+
+    /* Enhanced slideshow animations */
+    @keyframes slideInFromBottom {
+        0% {
+            transform: translateY(100px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Smooth HTMX swap animation */
+    .htmx-swapping {
+        opacity: 0.5;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    /* Enhance party header with subtle animations */
+    .party-header {
+        animation: slideDownFade 1s ease-out;
+    }
+
+    @keyframes slideDownFade {
+        0% {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Sidebar entrance animation */
+    .sidebar {
+        animation: slideInFromRight 0.8s ease-out 0.3s both;
+    }
+
+    @keyframes slideInFromRight {
+        0% {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        100% {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
 </style>
 {% endblock %}
@@ -112,7 +250,8 @@
         <div id="photo-display" 
              hx-get="{{ url_for('api.current_photo') }}" 
              hx-trigger="every {{ slideshow_duration }}s"
-             hx-swap="innerHTML">
+             hx-swap="innerHTML"
+             hx-indicator=".htmx-indicator">
             <!-- Initial content -->
             <div class="no-photos-placeholder">
                 <div class="text-6xl mb-4">📸</div>
