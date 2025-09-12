@@ -79,10 +79,24 @@ def photo_queue():
 @api_bp.route('/music_queue')
 @api_bp.route('/music/queue')
 def music_queue():
-    """Get music queue for sidebar."""
+    """Get music queue for sidebar (excluding currently playing song)."""
     from app.models import Guest
     
-    queue = MusicQueue.query.filter_by(played_at=None).order_by(MusicQueue.submitted_at.asc()).limit(5).all()
+    # Get all unplayed songs in order
+    all_songs = MusicQueue.query.filter_by(played_at=None).order_by(MusicQueue.submitted_at.asc()).all()
+    
+    # Exclude the currently playing song (first ready song with filename)
+    queue = []
+    found_current = False
+    for song in all_songs:
+        # Skip the first ready song with filename (this is the currently playing one)
+        if not found_current and song.status == 'ready' and song.filename:
+            found_current = True
+            continue
+        queue.append(song)
+        # Limit to 3 songs as requested
+        if len(queue) >= 3:
+            break
     
     # Get guest names for each song
     for song in queue:
@@ -162,6 +176,8 @@ def reset_test_data():
 @api_bp.route('/music/current')
 def get_current_song():
     """Get currently playing song (only ready songs with files)."""
+    from app.models import Guest
+    
     # Get the first ready song that hasn't been played yet
     current_song = MusicQueue.query.filter_by(
         played_at=None, 
@@ -171,6 +187,13 @@ def get_current_song():
     ).order_by(MusicQueue.submitted_at.asc()).first()
     
     if current_song and current_song.filename:
+        # Get guest information
+        guest_name = "Anonymous"
+        if current_song.guest_id:
+            guest = Guest.query.get(current_song.guest_id)
+            if guest:
+                guest_name = guest.name
+        
         # Construct file URL
         file_url = f"/media/music/{current_song.filename}"
         
@@ -182,6 +205,7 @@ def get_current_song():
             'file_url': file_url,
             'source': current_song.source,
             'status': current_song.status,
+            'guest_name': guest_name,
             'submitted_at': current_song.submitted_at.isoformat() if current_song.submitted_at else None
         })
     
@@ -191,6 +215,8 @@ def get_current_song():
 @api_bp.route('/music/next', methods=['POST'])
 def next_song():
     """Mark current song as played and get next ready song."""
+    from app.models import Guest
+    
     # Mark current ready song as played
     current_song = MusicQueue.query.filter_by(
         played_at=None, 
@@ -212,6 +238,13 @@ def next_song():
     ).order_by(MusicQueue.submitted_at.asc()).first()
     
     if next_song and next_song.filename:
+        # Get guest information
+        guest_name = "Anonymous"
+        if next_song.guest_id:
+            guest = Guest.query.get(next_song.guest_id)
+            if guest:
+                guest_name = guest.name
+        
         file_url = f"/media/music/{next_song.filename}"
         
         return jsonify({
@@ -222,6 +255,7 @@ def next_song():
             'file_url': file_url,
             'source': next_song.source,
             'status': next_song.status,
+            'guest_name': guest_name,
             'submitted_at': next_song.submitted_at.isoformat() if next_song.submitted_at else None
         })
     
@@ -231,6 +265,8 @@ def next_song():
 @api_bp.route('/music/previous', methods=['POST'])  
 def previous_song():
     """Get previous song (last played ready song)."""
+    from app.models import Guest
+    
     # Get the most recently played ready song with a file
     previous_song = MusicQueue.query.filter(
         MusicQueue.played_at.is_not(None),
@@ -244,6 +280,13 @@ def previous_song():
         previous_song.played_at = None
         db.session.commit()
         
+        # Get guest information
+        guest_name = "Anonymous"
+        if previous_song.guest_id:
+            guest = Guest.query.get(previous_song.guest_id)
+            if guest:
+                guest_name = guest.name
+        
         file_url = f"/media/music/{previous_song.filename}"
         
         return jsonify({
@@ -254,6 +297,7 @@ def previous_song():
             'file_url': file_url,
             'source': previous_song.source,
             'status': previous_song.status,
+            'guest_name': guest_name,
             'submitted_at': previous_song.submitted_at.isoformat() if previous_song.submitted_at else None
         })
     

@@ -153,12 +153,19 @@
                 <div class="card bg-base-200 shadow-xl">
                     <div class="card-body p-2">
                         <div class="flex items-center justify-between mb-1">
-                            <h2 class="card-title text-sm flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-                                </svg>
-                                Now Playing
-                            </h2>
+                            <div>
+                                <h2 class="card-title text-sm flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                                    </svg>
+                                    Now Playing
+                                </h2>
+                                <!-- Submitter Info - Right below "Now Playing" title -->
+                                <div class="flex items-center gap-2" id="submitter-info" style="display: none;">
+                                    <div class="text-xl font-bold text-pink-400" id="submitter-name">Elizabeth</div>
+                                    <div class="badge badge-xs badge-info" id="song-source" style="border-radius: 3px; font-size: 8px;">YouTube</div>
+                                </div>
+                            </div>
                             <!-- Larger QR Code for when photos start -->
                             <div id="mini-qr-container" class="hidden">
                                 <div id="mini-qr" class="w-32 h-32 bg-white p-1 rounded-lg shadow-lg"></div>
@@ -215,8 +222,8 @@
                 <div class="card bg-base-200 shadow-xl">
                     <div class="card-body p-2">
                         <h2 class="card-title text-sm mb-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
                             </svg>
                             Music Queue
                         </h2>
@@ -436,10 +443,18 @@
                     if (data.error) {
                         document.getElementById('song-title').textContent = 'Ready to Party!';
                         document.getElementById('song-artist').textContent = 'Add songs from your phone';
+                        document.getElementById('submitter-info').style.display = 'none';
                         audioPlayer.src = '';
                     } else {
                         document.getElementById('song-title').textContent = data.title || 'Unknown Song';
                         document.getElementById('song-artist').textContent = data.artist || 'Unknown Artist';
+                        
+                        // Show submitter info
+                        document.getElementById('submitter-name').textContent = data.guest_name || 'Anonymous';
+                        const sourceElement = document.getElementById('song-source');
+                        sourceElement.textContent = data.source || 'Unknown';
+                        sourceElement.className = data.source === 'local' ? 'badge badge-xs badge-info' : 'badge badge-xs badge-error text-white';
+                        document.getElementById('submitter-info').style.display = 'flex';
                         
                         if (data.file_url && audioPlayer.src !== window.location.origin + data.file_url) {
                             audioPlayer.src = data.file_url;
@@ -467,6 +482,13 @@
                     document.getElementById('song-title').textContent = data.title || 'Unknown Song';
                     document.getElementById('song-artist').textContent = data.artist || 'Unknown Artist';
                     
+                    // Show submitter info
+                    document.getElementById('submitter-name').textContent = data.guest_name || 'Anonymous';
+                    const sourceElement = document.getElementById('song-source');
+                    sourceElement.textContent = data.source || 'Unknown';
+                    sourceElement.className = data.source === 'local' ? 'badge badge-xs badge-info' : 'badge badge-xs badge-error text-white';
+                    document.getElementById('submitter-info').style.display = 'flex';
+                    
                     if (data.file_url) {
                         audioPlayer.src = data.file_url;
                         audioPlayer.load();
@@ -477,6 +499,7 @@
                 } else {
                     document.getElementById('song-title').textContent = 'Ready to Party!';
                     document.getElementById('song-artist').textContent = 'Add songs from your phone';
+                    document.getElementById('submitter-info').style.display = 'none';
                     audioPlayer.src = '';
                 }
             })
@@ -495,6 +518,13 @@
                 if (!data.error) {
                     document.getElementById('song-title').textContent = data.title || 'Unknown Song';
                     document.getElementById('song-artist').textContent = data.artist || 'Unknown Artist';
+                    
+                    // Show submitter info
+                    document.getElementById('submitter-name').textContent = data.guest_name || 'Anonymous';
+                    const sourceElement = document.getElementById('song-source');
+                    sourceElement.textContent = data.source || 'Unknown';
+                    sourceElement.className = data.source === 'local' ? 'badge badge-xs badge-info' : 'badge badge-xs badge-error text-white';
+                    document.getElementById('submitter-info').style.display = 'flex';
                     
                     if (data.file_url) {
                         audioPlayer.src = data.file_url;
