@@ -74,13 +74,10 @@
     <!-- Main Big Screen Layout - Full Screen -->
     <div class="min-h-screen h-screen w-screen flex flex-col m-0 p-0 bg-base-300">
         <!-- Dark Header with proper height -->
-        <div class="bg-base-200 text-white shadow-lg px-3 py-4 h-24">
+        <div class="bg-base-300 text-white shadow-lg px-3 py-4 h-24">
             <div class="grid grid-cols-4 gap-3 h-full">
-                <!-- Left section with clock and title centered in photo area -->
+                <!-- Left section with title centered in photo area -->
                 <div class="col-span-3 flex items-center">
-                    <!-- Clock on the left -->
-                    <div class="text-gray-400 text-sm font-medium w-32" id="current-time"></div>
-                    
                     <!-- Title centered in this 3-column area -->
                     <div class="flex-1 text-center">
                         <h1 class="birthday-title text-5xl font-bold whitespace-nowrap">
@@ -89,8 +86,10 @@
                     </div>
                 </div>
                 
-                <!-- Icons on the right -->
+                <!-- Icons and clock on the right -->
                 <div class="col-span-1 flex gap-3 justify-end items-center">
+                    <!-- Clock moved to right -->
+                    <div class="text-gray-400 text-sm font-medium" id="current-time"></div>
                     <!-- Settings Icon -->
                     <button class="btn btn-ghost btn-sm btn-circle" onclick="window.location.href='/admin/settings'" title="Settings">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400">
@@ -251,7 +250,7 @@
         </div>
 
         <!-- Minimal Dark Footer - No Guests -->
-        <footer class="bg-base-200 text-gray-400 p-2">
+        <footer class="bg-base-300 text-gray-400 p-2">
             <div class="grid grid-cols-4 gap-3">
                 <!-- Stats centered in the photo area (first 3 columns) -->
                 <div class="col-span-3 flex justify-center space-x-6 text-xs">
