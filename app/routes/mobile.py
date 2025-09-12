@@ -15,43 +15,72 @@ mobile_bp = Blueprint('mobile', __name__)
 
 def download_youtube_async(video_url, title, artist, app, music_request_id):
     """Download YouTube audio in background thread."""
+    import traceback
+    
     with app.app_context():
         from app import db
         from app.models import MusicQueue
         
+        music_request = None
         try:
             # Update status to downloading
             music_request = MusicQueue.query.get(music_request_id)
             if music_request:
                 music_request.status = 'downloading'
                 db.session.commit()
+                current_app.logger.info(f"🎵 Starting background download: {title} by {artist} (ID: {music_request_id})")
+            else:
+                current_app.logger.error(f"❌ Music request {music_request_id} not found in database")
+                return
             
             from app.services.youtube_service import get_youtube_service
             youtube_service = get_youtube_service()
             
-            current_app.logger.info(f"🎵 Background downloading: {title} by {artist}")
             copied_filename = youtube_service.download_audio(video_url, title, artist)
             
-            if copied_filename and music_request:
-                # Update database entry with filename and status
-                music_request.filename = copied_filename
-                music_request.status = 'ready'
-                db.session.commit()
-                current_app.logger.info(f"✅ Background download complete: {copied_filename}")
-            elif music_request:
-                # Mark as error
-                music_request.status = 'error'
-                db.session.commit()
-                current_app.logger.error(f"❌ Background download failed: {video_url}")
+            if copied_filename:
+                # Verify file actually exists
+                import os
+                file_path = os.path.join('media/music', copied_filename)
+                if os.path.exists(file_path):
+                    # Update database entry with filename and status
+                    music_request = MusicQueue.query.get(music_request_id)  # Re-query to avoid stale session
+                    if music_request:
+                        music_request.filename = copied_filename
+                        music_request.status = 'ready'
+                        try:
+                            db.session.commit()
+                            current_app.logger.info(f"✅ Background download complete: {copied_filename} (ID: {music_request_id})")
+                        except Exception as db_error:
+                            db.session.rollback()
+                            current_app.logger.error(f"❌ Database commit failed for {music_request_id}: {db_error}")
+                            raise
+                    else:
+                        current_app.logger.error(f"❌ Music request {music_request_id} disappeared from database")
+                else:
+                    current_app.logger.error(f"❌ Downloaded file not found: {file_path}")
+                    raise FileNotFoundError(f"Downloaded file not found: {file_path}")
+            else:
+                current_app.logger.error(f"❌ YouTube download returned no filename for: {video_url}")
+                raise Exception("YouTube download failed - no filename returned")
                 
         except Exception as e:
-            # Mark as error
-            if music_request_id:
-                music_request = MusicQueue.query.get(music_request_id)
-                if music_request:
-                    music_request.status = 'error'
-                    db.session.commit()
-            current_app.logger.error(f"❌ Background YouTube download error: {e}")
+            # Mark as error with more robust error handling
+            current_app.logger.error(f"❌ Background YouTube download error for {music_request_id}: {e}")
+            current_app.logger.error(f"❌ Full traceback: {traceback.format_exc()}")
+            
+            try:
+                if music_request_id:
+                    music_request = MusicQueue.query.get(music_request_id)  # Re-query to avoid stale session
+                    if music_request:
+                        music_request.status = 'error'
+                        db.session.commit()
+                        current_app.logger.info(f"⚠️ Marked request {music_request_id} as error")
+                    else:
+                        current_app.logger.error(f"❌ Could not mark {music_request_id} as error - not found in database")
+            except Exception as db_error:
+                db.session.rollback()
+                current_app.logger.error(f"❌ Failed to update error status for {music_request_id}: {db_error}")
 
 
 @mobile_bp.route('/')

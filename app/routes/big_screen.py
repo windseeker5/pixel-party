@@ -15,6 +15,19 @@ def big_screen():
     return render_template('big_screen/display.html')
 
 
+@big_screen_bp.route('/slideshow')
+def slideshow():
+    """Full screen slideshow with TikTok-style text animations."""
+    party_title = get_setting('party_title', 'Birthday Celebration')
+    host_name = get_setting('host_name', 'Birthday Star')
+    slideshow_duration = int(get_setting('slideshow_duration', 8))
+    
+    return render_template('big_screen/slideshow.html', 
+                         party_title=party_title,
+                         host_name=host_name,
+                         slideshow_duration=slideshow_duration)
+
+
 @big_screen_bp.route('/api/photos')
 def get_photos():
     """API endpoint to get photos for slideshow with HTMX support."""

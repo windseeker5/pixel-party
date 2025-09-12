@@ -5,15 +5,16 @@
          alt="Photo from {{ photo.guest_name }}"
          class="absolute inset-0 w-full h-full object-cover ken-burns-animation">
     
-    <!-- TikTok-style text overlay - 3 Rotating Styles -->
+    <!-- SIMPLE TikTok-style text overlay - NO JAVASCRIPT -->
     {% if photo.wish_message %}
-    <div class="text-overlay-container" data-style="random">
-        <!-- Large Bold Wish Text -->
-        <div class="wish-text-tiktok" data-text="{{ photo.wish_message }}">
+    <div class="tiktok-overlay">
+        <!-- Main wish text with random animation style -->
+        <div class="tiktok-wish tiktok-style-{{ (photo.id % 3) + 1 }}">
             "{{ photo.wish_message }}"
         </div>
-        <!-- Prominent Sender Name -->
-        <div class="sender-name-tiktok" data-name="{{ photo.guest_name }}">
+        
+        <!-- Sender name -->
+        <div class="tiktok-name">
             - {{ photo.guest_name }}
         </div>
     </div>
@@ -21,25 +22,18 @@
 </div>
 
 <style>
-/* Simple Ken Burns effect - just slow zoom and gentle movement in one direction */
+/* Ken Burns effect for photos */
 @keyframes kenBurnsSimple {
-    0% {
-        transform: scale(1.0) translate(0, 0);
-    }
-    100% {
-        transform: scale(1.1) translate(-1%, -1%);
-    }
+    0% { transform: scale(1.0) translate(0, 0); }
+    100% { transform: scale(1.1) translate(-1%, -1%); }
 }
 
-/* Apply simple Ken Burns effect */
 .ken-burns-animation {
-    animation: kenBurnsSimple 8s ease-out;
-    animation-fill-mode: forwards;
+    animation: kenBurnsSimple 8s ease-out forwards;
 }
 
-
-/* TikTok-style text overlay container */
-.text-overlay-container {
+/* TikTok overlay container */
+.tiktok-overlay {
     position: absolute;
     inset: 0;
     display: flex;
@@ -48,34 +42,51 @@
     align-items: center;
     text-align: center;
     pointer-events: none;
+    z-index: 10;
 }
 
-/* Base styles for all TikTok text - SIMPLIFIED FOR TESTING */
-.wish-text-tiktok {
+/* Base TikTok text style */
+.tiktok-wish {
     font-size: clamp(2.5rem, 6vw, 5rem);
     font-weight: 900;
     color: white;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
     line-height: 0.9;
-    margin-bottom: 1.5rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    margin-bottom: 2rem;
+    text-shadow: 3px 3px 0px rgba(0,0,0,1);
+    max-width: 80%;
+    word-wrap: break-word;
 }
 
-.sender-name-tiktok {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 700;
-    color: #FFD700;
+.tiktok-name {
     position: absolute;
     bottom: 15%;
     left: 50%;
     transform: translateX(-50%);
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 700;
+    color: #FFD700;
+    text-shadow: 2px 2px 0px rgba(0,0,0,1);
 }
 
-/* STYLE 1: NEON GLOW PULSE */
-.text-overlay-container[data-style="1"] .wish-text-tiktok {
-    font-family: 'Montserrat', 'Arial', sans-serif;
+/* STYLE 1: Typewriter effect (pure CSS) */
+.tiktok-style-1 {
+    animation: typewriterReveal 3s steps(50, end) forwards;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    border-right: 2px solid white;
+}
+
+@keyframes typewriterReveal {
+    0% { width: 0; }
+    90% { width: 100%; border-right: 2px solid white; }
+    100% { width: 100%; border-right: transparent; }
+}
+
+/* STYLE 2: Neon glow effect */
+.tiktok-style-2 {
     color: #FFFFFF;
     text-shadow: 
         0 0 5px #FFFFFF,
@@ -83,71 +94,18 @@
         0 0 15px #00FFFF,
         0 0 20px #00FFFF,
         0 0 35px #00FFFF;
+    animation: neonPulse 2s ease-in-out forwards;
 }
 
-.text-overlay-container[data-style="1"] .sender-name-tiktok {
-    font-family: 'Montserrat', sans-serif;
-    color: #FFD700;
-    text-shadow: 
-        0 0 10px #FFD700,
-        0 0 20px #FFD700,
-        0 0 30px #FFD700;
-}
-
-/* STYLE 2: CHUNKY POP */
-.text-overlay-container[data-style="2"] .wish-text-tiktok {
-    font-family: 'Impact', sans-serif;
-    color: #FFFFFF;
-    -webkit-text-stroke: 2px #000000;
-    text-stroke: 2px #000000;
-    text-shadow: 4px 4px 0px #000000;
-}
-
-.text-overlay-container[data-style="2"] .sender-name-tiktok {
-    font-family: 'Arial', sans-serif;
-    color: #FF1493;
-    text-shadow: 
-        3px 3px 0px #000000,
-        -1px -1px 0px #000000,
-        1px -1px 0px #000000,
-        -1px 1px 0px #000000;
-}
-
-/* STYLE 3: GRADIENT WAVE */
-.text-overlay-container[data-style="3"] .wish-text-tiktok {
-    font-family: 'Roboto', sans-serif;
-    background: linear-gradient(45deg, #FF6B6B, #FFD93D, #6BCF7F, #4ECDC4);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.8));
-}
-
-.text-overlay-container[data-style="3"] .sender-name-tiktok {
-    font-family: 'Allura', cursive;
-    background: linear-gradient(45deg, #FFD700, #FF6B6B);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    right: 10%;
-    left: auto;
-    transform: none;
-    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.8));
-}
-
-/* STYLE 1: NEON GLOW ANIMATIONS */
 @keyframes neonPulse {
-    0% {
+    0% { 
         opacity: 0;
-        transform: translateY(30px) scale(0.9);
-        text-shadow: 
-            0 0 5px #FFFFFF,
-            0 0 10px #FFFFFF,
-            0 0 15px #00FFFF;
+        transform: scale(0.8);
+        text-shadow: 0 0 5px #FFFFFF;
     }
     50% {
-        opacity: 0.8;
-        transform: translateY(0) scale(1.05);
+        opacity: 0.9;
+        transform: scale(1.05);
         text-shadow: 
             0 0 10px #FFFFFF,
             0 0 20px #FFFFFF,
@@ -155,196 +113,77 @@
             0 0 40px #00FFFF,
             0 0 60px #00FFFF;
     }
-    100% {
+    100% { 
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: scale(1);
         text-shadow: 
             0 0 5px #FFFFFF,
             0 0 10px #FFFFFF,
             0 0 15px #00FFFF,
             0 0 20px #00FFFF,
-            0 0 35px #00FFFF,
-            0 0 40px #00FFFF;
+            0 0 35px #00FFFF;
     }
 }
 
-@keyframes neonNameGlow {
-    0% {
-        opacity: 0;
-        transform: translateX(-50%) scale(0.8);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(-50%) scale(1);
-    }
+/* STYLE 3: Bounce effect */
+.tiktok-style-3 {
+    color: #FFFFFF;
+    text-shadow: 
+        3px 3px 0px #000000,
+        -1px -1px 0px #000000,
+        1px -1px 0px #000000,
+        -1px 1px 0px #000000;
+    animation: bounceIn 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
 
-/* STYLE 2: CHUNKY POP ANIMATIONS */
-@keyframes chunkPop {
+@keyframes bounceIn {
     0% {
         opacity: 0;
-        transform: translateY(40px) scale(0.7) rotate(-3deg);
+        transform: scale(0.3) rotate(-10deg);
     }
-    60% {
+    50% {
         opacity: 0.9;
-        transform: translateY(-10px) scale(1.2) rotate(2deg);
-    }
-    80% {
-        opacity: 1;
-        transform: translateY(5px) scale(0.95) rotate(-1deg);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1) rotate(0deg);
-    }
-}
-
-@keyframes popBounce {
-    0% {
-        opacity: 0;
-        transform: translateX(-50%) scale(0.6) rotate(5deg);
+        transform: scale(1.2) rotate(5deg);
     }
     70% {
         opacity: 1;
-        transform: translateX(-50%) scale(1.15) rotate(-2deg);
+        transform: scale(0.9) rotate(-2deg);
     }
     100% {
         opacity: 1;
-        transform: translateX(-50%) scale(1) rotate(0deg);
+        transform: scale(1) rotate(0deg);
     }
 }
 
-/* STYLE 3: GRADIENT WAVE ANIMATIONS */
-@keyframes gradientWave {
+/* Name animation - always the same */
+.tiktok-name {
+    animation: nameSlideUp 2s 1s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes nameSlideUp {
     0% {
         opacity: 0;
-        transform: translateX(-100px) scale(0.9);
-        filter: blur(3px) drop-shadow(2px 2px 4px rgba(0,0,0,0.8));
-    }
-    60% {
-        opacity: 0.8;
-        transform: translateX(10px) scale(1.02);
-        filter: blur(1px) drop-shadow(2px 2px 4px rgba(0,0,0,0.8));
+        transform: translateX(-50%) translateY(30px);
     }
     100% {
         opacity: 1;
-        transform: translateX(0) scale(1);
-        filter: blur(0) drop-shadow(2px 2px 4px rgba(0,0,0,0.8));
+        transform: translateX(-50%) translateY(0);
     }
 }
 
-@keyframes signatureSlide {
-    0% {
-        opacity: 0;
-        transform: translateX(50px) scale(0.8);
-    }
-    70% {
-        opacity: 0.9;
-        transform: translateX(-5px) scale(1.05);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-}
-
-/* Mobile responsiveness for all styles */
+/* Mobile responsiveness */
 @media (max-width: 768px) {
-    .wish-text-tiktok {
+    .tiktok-wish {
         font-size: clamp(2rem, 8vw, 3.5rem);
         letter-spacing: 1px;
+        max-width: 90%;
     }
     
-    .sender-name-tiktok {
+    .tiktok-name {
         font-size: clamp(1.5rem, 5vw, 2.5rem);
         bottom: 12%;
-    }
-    
-    .text-overlay-container[data-style="3"] .sender-name-tiktok {
-        right: 8%;
     }
 }
 </style>
 
-<script>
-console.log('TikTok Script Starting...');
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded');
-    
-    const container = document.querySelector('[data-style="random"]');
-    console.log('Container found:', container);
-    
-    if (!container) {
-        console.error('No container found with [data-style="random"]');
-        return;
-    }
-
-    // 1. SELECT RANDOM STYLE (1, 2, or 3)
-    const randomStyle = Math.floor(Math.random() * 3) + 1;
-    container.setAttribute('data-style', randomStyle);
-    console.log('Random style applied:', randomStyle);
-    
-    // 2. GET ELEMENTS AND TEXT
-    const wishElement = container.querySelector('.wish-text-tiktok');
-    const nameElement = container.querySelector('.sender-name-tiktok');
-    
-    console.log('Wish element:', wishElement);
-    console.log('Name element:', nameElement);
-    
-    if (!wishElement || !nameElement) {
-        console.error('Elements not found');
-        return;
-    }
-    
-    const wishText = '"' + (wishElement.getAttribute('data-text') || 'No message') + '"';
-    const nameText = '- ' + (nameElement.getAttribute('data-name') || 'Anonymous');
-    
-    console.log('Wish text:', wishText);
-    console.log('Name text:', nameText);
-    
-    // 3. TYPING EFFECT FUNCTION
-    function typeText(element, text, speed = 100, callback = null) {
-        console.log('Starting to type:', text);
-        element.innerHTML = '';
-        let i = 0;
-        
-        function typeChar() {
-            if (i < text.length) {
-                element.innerHTML += text.charAt(i);
-                i++;
-                setTimeout(typeChar, speed);
-            } else {
-                console.log('Finished typing:', text);
-                if (callback) {
-                    setTimeout(callback, 500);
-                }
-            }
-        }
-        
-        typeChar();
-    }
-    
-    // 4. START ANIMATION SEQUENCE
-    setTimeout(() => {
-        console.log('Starting typing sequence...');
-        // First: Type the wish text
-        typeText(wishElement, wishText, 80, () => {
-            // Then: Type the name
-            typeText(nameElement, nameText, 60);
-        });
-    }, 500);
-});
-
-// Alternative simple approach - no typing, just show text
-setTimeout(() => {
-    const containers = document.querySelectorAll('[data-style]');
-    console.log('Fallback check - containers found:', containers.length);
-    
-    containers.forEach(container => {
-        if (container.getAttribute('data-style') === 'random') {
-            container.setAttribute('data-style', '1'); // Default to style 1
-        }
-    });
-}, 2000);
-</script>
