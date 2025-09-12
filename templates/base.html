@@ -99,7 +99,7 @@
         /* Classy Professional Drop Zone Styling */
         .photo-dropzone-empty,
         .photo-dropzone-filled {
-            height: 192px; /* Reduced by 20% (240px → 192px) */
+            height: 240px; /* Increased for better tap targets */
             border: 2px dashed #4b5563;
             border-radius: 0.75rem;
             background: rgba(255, 255, 255, 0.02); /* Barely visible, elegant */
@@ -123,7 +123,7 @@
         .photo-dropzone-filled {
             border: 2px solid #6b7280; /* Subtle gray when filled */
             background: transparent;
-            height: 192px; /* Same reduced height */
+            height: 240px; /* Same increased height */
         }
         
         .photo-dropzone-filled:hover {
@@ -254,7 +254,7 @@
     {% block navbar %}{% endblock %}
     
     <!-- Main content wrapper -->
-    <main class="container mx-auto px-4 py-6 max-w-md">
+    <main class="container mx-auto px-2 py-6 max-w-lg">
         <!-- Flash messages with beautiful alerts -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
