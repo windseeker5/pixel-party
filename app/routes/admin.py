@@ -241,6 +241,67 @@ def memory_book():
     return render_template('admin/memory_book.html', memories=memories)
 
 
+@admin_bp.route('/manage')
+def manage():
+    """Admin management page to view and delete entries."""
+    # Get all photos with guest info
+    photos = Photo.query.order_by(Photo.uploaded_at.desc()).all()
+    
+    # Get all music queue entries with guest info
+    music_entries = MusicQueue.query.order_by(MusicQueue.submitted_at.desc()).all()
+    
+    return render_template('admin/manage.html', photos=photos, music_entries=music_entries)
+
+
+@admin_bp.route('/manage/delete_photo/<int:photo_id>', methods=['POST'])
+def delete_photo(photo_id):
+    """Delete a photo entry."""
+    import os
+    
+    photo = Photo.query.get_or_404(photo_id)
+    
+    try:
+        # Delete the physical file
+        photo_path = f'media/photos/{photo.filename}'
+        if os.path.exists(photo_path):
+            os.remove(photo_path)
+        
+        # Delete from database
+        db.session.delete(photo)
+        db.session.commit()
+        
+        flash('Photo deleted successfully!', 'success')
+    except Exception as e:
+        flash(f'Error deleting photo: {str(e)}', 'error')
+    
+    return redirect(url_for('admin.manage'))
+
+
+@admin_bp.route('/manage/delete_music/<int:music_id>', methods=['POST'])
+def delete_music(music_id):
+    """Delete a music entry."""
+    import os
+    
+    music = MusicQueue.query.get_or_404(music_id)
+    
+    try:
+        # Delete the physical file if it exists
+        if music.filename:
+            music_path = f'media/music/{music.filename}'
+            if os.path.exists(music_path):
+                os.remove(music_path)
+        
+        # Delete from database
+        db.session.delete(music)
+        db.session.commit()
+        
+        flash('Music entry deleted successfully!', 'success')
+    except Exception as e:
+        flash(f'Error deleting music: {str(e)}', 'error')
+    
+    return redirect(url_for('admin.manage'))
+
+
 @admin_bp.route('/export/standalone')
 def export_standalone():
     """Export standalone HTML memory book for USB."""

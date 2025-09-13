@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Management - PixelParty</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- daisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.24/dist/full.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Admin Management</h1>
+                    <p class="text-gray-600 mt-2">Manage photos, wishes, and music entries</p>
+                </div>
+                <button onclick="window.location.href='/'" class="btn btn-primary">
+                    ← Back to Display
+                </button>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6">
+                    {% for category, message in messages %}
+                        <div class="alert {{ 'alert-success' if category == 'success' else 'alert-error' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div class="stat bg-white rounded-lg shadow">
+                <div class="stat-title">Total Photos</div>
+                <div class="stat-value text-primary">{{ photos|length }}</div>
+            </div>
+            <div class="stat bg-white rounded-lg shadow">
+                <div class="stat-title">Total Music Entries</div>
+                <div class="stat-value text-secondary">{{ music_entries|length }}</div>
+            </div>
+        </div>
+
+        <!-- Photos Section -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold mb-4">Photos & Wishes</h2>
+            {% if photos %}
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="table w-full">
+                            <thead>
+                                <tr>
+                                    <th>Thumbnail</th>
+                                    <th>Guest Name</th>
+                                    <th>Wish Message</th>
+                                    <th>Uploaded</th>
+                                    <th>File</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for photo in photos %}
+                                <tr class="hover">
+                                    <td>
+                                        <div class="avatar">
+                                            <div class="mask mask-squircle w-12 h-12">
+                                                <img src="/media/photos/{{ photo.filename }}" alt="Thumbnail">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="font-bold">{{ photo.guest_name }}</div>
+                                        <div class="text-sm opacity-50">ID: {{ photo.id }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="max-w-xs truncate">{{ photo.wish_message }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm">{{ photo.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm font-mono">{{ photo.filename }}</div>
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('admin.delete_photo', photo_id=photo.id) }}" 
+                                              onsubmit="return confirm('Are you sure you want to delete this photo and wish?')">
+                                            <button type="submit" class="btn btn-error btn-xs">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <div class="bg-white rounded-lg shadow p-8 text-center">
+                    <p class="text-gray-500">No photos uploaded yet.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Music Section -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold mb-4">Music Queue</h2>
+            {% if music_entries %}
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="table w-full">
+                            <thead>
+                                <tr>
+                                    <th>Song</th>
+                                    <th>Guest</th>
+                                    <th>Source</th>
+                                    <th>Status</th>
+                                    <th>Submitted</th>
+                                    <th>File</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for music in music_entries %}
+                                <tr class="hover">
+                                    <td>
+                                        <div class="font-bold">{{ music.song_title or 'Unknown Song' }}</div>
+                                        <div class="text-sm opacity-50">{{ music.artist or 'Unknown Artist' }}</div>
+                                    </td>
+                                    <td>
+                                        {% if music.guest %}
+                                            <div class="font-medium">{{ music.guest.name }}</div>
+                                            <div class="text-sm opacity-50">ID: {{ music.guest_id }}</div>
+                                        {% else %}
+                                            <span class="text-gray-500">Anonymous</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="badge {{ 'badge-info' if music.source == 'local' else 'badge-warning' }}">
+                                            {{ music.source }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="badge {{ 
+                                            'badge-success' if music.status == 'ready' else 
+                                            'badge-error' if music.status == 'error' else 
+                                            'badge-warning' if music.status == 'downloading' else 
+                                            'badge-neutral' 
+                                        }}">
+                                            {{ music.status }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-sm">{{ music.submitted_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                    </td>
+                                    <td>
+                                        {% if music.filename %}
+                                            <div class="text-sm font-mono truncate max-w-32">{{ music.filename }}</div>
+                                        {% else %}
+                                            <span class="text-gray-400">None</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('admin.delete_music', music_id=music.id) }}" 
+                                              onsubmit="return confirm('Are you sure you want to delete this music entry?')">
+                                            <button type="submit" class="btn btn-error btn-xs">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <div class="bg-white rounded-lg shadow p-8 text-center">
+                    <p class="text-gray-500">No music entries yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
