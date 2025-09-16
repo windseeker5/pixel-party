@@ -364,3 +364,51 @@ def export_standalone():
     
     flash(f'Memory book exported to {export_dir}/ directory!', 'success')
     return redirect(url_for('admin.memory_book'))
+
+
+@admin_bp.route('/reset-party', methods=['POST'])
+def reset_party():
+    """Reset party data using the reset_party.py script."""
+    import os
+    import sys
+
+    try:
+        # Get the project root directory (where the script is located)
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        reset_script_path = os.path.join(project_root, 'utils', 'reset_party.py')
+
+        # Check if the reset script exists
+        if not os.path.exists(reset_script_path):
+            flash('Reset script not found!', 'error')
+            return redirect(url_for('admin.manage'))
+
+        # Set up the environment to include the project root in Python path
+        env = os.environ.copy()
+        pythonpath = env.get('PYTHONPATH', '')
+        if pythonpath:
+            env['PYTHONPATH'] = f"{project_root}:{pythonpath}"
+        else:
+            env['PYTHONPATH'] = project_root
+
+        # Run the reset script with --no-confirm flag
+        result = subprocess.run(
+            [sys.executable, reset_script_path, '--no-confirm'],
+            cwd=project_root,
+            capture_output=True,
+            text=True,
+            timeout=60,  # 60 second timeout
+            env=env
+        )
+
+        if result.returncode == 0:
+            flash('Party data reset successfully! 🎉', 'success')
+        else:
+            error_msg = result.stderr or result.stdout or 'Unknown error occurred'
+            flash(f'Reset failed: {error_msg}', 'error')
+
+    except subprocess.TimeoutExpired:
+        flash('Reset operation timed out. Please try again.', 'error')
+    except Exception as e:
+        flash(f'Error running reset script: {str(e)}', 'error')
+
+    return redirect(url_for('admin.manage'))

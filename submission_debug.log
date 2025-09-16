@@ -226,3 +226,11 @@ guest_name: 'Test User'
 PASS: Guest name validation
 PASS: File exists - test_birthday_photo.jpg
 PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'sss'
+PASS: Guest name validation
+PASS: File exists - Image_fx(33).jpg
+PASS: File type allowed

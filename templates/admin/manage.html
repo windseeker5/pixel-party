@@ -19,9 +19,14 @@
                     <h1 class="text-3xl font-bold text-gray-900">Admin Management</h1>
                     <p class="text-gray-600 mt-2">Manage photos, wishes, and music entries</p>
                 </div>
-                <button onclick="window.location.href='/'" class="btn btn-primary">
-                    ← Back to Display
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="window.location.href='/'" class="btn btn-primary">
+                        ← Back to Display
+                    </button>
+                    <button onclick="document.getElementById('reset_modal').showModal()" class="btn btn-error">
+                        🔄 Reset Party
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -186,5 +191,33 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- Reset Confirmation Modal -->
+    <dialog id="reset_modal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg text-error">⚠️ Reset Party Data</h3>
+            <p class="py-4">
+                This will permanently delete:
+                <br>• All guest records and photo submissions
+                <br>• All photos and wish messages
+                <br>• All music queue entries
+                <br>• All files in media directories
+                <br><br>
+                <strong class="text-success">This will preserve:</strong>
+                <br>• Music library index
+                <br>• App settings and configuration
+            </p>
+            <div class="modal-action">
+                <form method="POST" action="{{ url_for('admin.reset_party') }}">
+                    <button type="submit" class="btn btn-error">
+                        Yes, Reset Everything
+                    </button>
+                    <button type="button" onclick="document.getElementById('reset_modal').close()" class="btn">
+                        Cancel
+                    </button>
+                </form>
+            </div>
+        </div>
+    </dialog>
 </body>
 </html>
