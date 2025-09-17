@@ -127,7 +127,12 @@
             <!-- Name -->
             <div class="form-control">
                 <label class="label">
-                    <span class="label-text font-medium text-lg">Your Name</span>
+                    <span class="label-text font-medium flex items-center text-lg">
+                        <svg class="w-5 h-5 mr-2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        Your Name
+                    </span>
                 </label>
                 <input type="text" name="guest_name" value="{{ guest_name or '' }}" 
                        placeholder="Enter your name..."
@@ -138,7 +143,7 @@
             <div class="form-control">
                 <label class="label">
                     <span class="label-text font-medium flex items-center text-lg">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 mr-2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
@@ -212,7 +217,7 @@
             <div class="form-control">
                 <label class="label">
                     <span class="label-text font-medium flex items-center text-lg">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 mr-2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                         </svg>
                         Birthday Wish
@@ -231,7 +236,7 @@
             <div class="form-control">
                 <label class="label">
                     <span class="label-text font-medium flex items-center text-lg">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 mr-2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                         </svg>
                         Suggest a Song (Optional)
@@ -240,43 +245,31 @@
                         </svg>
                     </span>
                 </label>
-                <div class="collapse collapse-arrow bg-base-200">
-                    <input type="checkbox" class="peer" /> 
-                    <div class="collapse-title text-sm font-medium flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                        Add a song to the party playlist
-                    </div>
-                    <div class="collapse-content">
-                        <div class="space-y-3">
-                            <input type="text" 
-                                   placeholder="Search by mood, song title, or artist..." 
-                                   class="input input-bordered input-lg input-secondary w-full border-orange-500 focus:border-orange-500 text-lg"
-                                   hx-post="/mobile/search_music"
-                                   hx-trigger="input delay:300ms, keyup delay:300ms"
-                                   hx-target="#music-results"
-                                   hx-include="this"
-                                   hx-indicator="#search-spinner"
-                                   hx-swap="innerHTML"
-                                   hx-sync="this:replace"
-                                   name="query"
-                                   autocomplete="off">
-                            
-                            <!-- Search loading indicator -->
-                            <div id="search-spinner" class="htmx-indicator text-center py-2">
-                                <span class="loading loading-spinner loading-sm"></span>
-                                <span class="text-sm opacity-70 ml-2">Searching music...</span>
-                            </div>
-                            
-                            <!-- Search results -->
-                            <div id="music-results" class="space-y-1 max-h-96 overflow-y-auto"></div>
-                            
-                            <!-- Hidden input for selected song -->
-                            <input type="hidden" name="selected_song" id="selected-song-input">
-                        </div>
-                    </div>
+
+                <input type="text"
+                       placeholder="Search by mood, song title, or artist..."
+                       class="input input-bordered input-lg input-secondary w-full border-orange-500 focus:border-orange-500 text-lg"
+                       hx-post="/mobile/search_music"
+                       hx-trigger="input delay:300ms, keyup delay:300ms"
+                       hx-target="#music-results"
+                       hx-include="this"
+                       hx-indicator="#search-spinner"
+                       hx-swap="innerHTML"
+                       hx-sync="this:replace"
+                       name="query"
+                       autocomplete="off">
+
+                <!-- Search loading indicator -->
+                <div id="search-spinner" class="htmx-indicator text-center py-2">
+                    <span class="loading loading-spinner loading-sm"></span>
+                    <span class="text-sm opacity-70 ml-2">Searching music...</span>
                 </div>
+
+                <!-- Search results -->
+                <div id="music-results" class="space-y-1 max-h-96 overflow-y-auto"></div>
+
+                <!-- Hidden input for selected song -->
+                <input type="hidden" name="selected_song" id="selected-song-input">
                 
                 <!-- Selected song display (outside collapsible) -->
                 <div id="selected-song" class="hidden mt-3">
@@ -294,17 +287,17 @@
             
             <!-- Submit Button -->
             <div class="card-actions justify-end">
-                <button type="submit" class="btn btn-info btn-lg w-full text-xl" id="submit-btn">
-                    <svg class="w-5 h-5 mr-2 htmx-indicator loading loading-spinner loading-sm hidden" id="submit-spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    <svg class="w-5 h-5 mr-2" id="submit-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                    </svg>
+                <button type="submit" class="btn btn-success btn-lg w-full text-xl" id="submit-btn">
+                    <span class="loading loading-spinner loading-sm hidden" id="submit-spinner"></span>
                     <span id="submit-text">Share Memory</span>
                 </button>
             </div>
         </form>
+
+        <!-- Made with love text -->
+        <div class="text-center mt-4 text-sm text-gray-600">
+            Made with ❤️ for Valérie's 50th Birthday Celebration
+        </div>
     </div>
 </div>
 

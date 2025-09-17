@@ -234,3 +234,19 @@ guest_name: 'sss'
 PASS: Guest name validation
 PASS: File exists - Image_fx(33).jpg
 PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+PASS: File exists - IMG_1288.JPG
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie'
+PASS: Guest name validation
+PASS: File exists - pexels-pixabay-390051.jpg
+PASS: File type allowed
