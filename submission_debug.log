@@ -250,3 +250,11 @@ guest_name: 'Marie'
 PASS: Guest name validation
 PASS: File exists - pexels-pixabay-390051.jpg
 PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie-France'
+PASS: Guest name validation
+PASS: File exists - pexels-sebastian-ervi-866902-1763075.jpg
+PASS: File type allowed

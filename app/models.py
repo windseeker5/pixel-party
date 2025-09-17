@@ -103,6 +103,9 @@ def init_default_settings():
         ('auto_play_music', 'true'),
         ('party_title', '50th Birthday Celebration'),
         ('host_name', 'Birthday Star'),
+        ('welcome_screen_interval_type', 'photos'),
+        ('welcome_screen_interval_value', '5'),
+        ('welcome_screen_duration', '8'),
     ]
     
     for key, value in default_settings:

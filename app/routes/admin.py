@@ -27,29 +27,6 @@ def dashboard():
     return render_template('admin/dashboard.html', stats=stats, recent_photos=recent_photos)
 
 
-@admin_bp.route('/settings', methods=['GET', 'POST'])
-def settings():
-    """Settings management."""
-    if request.method == 'POST':
-        # Update settings
-        settings_to_update = [
-            'party_title', 'host_name', 'slideshow_duration', 
-            'max_submissions_per_guest', 'auto_play_music'
-        ]
-        
-        for key in settings_to_update:
-            value = request.form.get(key)
-            if value is not None:
-                update_setting(key, value)
-        
-        flash('Settings updated successfully!', 'success')
-        return redirect(url_for('admin.settings'))
-    
-    # Get all settings
-    all_settings = Settings.query.all()
-    settings_dict = {s.key: s.value for s in all_settings}
-    
-    return render_template('admin/settings.html', settings=settings_dict)
 
 
 # Global variable to track indexing status
@@ -246,11 +223,35 @@ def manage():
     """Admin management page to view and delete entries."""
     # Get all photos with guest info
     photos = Photo.query.order_by(Photo.uploaded_at.desc()).all()
-    
+
     # Get all music queue entries with guest info
     music_entries = MusicQueue.query.order_by(MusicQueue.submitted_at.desc()).all()
-    
-    return render_template('admin/manage.html', photos=photos, music_entries=music_entries)
+
+    # Get all settings for the form
+    all_settings = Settings.query.all()
+    settings_dict = {s.key: s.value for s in all_settings}
+
+    return render_template('admin/manage.html', photos=photos, music_entries=music_entries, settings=settings_dict)
+
+
+@admin_bp.route('/manage/update_settings', methods=['POST'])
+def update_settings():
+    """Update settings from the manage page."""
+    # Update settings
+    settings_to_update = [
+        'party_title', 'host_name', 'slideshow_duration',
+        'max_submissions_per_guest', 'auto_play_music',
+        'welcome_screen_interval_type', 'welcome_screen_interval_value',
+        'welcome_screen_duration'
+    ]
+
+    for key in settings_to_update:
+        value = request.form.get(key)
+        if value is not None:
+            update_setting(key, value)
+
+    flash('Settings updated successfully!', 'success')
+    return redirect(url_for('admin.manage'))
 
 
 @admin_bp.route('/manage/delete_photo/<int:photo_id>', methods=['POST'])

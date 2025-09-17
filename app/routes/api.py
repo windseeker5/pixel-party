@@ -12,20 +12,60 @@ api_bp = Blueprint('api', __name__)
 
 @api_bp.route('/current_photo')
 def current_photo():
-    """Get current photo for slideshow with cycling."""
+    """Get current photo for slideshow with cycling and periodic welcome screen."""
     import time
-    
+
     photos = Photo.query.order_by(Photo.uploaded_at.asc()).all()
-    
+
     if not photos:
         return render_template('components/no_photos.html')
-    
-    # Simple cycling: use timestamp to cycle through photos every 8 seconds
+
+    # Get welcome screen settings
+    interval_type = get_setting('welcome_screen_interval_type', 'photos')
+    interval_value = int(get_setting('welcome_screen_interval_value', '5'))
+    welcome_duration = int(get_setting('welcome_screen_duration', '8'))
+    slideshow_duration = int(get_setting('slideshow_duration', '8'))
+
     current_time = int(time.time())
-    slideshow_duration = 8  # seconds per photo
-    photo_index = (current_time // slideshow_duration) % len(photos)
+
+    # Check if we should show welcome screen
+    should_show_welcome = False
+
+    if interval_type == 'photos':
+        # Show welcome screen every N photos, inserted between photos
+        # Calculate which photo cycle we're in (ignoring welcome screens)
+        total_photo_cycles = current_time // slideshow_duration
+
+        # Every (interval_value + 1) cycles, one cycle shows welcome screen
+        cycle_group = total_photo_cycles // (interval_value + 1)
+        position_in_group = total_photo_cycles % (interval_value + 1)
+
+        # Show welcome screen on the last position of each group
+        should_show_welcome = (position_in_group == interval_value)
+
+    elif interval_type == 'time':
+        # Show welcome screen every N minutes
+        minutes_elapsed = current_time // 60
+        should_show_welcome = (minutes_elapsed % interval_value == 0) and ((current_time % 60) < (welcome_duration))
+
+    if should_show_welcome:
+        return render_template('components/welcome_screen.html')
+
+    # Regular photo cycling - calculate photo index excluding welcome screen cycles
+    if interval_type == 'photos':
+        # Count only photo cycles (not welcome screen cycles)
+        total_photo_cycles = current_time // slideshow_duration
+        cycle_group = total_photo_cycles // (interval_value + 1)
+        position_in_group = total_photo_cycles % (interval_value + 1)
+
+        # If we're showing photos (not welcome screen), calculate which photo
+        actual_photo_cycles = cycle_group * interval_value + position_in_group
+        photo_index = actual_photo_cycles % len(photos)
+    else:
+        # Simple cycling for time-based welcome screens
+        photo_index = (current_time // slideshow_duration) % len(photos)
+
     photo = photos[photo_index]
-    
     return render_template('components/photo_display.html', photo=photo)
 
 
@@ -55,24 +95,46 @@ def photos():
 def photo_queue():
     """Get photo queue for sidebar with currently displaying photo first."""
     import time
-    
+
     # Get all photos in the same order as slideshow (oldest first)
     all_photos = Photo.query.order_by(Photo.uploaded_at.asc()).all()
-    
+
     if not all_photos:
         return render_template('components/photo_queue.html', photos=[])
-    
+
     # Calculate which photo is currently being displayed (same logic as current_photo)
     current_time = int(time.time())
-    slideshow_duration = 8  # seconds per photo
-    current_index = (current_time // slideshow_duration) % len(all_photos)
-    
+    slideshow_duration = int(get_setting('slideshow_duration', '8'))
+    interval_type = get_setting('welcome_screen_interval_type', 'photos')
+    interval_value = int(get_setting('welcome_screen_interval_value', '5'))
+
+    # Use same logic as current_photo to determine current photo index
+    current_index = 0
+    if interval_type == 'photos':
+        # Count only photo cycles (not welcome screen cycles)
+        total_photo_cycles = current_time // slideshow_duration
+        cycle_group = total_photo_cycles // (interval_value + 1)
+        position_in_group = total_photo_cycles % (interval_value + 1)
+
+        # If currently showing welcome screen, show the next photo that will be displayed
+        if position_in_group == interval_value:
+            # Welcome screen is showing, next will be first photo of next group
+            actual_photo_cycles = (cycle_group + 1) * interval_value
+        else:
+            # Photo is showing
+            actual_photo_cycles = cycle_group * interval_value + position_in_group
+
+        current_index = actual_photo_cycles % len(all_photos)
+    else:
+        # Simple cycling for time-based welcome screens
+        current_index = (current_time // slideshow_duration) % len(all_photos)
+
     # Reorder photos so current photo is first, then the next ones in sequence
     reordered_photos = []
     for i in range(min(6, len(all_photos))):  # Show up to 6 photos
         photo_index = (current_index + i) % len(all_photos)
         reordered_photos.append(all_photos[photo_index])
-    
+
     return render_template('components/photo_queue.html', photos=reordered_photos)
 
 
