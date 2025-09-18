@@ -716,7 +716,8 @@ def search_music():
                 <div id="ai-suggestions-container"
                      hx-get="/mobile/search_music_ai?query={html.escape(search_query)}"
                      hx-trigger="load delay:500ms"
-                     hx-swap="innerHTML">
+                     hx-target="this"
+                     hx-swap="outerHTML">
                     <div class="divider">AI Suggestions</div>
                     <div class="text-center py-4">
                         <span class="loading loading-spinner loading-sm"></span>
@@ -787,66 +788,91 @@ def search_music_ai():
         search_query = request.args.get('query', '').strip()
 
         if not search_query:
-            return '<div class="text-sm opacity-70 p-2">No query provided</div>'
+            # Return empty div that disappears gracefully
+            return '<div id="ai-suggestions-container" style="display: none;"></div>'
 
         # Check if AI suggestions are enabled
         from app.models import get_setting
         ai_enabled = get_setting('enable_ai_suggestions', 'true') == 'true'
 
         if not ai_enabled:
-            return '<div class="text-sm opacity-70 p-2 text-center">AI suggestions disabled</div>'
+            # Return empty div that disappears gracefully
+            return '<div id="ai-suggestions-container" style="display: none;"></div>'
 
-        # Get AI suggestions from Ollama
-        from utils.ollama_client import OllamaClient
-        ollama = OllamaClient()
+        # Try to get AI suggestions from Ollama
+        try:
+            from utils.ollama_client import OllamaClient
+            ollama = OllamaClient()
 
-        ai_suggestions = ollama.get_song_suggestions(search_query)
+            current_app.logger.info(f"Getting AI suggestions for: {search_query}")
+            ai_suggestions = ollama.get_song_suggestions(search_query)
+            current_app.logger.info(f"Got {len(ai_suggestions) if ai_suggestions else 0} AI suggestions")
 
-        if not ai_suggestions:
-            return '<div class="text-sm opacity-70 p-2 text-center">No AI suggestions available</div>'
+            if not ai_suggestions:
+                # Return empty div that disappears gracefully
+                return '<div id="ai-suggestions-container" style="display: none;"></div>'
 
-        # Format AI suggestions as HTML
-        html_results = ""
-        for idx, suggestion in enumerate(ai_suggestions[:5]):  # Max 5 AI suggestions
-            import html
-            title_display = html.escape(suggestion.get('title', 'Unknown'))
-            artist_display = html.escape(suggestion.get('artist', 'Unknown'))
-            album_display = html.escape(suggestion.get('album', ''))
+            # Format AI suggestions as HTML with proper container
+            html_results = '<div id="ai-suggestions-container">'
+            html_results += '<div class="divider">🤖 AI Suggestions</div>'
 
-            # Special styling for AI suggestions
-            html_results += f'''
-            <div class="card bg-purple-50 shadow-sm border border-purple-200 hover:shadow-md transition-all duration-200">
-                <div class="card-body p-2">
-                    <div class="flex justify-between items-center">
-                        <div class="flex-1">
-                            <div class="text-sm font-medium text-purple-800">{title_display}</div>
-                            <div class="text-xs opacity-70 mt-1 text-purple-600">{artist_display}{' • ' + album_display if album_display else ''}</div>
-                            <div class="flex items-center gap-2 mt-2">
-                                <div class="badge badge-sm bg-purple-500 text-white" style="border-radius: 4px;">🤖 AI</div>
-                                <div class="text-xs opacity-60">Memory suggestion</div>
+            for idx, suggestion in enumerate(ai_suggestions[:5]):  # Max 5 AI suggestions
+                import html
+                title_display = html.escape(suggestion.get('title', 'Unknown'))
+                artist_display = html.escape(suggestion.get('artist', 'Unknown'))
+                album_display = html.escape(suggestion.get('album', ''))
+
+                # Special styling for AI suggestions
+                html_results += f'''
+                <div class="card bg-purple-50 shadow-sm border border-purple-200 hover:shadow-md transition-all duration-200 mb-2">
+                    <div class="card-body p-2">
+                        <div class="flex justify-between items-center">
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-purple-800">{title_display}</div>
+                                <div class="text-xs opacity-70 mt-1 text-purple-600">{artist_display}{' • ' + album_display if album_display else ''}</div>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <div class="badge badge-sm bg-purple-500 text-white" style="border-radius: 4px;">🤖 AI</div>
+                                    <div class="text-xs opacity-60">Memory suggestion</div>
+                                </div>
                             </div>
+                            <button type="button"
+                                    class="btn btn-success btn-sm btn-circle ml-3 select-song-btn"
+                                    data-title="{html.escape(suggestion.get('title', ''))}"
+                                    data-artist="{html.escape(suggestion.get('artist', ''))}"
+                                    data-source="ai_suggestion"
+                                    data-file-path=""
+                                    data-url="">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                            </button>
                         </div>
-                        <button type="button"
-                                class="btn btn-success btn-sm btn-circle ml-3 select-song-btn"
-                                data-title="{html.escape(suggestion.get('title', ''))}"
-                                data-artist="{html.escape(suggestion.get('artist', ''))}"
-                                data-source="ai_suggestion"
-                                data-file-path=""
-                                data-url="">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                        </button>
                     </div>
+                </div>
+                '''
+
+            html_results += '</div>'
+            return html_results
+
+        except ImportError:
+            current_app.logger.warning("Ollama client not available")
+            return '<div id="ai-suggestions-container" style="display: none;"></div>'
+
+        except Exception as ollama_error:
+            current_app.logger.error(f"Ollama error: {ollama_error}")
+            # Try to return a subtle message
+            return '''
+            <div id="ai-suggestions-container">
+                <div class="text-xs opacity-50 text-center py-2">
+                    AI suggestions temporarily unavailable
                 </div>
             </div>
             '''
 
-        return html_results
-
     except Exception as e:
-        current_app.logger.error(f"Error in AI music search: {e}")
-        return '<div class="text-sm opacity-70 p-2 text-center text-error">AI suggestions unavailable</div>'
+        current_app.logger.error(f"Unexpected error in AI music search: {e}")
+        # Always return valid HTML that won't break the page
+        return '<div id="ai-suggestions-container" style="display: none;"></div>'
 
 
 @mobile_bp.route('/suggest_music', methods=['POST'])

@@ -104,13 +104,28 @@ No other text, just the JSON array."""
                     data = await response.json()
                     response_text = data.get('response', '').strip()
 
-                    # Try to parse the JSON response
+                    # Try to parse the JSON response (handle markdown code blocks)
                     try:
+                        # First try direct parsing
                         suggestions = json.loads(response_text)
                         if isinstance(suggestions, list):
                             return suggestions[:5]  # Return up to 5 suggestions
                     except json.JSONDecodeError:
-                        current_app.logger.warning(f"Could not parse Ollama response as JSON: {response_text}")
+                        # Try to extract JSON from markdown code blocks
+                        try:
+                            import re
+                            # Look for JSON inside ```json``` or ``` blocks
+                            json_pattern = r'```(?:json)?\s*(\[.*?\])\s*```'
+                            match = re.search(json_pattern, response_text, re.DOTALL)
+                            if match:
+                                json_str = match.group(1)
+                                suggestions = json.loads(json_str)
+                                if isinstance(suggestions, list):
+                                    return suggestions[:5]
+                        except (json.JSONDecodeError, AttributeError):
+                            pass
+
+                        current_app.logger.warning(f"Could not parse Ollama response as JSON: {response_text[:200]}...")
 
                         # Fallback: create generic suggestions based on the query
                         return [

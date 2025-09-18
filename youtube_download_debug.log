@@ -40,3 +40,17 @@
 [2025-09-17 21:46:23] ID:2 - ✅ Found file, updating database with: Eric_Lapointe_-_Poussé_par_le_vent.mp3
 [2025-09-17 21:46:23] ID:2 - ✅ Background download complete: Eric_Lapointe_-_Poussé_par_le_vent.mp3
 [2025-09-17 21:46:23] ID:2 - 🏁 Thread finished
+[2025-09-17 23:26:13] ID:4 - 🚀 Thread started: 'Feel Good' by 'Charlotte Cardin' from https://www.youtube.com/watch?v=_eUYB7M4EDE
+[2025-09-17 23:26:13] ID:4 - ✅ App context acquired
+[2025-09-17 23:26:13] ID:4 - 📊 Querying database for music request
+[2025-09-17 23:26:13] ID:4 - ✅ Found music request: Feel Good
+[2025-09-17 23:26:13] ID:4 - ✅ Status updated to 'downloading'
+[2025-09-17 23:26:13] ID:4 - 🔧 Getting YouTube service
+[2025-09-17 23:26:13] ID:4 - ✅ YouTube service acquired
+[2025-09-17 23:26:13] ID:4 - ⬇️ Starting download from: https://www.youtube.com/watch?v=_eUYB7M4EDE
+[2025-09-17 23:26:23] ID:4 - 📁 Download returned filename: Charlotte_Cardin_-_Feel_Good.mp3
+[2025-09-17 23:26:23] ID:4 - 🔍 Checking for file: media/music/Charlotte_Cardin_-_Feel_Good.mp3
+[2025-09-17 23:26:23] ID:4 - ✅ Found file using exact filename: Charlotte_Cardin_-_Feel_Good.mp3
+[2025-09-17 23:26:23] ID:4 - ✅ Found file, updating database with: Charlotte_Cardin_-_Feel_Good.mp3
+[2025-09-17 23:26:23] ID:4 - ✅ Background download complete: Charlotte_Cardin_-_Feel_Good.mp3
+[2025-09-17 23:26:23] ID:4 - 🏁 Thread finished

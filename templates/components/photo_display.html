@@ -9,21 +9,21 @@
     {% if photo.wish_message %}
     <div class="tiktok-overlay tiktok-position-{{ (photo.id % 5) + 1 }}">
         <!-- Main wish text with random animation style and dynamic sizing -->
-        {% if (photo.id % 3) + 1 == 1 %}
+        {% if (photo.id % 4) + 1 == 1 %}
             <!-- Style 1: Typewriter effect with JavaScript -->
             <div class="tiktok-wish tiktok-style-1 {% if photo.wish_message|length <= 30 %}text-extra-large{% elif photo.wish_message|length <= 60 %}text-large{% elif photo.wish_message|length <= 100 %}text-medium{% else %}text-small{% endif %}"
                  data-text="{{ photo.wish_message|e }}">
                 {{ photo.wish_message }}
             </div>
         {% else %}
-            <!-- Style 2 & 3: Direct text display (no JavaScript) -->
-            <div class="tiktok-wish tiktok-style-{{ (photo.id % 3) + 1 }} {% if photo.wish_message|length <= 30 %}text-extra-large{% elif photo.wish_message|length <= 60 %}text-large{% elif photo.wish_message|length <= 100 %}text-medium{% else %}text-small{% endif %}">
+            <!-- Style 2, 3 & 4: Direct text display (no JavaScript) -->
+            <div class="tiktok-wish tiktok-style-{{ (photo.id % 4) + 1 }} {% if photo.wish_message|length <= 30 %}text-extra-large{% elif photo.wish_message|length <= 60 %}text-large{% elif photo.wish_message|length <= 100 %}text-medium{% else %}text-small{% endif %}">
                 {{ photo.wish_message }}
             </div>
         {% endif %}
         
         <!-- Sender name with random color -->
-        <div class="tiktok-name name-color-{{ (photo.id % 8) + 1 }}">
+        <div class="tiktok-name name-color-{{ (photo.id % 5) + 1 }}">
             - {{ photo.guest_name }}
         </div>
     </div>
@@ -123,15 +123,12 @@
     margin-top: 1rem;
 }
 
-/* Random color classes for sender names */
-.name-color-1 { color: #FF1493; } /* Deep Pink */
-.name-color-2 { color: #00FFFF; } /* Cyan */
-.name-color-3 { color: #32CD32; } /* Lime Green */
-.name-color-4 { color: #FF4500; } /* Orange Red */
-.name-color-5 { color: #DA70D6; } /* Orchid */
-.name-color-6 { color: #FFD700; } /* Gold */
-.name-color-7 { color: #FF6347; } /* Tomato */
-.name-color-8 { color: #40E0D0; } /* Turquoise */
+/* 5 specific colors for sender names */
+.name-color-1 { color: #FFFFFF; } /* White */
+.name-color-2 { color: #FFA500; } /* Orange */
+.name-color-3 { color: #FFD700; } /* Yellow */
+.name-color-4 { color: #40E0D0; } /* Turquoise */
+.name-color-5 { color: #FF69B4; } /* Pink */
 
 /* STYLE 1: JavaScript typewriter effect */
 .tiktok-style-1 {
@@ -222,6 +219,76 @@
     100% {
         opacity: 1;
         transform: scale(1) rotate(0deg);
+    }
+}
+
+/* STYLE 4: Retro RGB Chromatic Aberration Effect - Properly centered */
+.tiktok-style-4 {
+    color: #FFFFFF;
+    transform: rotate(-8deg) scale(0.9);
+    transform-origin: center center;
+    margin: 0 auto;
+    max-width: 85%;
+    text-shadow:
+        /* Main RGB chromatic aberration layers */
+        -3px 0 0 #00FFFF,          /* Cyan offset left */
+        3px 0 0 #FF00FF,           /* Magenta offset right */
+        0 3px 0 #FFFF00,           /* Yellow offset down */
+        /* Additional depth layers for retro effect */
+        -5px -2px 0 rgba(0, 255, 255, 0.6),
+        5px 2px 0 rgba(255, 0, 255, 0.6),
+        1px 5px 0 rgba(255, 255, 0, 0.6),
+        /* Subtle outline for readability */
+        -1px -1px 0 rgba(0, 0, 0, 0.8),
+        1px -1px 0 rgba(0, 0, 0, 0.8),
+        -1px 1px 0 rgba(0, 0, 0, 0.8),
+        1px 1px 0 rgba(0, 0, 0, 0.8);
+    animation: retroBounce 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+@keyframes retroBounce {
+    0% {
+        opacity: 0;
+        transform: scale(0.4) rotate(-20deg);
+        text-shadow:
+            -6px 0 0 #00FFFF,
+            6px 0 0 #FF00FF,
+            0 6px 0 #FFFF00;
+    }
+    30% {
+        opacity: 0.8;
+        transform: scale(1.0) rotate(-4deg);
+        text-shadow:
+            -4px 0 0 #00FFFF,
+            4px 0 0 #FF00FF,
+            0 4px 0 #FFFF00,
+            -7px -3px 0 rgba(0, 255, 255, 0.7),
+            7px 3px 0 rgba(255, 0, 255, 0.7);
+    }
+    70% {
+        opacity: 1;
+        transform: scale(0.85) rotate(-12deg);
+        text-shadow:
+            -2px 0 0 #00FFFF,
+            2px 0 0 #FF00FF,
+            0 2px 0 #FFFF00,
+            -4px -1px 0 rgba(0, 255, 255, 0.5),
+            4px 1px 0 rgba(255, 0, 255, 0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(0.9) rotate(-8deg);
+        text-shadow:
+            -3px 0 0 #00FFFF,
+            3px 0 0 #FF00FF,
+            0 3px 0 #FFFF00,
+            -5px -2px 0 rgba(0, 255, 255, 0.6),
+            5px 2px 0 rgba(255, 0, 255, 0.6),
+            1px 5px 0 rgba(255, 255, 0, 0.6),
+            -1px -1px 0 rgba(0, 0, 0, 0.8),
+            1px -1px 0 rgba(0, 0, 0, 0.8),
+            -1px 1px 0 rgba(0, 0, 0, 0.8),
+            1px 1px 0 rgba(0, 0, 0, 0.8);
     }
 }
 
