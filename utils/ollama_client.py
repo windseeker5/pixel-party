@@ -38,6 +38,20 @@ class OllamaClient:
             current_app.logger.error(f"Error listing Ollama models: {e}")
             return []
     
+    def is_mood_query(self, query: str) -> bool:
+        """Check if the query is a mood-based search."""
+        mood_words = [
+            # Basic emotions
+            'romantic', 'party', 'chill', 'upbeat', 'slow', 'dance', 'happy', 'sad', 'energetic', 'relaxing',
+            # Additional feelings
+            'melancholic', 'nostalgic', 'groovy', 'mellow', 'peaceful', 'aggressive',
+            # Music genres/styles
+            'blues', 'jazz', 'rock', 'metal', 'classical', 'country', 'reggae', 'funk', 'soul', 'disco',
+            # Contexts
+            'birthday', 'road trip', 'workout', 'study', 'dinner', 'morning', 'night', 'cooking'
+        ]
+        return any(word in query.lower() for word in mood_words)
+
     def get_song_suggestions(self, mood_or_query: str) -> List[Dict[str, Any]]:
         """Get song suggestions synchronously (for Flask routes)."""
         try:
@@ -60,7 +74,16 @@ class OllamaClient:
             session = await self._get_session()
 
             # Detect if it's a mood or artist/song query
-            mood_words = ['romantic', 'party', 'chill', 'upbeat', 'slow', 'dance', 'happy', 'sad', 'energetic', 'relaxing']
+            mood_words = [
+                # Basic emotions
+                'romantic', 'party', 'chill', 'upbeat', 'slow', 'dance', 'happy', 'sad', 'energetic', 'relaxing',
+                # Additional feelings
+                'melancholic', 'nostalgic', 'groovy', 'mellow', 'peaceful', 'aggressive',
+                # Music genres/styles
+                'blues', 'jazz', 'rock', 'metal', 'classical', 'country', 'reggae', 'funk', 'soul', 'disco',
+                # Contexts
+                'birthday', 'road trip', 'workout', 'study', 'dinner', 'morning', 'night', 'cooking'
+            ]
             is_mood_query = any(word in mood_or_query.lower() for word in mood_words)
 
             if is_mood_query:

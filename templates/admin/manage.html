@@ -134,15 +134,15 @@
             {% if photos %}
                 <div class="bg-white rounded-lg shadow overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="table w-full">
+                        <table class="table w-full table-fixed">
                             <thead>
                                 <tr>
-                                    <th>Thumbnail</th>
-                                    <th>Guest Name</th>
-                                    <th>Wish Message</th>
-                                    <th>Uploaded</th>
-                                    <th>File</th>
-                                    <th>Actions</th>
+                                    <th class="w-16">Thumbnail</th>
+                                    <th class="w-32">Guest Name</th>
+                                    <th class="w-48">Wish Message</th>
+                                    <th class="w-28">Uploaded</th>
+                                    <th class="w-36">File</th>
+                                    <th class="w-20">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -150,7 +150,7 @@
                                 <tr class="hover">
                                     <td>
                                         <div class="avatar">
-                                            <div class="mask mask-squircle w-12 h-12">
+                                            <div class="mask mask-squircle w-10 h-10">
                                                 <img src="/media/photos/{{ photo.filename }}" alt="Thumbnail">
                                             </div>
                                         </div>
@@ -160,13 +160,13 @@
                                         <div class="text-sm opacity-50">ID: {{ photo.id }}</div>
                                     </td>
                                     <td>
-                                        <div class="max-w-xs truncate">{{ photo.wish_message }}</div>
+                                        <div class="max-w-[180px] truncate" title="{{ photo.wish_message }}">{{ photo.wish_message }}</div>
                                     </td>
                                     <td>
                                         <div class="text-sm">{{ photo.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</div>
                                     </td>
                                     <td>
-                                        <div class="text-sm font-mono">{{ photo.filename }}</div>
+                                        <div class="text-sm font-mono max-w-[140px] truncate" title="{{ photo.filename }}">{{ photo.filename }}</div>
                                     </td>
                                     <td>
                                         <form method="POST" action="{{ url_for('admin.delete_photo', photo_id=photo.id) }}" 
@@ -193,16 +193,16 @@
             {% if music_entries %}
                 <div class="bg-white rounded-lg shadow overflow-hidden">
                     <div class="overflow-x-auto">
-                        <table class="table w-full">
+                        <table class="table w-full table-fixed">
                             <thead>
                                 <tr>
-                                    <th>Song</th>
-                                    <th>Guest</th>
-                                    <th>Source</th>
-                                    <th>Status</th>
-                                    <th>Submitted</th>
-                                    <th>File</th>
-                                    <th>Actions</th>
+                                    <th class="w-40">Song</th>
+                                    <th class="w-28">Guest</th>
+                                    <th class="w-20">Source</th>
+                                    <th class="w-20">Status</th>
+                                    <th class="w-28">Submitted</th>
+                                    <th class="w-32">File</th>
+                                    <th class="w-20">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -240,7 +240,7 @@
                                     </td>
                                     <td>
                                         {% if music.filename %}
-                                            <div class="text-sm font-mono truncate max-w-32">{{ music.filename }}</div>
+                                            <div class="text-sm font-mono truncate max-w-[120px]" title="{{ music.filename }}">{{ music.filename }}</div>
                                         {% else %}
                                             <span class="text-gray-400">None</span>
                                         {% endif %}

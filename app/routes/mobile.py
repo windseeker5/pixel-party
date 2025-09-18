@@ -706,11 +706,19 @@ def search_music():
                 </div>
                 '''
 
-            # Step 4: Add AI suggestions container (will load async if enabled)
+            # Step 4: Add AI suggestions container (only for mood queries when enabled)
             from app.models import get_setting
             ai_enabled = get_setting('enable_ai_suggestions', 'true') == 'true'
 
-            if ai_enabled:
+            # Check if this is a mood query
+            try:
+                from utils.ollama_client import OllamaClient
+                ollama = OllamaClient()
+                is_mood = ollama.is_mood_query(search_query)
+            except Exception:
+                is_mood = False
+
+            if ai_enabled and is_mood:
                 # Add AI suggestions section that will load async
                 html_results += f'''
                 <div id="ai-suggestions-container"
@@ -718,7 +726,7 @@ def search_music():
                      hx-trigger="load delay:500ms"
                      hx-target="this"
                      hx-swap="outerHTML">
-                    <div class="divider">AI Suggestions</div>
+                    <div class="divider">🎵 Mood detected: {html.escape(search_query.title())}</div>
                     <div class="text-center py-4">
                         <span class="loading loading-spinner loading-sm"></span>
                         <span class="text-sm opacity-70 ml-2">Getting AI suggestions...</span>
@@ -814,7 +822,7 @@ def search_music_ai():
 
             # Format AI suggestions as HTML with proper container
             html_results = '<div id="ai-suggestions-container">'
-            html_results += '<div class="divider">🤖 AI Suggestions</div>'
+            html_results += f'<div class="divider">🎵 Mood detected: {html.escape(search_query.title())} - Click to search</div>'
 
             for idx, suggestion in enumerate(ai_suggestions[:5]):  # Max 5 AI suggestions
                 import html
@@ -822,30 +830,28 @@ def search_music_ai():
                 artist_display = html.escape(suggestion.get('artist', 'Unknown'))
                 album_display = html.escape(suggestion.get('album', ''))
 
-                # Special styling for AI suggestions
+                # Create search query for this suggestion
+                search_term = f"{suggestion.get('title', '')} {suggestion.get('artist', '')}"
+
+                # Special styling for AI suggestions - clickable to trigger search
                 html_results += f'''
-                <div class="card bg-purple-50 shadow-sm border border-purple-200 hover:shadow-md transition-all duration-200 mb-2">
-                    <div class="card-body p-2">
+                <div class="card bg-purple-50 shadow-sm border border-purple-200 hover:shadow-md transition-all duration-200 mb-2 cursor-pointer"
+                     onclick="document.querySelector('input[name=query]').value = '{html.escape(search_term)}'; document.querySelector('input[name=query]').dispatchEvent(new Event('input'));">
+                    <div class="card-body p-3">
                         <div class="flex justify-between items-center">
                             <div class="flex-1">
                                 <div class="text-sm font-medium text-purple-800">{title_display}</div>
                                 <div class="text-xs opacity-70 mt-1 text-purple-600">{artist_display}{' • ' + album_display if album_display else ''}</div>
                                 <div class="flex items-center gap-2 mt-2">
                                     <div class="badge badge-sm bg-purple-500 text-white" style="border-radius: 4px;">🤖 AI</div>
-                                    <div class="text-xs opacity-60">Memory suggestion</div>
+                                    <div class="text-xs opacity-60">Click to search</div>
                                 </div>
                             </div>
-                            <button type="button"
-                                    class="btn btn-success btn-sm btn-circle ml-3 select-song-btn"
-                                    data-title="{html.escape(suggestion.get('title', ''))}"
-                                    data-artist="{html.escape(suggestion.get('artist', ''))}"
-                                    data-source="ai_suggestion"
-                                    data-file-path=""
-                                    data-url="">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            <div class="text-purple-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                 </svg>
-                            </button>
+                            </div>
                         </div>
                     </div>
                 </div>
