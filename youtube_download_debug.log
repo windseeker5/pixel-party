@@ -82,3 +82,17 @@
 [2025-09-18 08:34:48] ID:7 - ✅ Found file, updating database with: The_Black_Eyed_Peas_-_I_Gotta_Feeling.mp3
 [2025-09-18 08:34:48] ID:7 - ✅ Background download complete: The_Black_Eyed_Peas_-_I_Gotta_Feeling.mp3
 [2025-09-18 08:34:48] ID:7 - 🏁 Thread finished
+[2025-09-18 10:30:04] ID:8 - 🚀 Thread started: 'Official Music Video' by '"Mad World" (feat. Gary Jules)' from https://www.youtube.com/watch?v=etSbOs3aUqI
+[2025-09-18 10:30:04] ID:8 - ✅ App context acquired
+[2025-09-18 10:30:04] ID:8 - 📊 Querying database for music request
+[2025-09-18 10:30:04] ID:8 - ✅ Found music request: Official Music Video
+[2025-09-18 10:30:04] ID:8 - ✅ Status updated to 'downloading'
+[2025-09-18 10:30:04] ID:8 - 🔧 Getting YouTube service
+[2025-09-18 10:30:04] ID:8 - ✅ YouTube service acquired
+[2025-09-18 10:30:04] ID:8 - ⬇️ Starting download from: https://www.youtube.com/watch?v=etSbOs3aUqI
+[2025-09-18 10:30:16] ID:8 - 📁 Download returned filename: Mad_World_feat_Gary_Jules_-_Official_Music_Video.mp3
+[2025-09-18 10:30:16] ID:8 - 🔍 Checking for file: media/music/Mad_World_feat_Gary_Jules_-_Official_Music_Video.mp3
+[2025-09-18 10:30:16] ID:8 - ✅ Found file using exact filename: Mad_World_feat_Gary_Jules_-_Official_Music_Video.mp3
+[2025-09-18 10:30:16] ID:8 - ✅ Found file, updating database with: Mad_World_feat_Gary_Jules_-_Official_Music_Video.mp3
+[2025-09-18 10:30:16] ID:8 - ✅ Background download complete: Mad_World_feat_Gary_Jules_-_Official_Music_Video.mp3
+[2025-09-18 10:30:16] ID:8 - 🏁 Thread finished

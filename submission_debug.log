@@ -372,3 +372,19 @@ guest_name: 'Carl B'
 PASS: Guest name validation
 PASS: File exists - pexels-apg-graphics-709181-1604746.jpg
 PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Bod Dylan'
+PASS: Guest name validation
+PASS: File exists - pexels-apg-graphics-709181-1604746.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Sydney Crosby'
+PASS: Guest name validation
+PASS: File exists - pexels-tony-schnagl-6468938.jpg
+PASS: File type allowed

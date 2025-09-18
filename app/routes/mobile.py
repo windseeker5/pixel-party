@@ -714,7 +714,12 @@ def search_music():
                      hx-trigger="load delay:1000ms"
                      hx-target="this"
                      hx-swap="outerHTML">
-                    <div class="divider">🎵 Mood detected: {html.escape(search_query.title())}</div>
+                    <div class="divider flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z"></path>
+                        </svg>
+                        <span>Mood: {html.escape(search_query.title())}</span>
+                    </div>
                     <div class="text-center py-4">
                         <span class="loading loading-spinner loading-sm"></span>
                         <span class="text-sm opacity-70 ml-2">Getting AI suggestions...</span>
@@ -837,7 +842,14 @@ def search_music_ai():
             # Format AI suggestions as HTML with proper container
             import html
             html_results = '<div id="ai-suggestions-container">'
-            html_results += f'<div class="divider">🎵 Mood detected: {html.escape(search_query.title())} - Click to search</div>'
+            html_results += f'''
+            <div class="divider flex items-center justify-center gap-2">
+                <svg class="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z"></path>
+                </svg>
+                <span>Mood: {html.escape(search_query.title())}</span>
+            </div>
+            '''
 
             for idx, suggestion in enumerate(ai_suggestions[:5]):  # Max 5 AI suggestions
                 title_display = html.escape(suggestion.get('title', 'Unknown'))
@@ -847,24 +859,21 @@ def search_music_ai():
                 # Create search query for this suggestion
                 search_term = f"{suggestion.get('title', '')} {suggestion.get('artist', '')}"
 
-                # Special styling for AI suggestions - clickable to trigger search
+                # Clean AI suggestions with gradient design - clickable to trigger search
                 html_results += f'''
-                <div class="card bg-purple-50 shadow-sm border border-purple-200 hover:shadow-md transition-all duration-200 mb-2 cursor-pointer"
+                <div class="card bg-gradient-to-r from-rose-50 to-pink-50 hover:from-rose-100 hover:to-pink-100 shadow-sm border border-rose-200 hover:shadow-md hover:border-rose-300 transition-all duration-300 mb-2 cursor-pointer group"
                      onclick="document.querySelector('input[name=query]').value = '{html.escape(search_term)}'; document.querySelector('input[name=query]').dispatchEvent(new Event('input'));">
                     <div class="card-body p-3">
                         <div class="flex justify-between items-center">
                             <div class="flex-1">
-                                <div class="text-sm font-medium text-purple-800">{title_display}</div>
-                                <div class="text-xs opacity-70 mt-1 text-purple-600">{artist_display}{' • ' + album_display if album_display else ''}</div>
-                                <div class="flex items-center gap-2 mt-2">
-                                    <div class="badge badge-sm bg-purple-500 text-white" style="border-radius: 4px;">🤖 AI</div>
-                                    <div class="text-xs opacity-60">Click to search</div>
-                                </div>
+                                <div class="text-sm font-medium text-gray-800 group-hover:text-rose-800 transition-colors">{title_display}</div>
+                                <div class="text-xs opacity-70 mt-1 text-gray-600 group-hover:text-rose-600 transition-colors">{artist_display}{' • ' + album_display if album_display else ''}</div>
                             </div>
-                            <div class="text-purple-400">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            <div class="flex items-center gap-1 text-rose-600 opacity-70">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423L16.5 15.75l.394 1.183a2.25 2.25 0 001.423 1.423L19.5 18.75l-1.183.394a2.25 2.25 0 00-1.423 1.423z"></path>
                                 </svg>
+                                <span class="text-xs font-medium">AI suggestion</span>
                             </div>
                         </div>
                     </div>
