@@ -8,13 +8,13 @@
     <!-- SIMPLE TikTok-style text overlay - NO JAVASCRIPT -->
     {% if photo.wish_message %}
     <div class="tiktok-overlay tiktok-position-{{ (photo.id % 5) + 1 }}">
-        <!-- Main wish text with random animation style -->
-        <div class="tiktok-wish tiktok-style-{{ (photo.id % 3) + 1 }}">
+        <!-- Main wish text with random animation style and dynamic sizing -->
+        <div class="tiktok-wish tiktok-style-{{ (photo.id % 3) + 1 }} {% if photo.wish_message|length <= 40 %}text-short{% elif photo.wish_message|length <= 80 %}text-medium{% else %}text-long{% endif %}">
             "{{ photo.wish_message }}"
         </div>
         
-        <!-- Sender name -->
-        <div class="tiktok-name">
+        <!-- Sender name with random color -->
+        <div class="tiktok-name name-color-{{ (photo.id % 8) + 1 }}">
             - {{ photo.guest_name }}
         </div>
     </div>
@@ -77,9 +77,8 @@
     padding-bottom: 20%;
 }
 
-/* Base TikTok text style */
+/* Base TikTok text style with dynamic sizing */
 .tiktok-wish {
-    font-size: clamp(2.5rem, 6vw, 5rem);
     font-weight: 900;
     color: white;
     text-transform: uppercase;
@@ -91,73 +90,105 @@
     word-wrap: break-word;
 }
 
+/* Dynamic font sizing based on text length */
+.tiktok-wish.text-short {
+    font-size: clamp(3rem, 7vw, 6rem); /* 1-40 chars */
+}
+
+.tiktok-wish.text-medium {
+    font-size: clamp(2.5rem, 6vw, 5rem); /* 41-80 chars */
+}
+
+.tiktok-wish.text-long {
+    font-size: clamp(2rem, 5vw, 4rem); /* 81-140 chars */
+}
+
 .tiktok-name {
     font-size: clamp(1.8rem, 4vw, 3rem);
     font-weight: 700;
-    color: #FFD700;
     text-shadow: 2px 2px 0px rgba(0,0,0,1);
     margin-top: 1rem;
 }
 
-/* STYLE 1: Typewriter effect (pure CSS) */
+/* Random color classes for sender names */
+.name-color-1 { color: #FF1493; } /* Deep Pink */
+.name-color-2 { color: #00FFFF; } /* Cyan */
+.name-color-3 { color: #32CD32; } /* Lime Green */
+.name-color-4 { color: #FF4500; } /* Orange Red */
+.name-color-5 { color: #DA70D6; } /* Orchid */
+.name-color-6 { color: #FFD700; } /* Gold */
+.name-color-7 { color: #FF6347; } /* Tomato */
+.name-color-8 { color: #40E0D0; } /* Turquoise */
+
+/* STYLE 1: Typewriter effect (pure CSS) - Fixed for multi-line */
 .tiktok-style-1 {
     animation: typewriterReveal 3s steps(50, end) forwards;
     overflow: hidden;
-    white-space: nowrap;
-    width: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-width: 100%;
     border-right: 2px solid white;
 }
 
 @keyframes typewriterReveal {
-    0% { width: 0; }
-    90% { width: 100%; border-right: 2px solid white; }
-    100% { width: 100%; border-right: transparent; }
+    0% {
+        max-height: 0;
+        border-right: 2px solid white;
+    }
+    90% {
+        max-height: 20rem;
+        border-right: 2px solid white;
+    }
+    100% {
+        max-height: 20rem;
+        border-right: transparent;
+    }
 }
 
-/* STYLE 2: Neon glow effect */
+/* STYLE 2: Neon glow effect - reduced intensity */
 .tiktok-style-2 {
     color: #FFFFFF;
-    text-shadow: 
-        0 0 5px #FFFFFF,
-        0 0 10px #FFFFFF,
-        0 0 15px #00FFFF,
-        0 0 20px #00FFFF,
-        0 0 35px #00FFFF;
+    text-shadow:
+        0 0 3px #FFFFFF,
+        0 0 6px #FFFFFF,
+        0 0 9px #00FFFF,
+        0 0 12px #00FFFF,
+        0 0 18px #00FFFF;
     animation: neonPulse 2s ease-in-out forwards;
 }
 
 @keyframes neonPulse {
-    0% { 
+    0% {
         opacity: 0;
         transform: scale(0.8);
-        text-shadow: 0 0 5px #FFFFFF;
+        text-shadow: 0 0 3px #FFFFFF;
     }
     50% {
         opacity: 0.9;
         transform: scale(1.05);
-        text-shadow: 
-            0 0 10px #FFFFFF,
-            0 0 20px #FFFFFF,
-            0 0 30px #00FFFF,
-            0 0 40px #00FFFF,
-            0 0 60px #00FFFF;
-    }
-    100% { 
-        opacity: 1;
-        transform: scale(1);
-        text-shadow: 
+        text-shadow:
             0 0 5px #FFFFFF,
             0 0 10px #FFFFFF,
             0 0 15px #00FFFF,
             0 0 20px #00FFFF,
-            0 0 35px #00FFFF;
+            0 0 30px #00FFFF;
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        text-shadow:
+            0 0 3px #FFFFFF,
+            0 0 6px #FFFFFF,
+            0 0 9px #00FFFF,
+            0 0 12px #00FFFF,
+            0 0 18px #00FFFF;
     }
 }
 
 /* STYLE 3: Bounce effect */
 .tiktok-style-3 {
     color: #FFFFFF;
-    text-shadow: 
+    text-shadow:
         3px 3px 0px #000000,
         -1px -1px 0px #000000,
         1px -1px 0px #000000,

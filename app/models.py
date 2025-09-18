@@ -28,7 +28,7 @@ class Photo(db.Model):
     guest_name = db.Column(db.String(100), nullable=False)  # Stored for easy access
     filename = db.Column(db.String(255), nullable=False)
     original_filename = db.Column(db.String(255), nullable=False)
-    wish_message = db.Column(db.String(180), nullable=False)  # Birthday wish/note (max 180 chars)
+    wish_message = db.Column(db.String(140), nullable=False)  # Birthday wish/note (max 140 chars)
     uploaded_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     displayed_at = db.Column(db.DateTime, nullable=True)
     display_duration = db.Column(db.Integer, default=10)  # Seconds to show on screen
