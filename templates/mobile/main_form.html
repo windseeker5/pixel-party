@@ -250,7 +250,7 @@
                        placeholder="Search by mood, song title, or artist..."
                        class="input input-bordered input-lg input-secondary w-full border-orange-500 focus:border-orange-500 text-lg"
                        hx-post="/mobile/search_music"
-                       hx-trigger="input delay:300ms, keyup delay:300ms"
+                       hx-trigger="input delay:500ms"
                        hx-target="#music-results"
                        hx-include="this"
                        hx-indicator="#search-spinner"
@@ -259,10 +259,12 @@
                        name="query"
                        autocomplete="off">
 
-                <!-- Search loading indicator -->
+                <!-- Search loading indicator with progressive states -->
                 <div id="search-spinner" class="htmx-indicator text-center py-2">
                     <span class="loading loading-spinner loading-sm"></span>
-                    <span class="text-sm opacity-70 ml-2">Searching music...</span>
+                    <span class="text-sm opacity-70 ml-2">
+                        <span id="search-stage">Searching music library and YouTube...</span>
+                    </span>
                 </div>
 
                 <!-- Search results -->

@@ -4,7 +4,8 @@ import aiohttp
 import asyncio
 import json
 from typing import List, Dict, Any
-from flask import current_app
+import logging
+# Remove Flask dependency to make it testable outside Flask context
 
 class OllamaClient:
     """Simple Ollama client for music suggestions."""
@@ -13,6 +14,7 @@ class OllamaClient:
         self.base_url = "http://127.0.0.1:11434"
         self.model = "llama3.2:1b"
         self.session = None
+        self.logger = logging.getLogger(__name__)
     
     async def _get_session(self):
         """Get or create aiohttp session."""
@@ -35,7 +37,7 @@ class OllamaClient:
                     return [model['name'] for model in data.get('models', [])]
                 return []
         except Exception as e:
-            current_app.logger.error(f"Error listing Ollama models: {e}")
+            self.logger.error(f"Error listing Ollama models: {e}")
             return []
     
     def is_mood_query(self, query: str) -> bool:
@@ -55,23 +57,61 @@ class OllamaClient:
     def get_song_suggestions(self, mood_or_query: str) -> List[Dict[str, Any]]:
         """Get song suggestions synchronously (for Flask routes)."""
         try:
-            # Run the async function in a new event loop
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            # Check if there's already a running event loop
             try:
-                return loop.run_until_complete(self._get_song_suggestions_async(mood_or_query))
-            finally:
-                # Ensure proper cleanup
-                loop.run_until_complete(self.close())
-                loop.close()
+                loop = asyncio.get_running_loop()
+                # If there's a running loop, we need to use a different approach
+                # Create a new thread to run the async function
+                import concurrent.futures
+                import threading
+
+                result = []
+                exception = None
+
+                def run_async():
+                    nonlocal result, exception
+                    try:
+                        # Create a new event loop for this thread
+                        new_loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(new_loop)
+                        try:
+                            result = new_loop.run_until_complete(self._get_song_suggestions_async(mood_or_query))
+                        finally:
+                            # Session is handled by the async function
+                            new_loop.close()
+                    except Exception as e:
+                        exception = e
+
+                thread = threading.Thread(target=run_async)
+                thread.start()
+                thread.join(timeout=30)  # 30 second timeout
+
+                if exception:
+                    raise exception
+
+                return result
+
+            except RuntimeError:
+                # No running event loop, we can create a new one
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    return loop.run_until_complete(self._get_song_suggestions_async(mood_or_query))
+                finally:
+                    # Session is handled by the async function
+                    loop.close()
+
         except Exception as e:
-            current_app.logger.error(f"Error getting song suggestions: {e}")
+            self.logger.error(f"Error getting song suggestions: {e}")
             return []
     
     async def _get_song_suggestions_async(self, mood_or_query: str) -> List[Dict[str, Any]]:
         """Get song suggestions based on mood or search query."""
+        session = None
         try:
-            session = await self._get_session()
+            # Create a fresh session for this request to avoid conflicts
+            timeout = aiohttp.ClientTimeout(total=10)
+            session = aiohttp.ClientSession(timeout=timeout)
 
             # Detect if it's a mood or artist/song query
             mood_words = [
@@ -87,22 +127,26 @@ class OllamaClient:
             is_mood_query = any(word in mood_or_query.lower() for word in mood_words)
 
             if is_mood_query:
-                prompt = f"""Suggest 5 songs that match this mood: "{mood_or_query}"
+                prompt = f"""You are a music expert. Suggest exactly 5 songs that match this mood: "{mood_or_query}"
 
-Return ONLY a JSON array with this exact format:
+IMPORTANT: Respond with ONLY a valid JSON array. Each song must be an object with title, artist, and album fields.
+
+Format:
 [
-  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
-  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
-  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
-  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
-  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}}
+  {{"title": "Happy", "artist": "Pharrell Williams", "album": "Girl"}},
+  {{"title": "I Gotta Feeling", "artist": "The Black Eyed Peas", "album": "The E.N.D."}},
+  {{"title": "Can't Stop the Feeling!", "artist": "Justin Timberlake", "album": "Trolls Soundtrack"}},
+  {{"title": "Uptown Funk", "artist": "Mark Ronson ft. Bruno Mars", "album": "Uptown Special"}},
+  {{"title": "All About That Bass", "artist": "Meghan Trainor", "album": "Title"}}
 ]
 
-No other text, just the JSON array."""
+Return only the JSON array, no other text."""
             else:
-                prompt = f"""Suggest 5 songs similar in style to "{mood_or_query}" or that would remind people of memories with this artist/song:
+                prompt = f"""You are a music expert. Suggest exactly 5 songs similar to "{mood_or_query}":
 
-Return ONLY a JSON array with this exact format:
+IMPORTANT: Respond with ONLY a valid JSON array. Each song must be an object with title, artist, and album fields.
+
+Format:
 [
   {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
   {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
@@ -111,7 +155,7 @@ Return ONLY a JSON array with this exact format:
   {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}}
 ]
 
-No other text, just the JSON array."""
+Return only the JSON array, no other text."""
 
             payload = {
                 "model": self.model,
@@ -120,9 +164,8 @@ No other text, just the JSON array."""
                 "temperature": 0.7
             }
 
-            # Add 10-second timeout for Raspberry Pi
-            timeout = aiohttp.ClientTimeout(total=10)
-            async with session.post(f"{self.base_url}/api/generate", json=payload, timeout=timeout) as response:
+            # Use the session timeout we already set
+            async with session.post(f"{self.base_url}/api/generate", json=payload) as response:
                 if response.status == 200:
                     data = await response.json()
                     response_text = data.get('response', '').strip()
@@ -148,7 +191,39 @@ No other text, just the JSON array."""
                         except (json.JSONDecodeError, AttributeError):
                             pass
 
-                        current_app.logger.warning(f"Could not parse Ollama response as JSON: {response_text[:200]}...")
+                        # Try to parse if it returned a string array instead of objects
+                        try:
+                            # Parse as simple string array
+                            song_strings = json.loads(response_text)
+                            if isinstance(song_strings, list) and all(isinstance(s, str) for s in song_strings):
+                                # Convert string array to object format
+                                suggestions = []
+                                for song_str in song_strings[:5]:
+                                    # Try to parse "Title by Artist" format
+                                    if ' by ' in song_str:
+                                        parts = song_str.split(' by ', 1)
+                                        title = parts[0].strip().strip('"')
+                                        artist = parts[1].strip().strip('"')
+                                        suggestions.append({
+                                            "title": title,
+                                            "artist": artist,
+                                            "album": "Unknown"
+                                        })
+                                    else:
+                                        # If no "by" found, treat whole string as title
+                                        suggestions.append({
+                                            "title": song_str.strip().strip('"'),
+                                            "artist": "Unknown",
+                                            "album": "Unknown"
+                                        })
+
+                                if suggestions:
+                                    self.logger.info(f"Successfully parsed string array format: {len(suggestions)} songs")
+                                    return suggestions
+                        except (json.JSONDecodeError, AttributeError):
+                            pass
+
+                        self.logger.warning(f"Could not parse Ollama response as JSON: {response_text[:200]}...")
 
                         # Fallback: create generic suggestions based on the query
                         return [
@@ -158,8 +233,12 @@ No other text, just the JSON array."""
                 return []
 
         except asyncio.TimeoutError:
-            current_app.logger.warning(f"Ollama request timed out for query: {mood_or_query}")
+            self.logger.warning(f"Ollama request timed out for query: {mood_or_query}")
             return []
         except Exception as e:
-            current_app.logger.error(f"Error calling Ollama API: {e}")
+            self.logger.error(f"Error calling Ollama API: {e}")
             return []
+        finally:
+            # Always close the session
+            if session and not session.closed:
+                await session.close()

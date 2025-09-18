@@ -25,19 +25,21 @@ class MusicSearch:
                 )
             ).all()
             
-            # Remove duplicates by creating a unique key (title + duration)
+            # Remove duplicates by creating a unique key (title + artist + duration)
             seen_songs = {}
             unique_results = []
 
             for result in results:
-                # Create unique key using lowercase title and duration
-                # This catches artist variations like "R.E.M." vs "REM" for same song
-                unique_key = f"{result.title_lower}|||{result.duration}"
+                # Normalize artist name to handle variations like "R.E.M." vs "REM"
+                normalized_artist = (result.artist_lower or '').replace('.', '').replace(' ', '').replace('-', '')
+
+                # Create unique key using normalized title, artist, and duration
+                unique_key = f"{result.title_lower}|||{normalized_artist}|||{result.duration}"
 
                 if unique_key not in seen_songs:
                     seen_songs[unique_key] = True
                     unique_results.append(result)
-                    
+
                     # Stop when we have enough unique results
                     if len(unique_results) >= limit:
                         break

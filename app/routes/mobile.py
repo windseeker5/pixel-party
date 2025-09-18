@@ -603,7 +603,12 @@ def search_music():
 
         if not search_query:
             if is_htmx_request():
-                return '<div class="text-sm opacity-70 p-2">Type to search...</div>'
+                return '''<div class="text-sm opacity-70 p-2 text-center">
+                    <svg class="w-5 h-5 mx-auto mb-1 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    Type to search music, moods, or artists...
+                </div>'''
             return jsonify({'results': []})
 
         # Step 1: Search local library first (up to 25 results)
@@ -710,12 +715,14 @@ def search_music():
             from app.models import get_setting
             ai_enabled = get_setting('enable_ai_suggestions', 'true') == 'true'
 
-            # Check if this is a mood query
+            # Check if this is a mood query with debug logging
             try:
                 from utils.ollama_client import OllamaClient
                 ollama = OllamaClient()
                 is_mood = ollama.is_mood_query(search_query)
-            except Exception:
+                current_app.logger.info(f"AI Mood Detection: query='{search_query}', is_mood={is_mood}, ai_enabled={ai_enabled}")
+            except Exception as e:
+                current_app.logger.error(f"Error in mood detection: {e}")
                 is_mood = False
 
             if ai_enabled and is_mood:
@@ -812,13 +819,28 @@ def search_music_ai():
             from utils.ollama_client import OllamaClient
             ollama = OllamaClient()
 
-            current_app.logger.info(f"Getting AI suggestions for: {search_query}")
+            current_app.logger.info(f"Getting AI suggestions for: '{search_query}'")
+
+            # First check if this is actually a mood query
+            is_mood = ollama.is_mood_query(search_query)
+            current_app.logger.info(f"Is mood query: {is_mood}")
+
+            if not is_mood:
+                current_app.logger.info(f"'{search_query}' not detected as mood query, skipping AI suggestions")
+                return '<div id="ai-suggestions-container" style="display: none;"></div>'
+
             ai_suggestions = ollama.get_song_suggestions(search_query)
             current_app.logger.info(f"Got {len(ai_suggestions) if ai_suggestions else 0} AI suggestions")
 
             if not ai_suggestions:
-                # Return empty div that disappears gracefully
-                return '<div id="ai-suggestions-container" style="display: none;"></div>'
+                # Return message explaining why no suggestions
+                return '''
+                <div id="ai-suggestions-container">
+                    <div class="text-xs opacity-50 text-center py-2">
+                        AI mood suggestions temporarily unavailable
+                    </div>
+                </div>
+                '''
 
             # Format AI suggestions as HTML with proper container
             html_results = '<div id="ai-suggestions-container">'
