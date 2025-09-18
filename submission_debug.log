@@ -266,3 +266,53 @@ guest_name: 'Ken'
 PASS: Guest name validation
 PASS: File exists - test_photo.jpg
 PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie'
+PASS: Guest name validation
+PASS: File exists - PXL_20250917_212628867.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+PASS: File exists - kd-mask2.png
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie'
+PASS: Guest name validation
+PASS: File exists - PXL_20250917_212628867.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+PASS: File exists - pexels-sebastian-189349.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie-France'
+PASS: Guest name validation

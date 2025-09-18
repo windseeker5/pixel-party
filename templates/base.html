@@ -149,7 +149,7 @@
         .dropzone-content-preview {
             position: relative;
             width: 100%;
-            height: 192px; /* Match reduced container height */
+            height: 240px; /* Match container height exactly */
             padding: 0; /* Remove padding so photo fills completely */
         }
         
@@ -158,7 +158,9 @@
             width: 100%;
             height: 100%;
             object-fit: cover; /* Fill entire space, crop if necessary */
+            object-position: center; /* Center the image for better cropping */
             border-radius: 0.75rem; /* Match container radius */
+            display: block; /* Remove any inline gaps */
         }
         
         /* Drag and drop states - Subtle */

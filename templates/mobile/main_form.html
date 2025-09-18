@@ -273,14 +273,14 @@
                 
                 <!-- Selected song display (outside collapsible) -->
                 <div id="selected-song" class="hidden mt-3">
-                    <div class="alert alert-success">
+                    <div class="alert bg-yellow-400 text-black border-yellow-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                         </svg>
                         <span id="selected-song-text"></span>
-                        <button type="button" 
+                        <button type="button"
                                 onclick="document.getElementById('selected-song').classList.add('hidden'); document.getElementById('selected-song-input').value='';"
-                                class="btn btn-xs btn-ghost">Remove</button>
+                                class="badge badge-error text-white">Remove</button>
                     </div>
                 </div>
             </div>
@@ -296,7 +296,7 @@
 
         <!-- Made with love text -->
         <div class="text-center mt-4 text-sm text-gray-600">
-            Made with ❤️ for Valérie's 50th Birthday Celebration
+            Made with ❤️ for Valérie
         </div>
     </div>
 </div>
@@ -308,14 +308,14 @@
         if (selectedSongDiv && selectedSongDiv.innerHTML.trim() === '') {
             console.log('🔧 Fixing empty selected-song div...');
             selectedSongDiv.innerHTML = `
-                <div class="alert alert-success">
+                <div class="alert bg-yellow-400 text-black border-yellow-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                     </svg>
                     <span id="selected-song-text"></span>
-                    <button type="button" 
+                    <button type="button"
                             onclick="document.getElementById('selected-song').classList.add('hidden'); document.getElementById('selected-song-input').value='';"
-                            class="btn btn-xs btn-ghost">Remove</button>
+                            class="badge badge-error text-white">Remove</button>
                 </div>
             `;
             return true;
@@ -389,14 +389,14 @@
         if (!selectedSongText) {
             console.log('🔧 selected-song-text not found, rebuilding div content...');
             selectedSongDiv.innerHTML = `
-                <div class="alert alert-success">
+                <div class="alert bg-yellow-400 text-black border-yellow-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                     </svg>
                     <span id="selected-song-text"></span>
-                    <button type="button" 
+                    <button type="button"
                             onclick="document.getElementById('selected-song').classList.add('hidden'); document.getElementById('selected-song-input').value='';"
-                            class="btn btn-xs btn-ghost">Remove</button>
+                            class="badge badge-error text-white">Remove</button>
                 </div>
             `;
             selectedSongText = document.getElementById('selected-song-text');

@@ -16,71 +16,218 @@ mobile_bp = Blueprint('mobile', __name__)
 def download_youtube_async(video_url, title, artist, app, music_request_id):
     """Download YouTube audio in background thread."""
     import traceback
-    
-    with app.app_context():
-        from app import db
-        from app.models import MusicQueue
-        
-        music_request = None
+    import time
+
+    # Create debug log file for thread debugging
+    def log_to_file(message):
+        """Log to debug file with timestamp"""
         try:
-            # Update status to downloading
-            music_request = MusicQueue.query.get(music_request_id)
-            if music_request:
-                music_request.status = 'downloading'
-                db.session.commit()
-                current_app.logger.info(f"🎵 Starting background download: {title} by {artist} (ID: {music_request_id})")
-            else:
-                current_app.logger.error(f"❌ Music request {music_request_id} not found in database")
-                return
-            
-            from app.services.youtube_service import get_youtube_service
-            youtube_service = get_youtube_service()
-            
-            copied_filename = youtube_service.download_audio(video_url, title, artist)
-            
-            if copied_filename:
-                # Verify file actually exists
+            with open('youtube_download_debug.log', 'a', encoding='utf-8') as f:
+                timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+                f.write(f"[{timestamp}] ID:{music_request_id} - {message}\n")
+                f.flush()
+        except Exception as log_error:
+            print(f"Failed to write debug log: {log_error}")
+
+    log_to_file(f"🚀 Thread started: '{title}' by '{artist}' from {video_url}")
+
+    try:
+        with app.app_context():
+            from app import db
+            from app.models import MusicQueue
+
+            log_to_file("✅ App context acquired")
+
+            music_request = None
+            try:
+                # Update status to downloading
+                log_to_file("📊 Querying database for music request")
+                music_request = MusicQueue.query.get(music_request_id)
+                if music_request:
+                    log_to_file(f"✅ Found music request: {music_request.song_title}")
+                    music_request.status = 'downloading'
+                    db.session.commit()
+                    log_to_file("✅ Status updated to 'downloading'")
+                    current_app.logger.info(f"🎵 Starting background download: {title} by {artist} (ID: {music_request_id})")
+                else:
+                    log_to_file("❌ Music request not found in database")
+                    current_app.logger.error(f"❌ Music request {music_request_id} not found in database")
+                    return
+
+                log_to_file("🔧 Getting YouTube service")
+                from app.services.youtube_service import get_youtube_service
+                youtube_service = get_youtube_service()
+                log_to_file("✅ YouTube service acquired")
+
+                log_to_file(f"⬇️ Starting download from: {video_url}")
+                copied_filename = youtube_service.download_audio(video_url, title, artist)
+                log_to_file(f"📁 Download returned filename: {copied_filename}")
+
+                # More robust file verification - try multiple approaches
                 import os
-                file_path = os.path.join('media/music', copied_filename)
-                if os.path.exists(file_path):
+                import glob
+                import re
+                from pathlib import Path
+
+                actual_filename = None
+
+                if copied_filename:
+                    # First try the exact filename returned
+                    file_path = os.path.join('media/music', copied_filename)
+                    log_to_file(f"🔍 Checking for file: {file_path}")
+                    if os.path.exists(file_path):
+                        actual_filename = copied_filename
+                        log_to_file(f"✅ Found file using exact filename: {copied_filename}")
+                        current_app.logger.info(f"✅ Found file using exact filename: {copied_filename}")
+                    else:
+                        log_to_file(f"⚠️ Exact filename not found: {file_path}")
+                        current_app.logger.warning(f"⚠️ Exact filename not found: {file_path}")
+
+                if not actual_filename:
+                    # Try to find the file using pattern matching
+                    log_to_file(f"🔍 Searching for downloaded file matching: '{title}' by '{artist}'")
+                    current_app.logger.info(f"🔍 Searching for downloaded file matching: '{title}' by '{artist}'")
+
+                    # Create search patterns
+                    def create_safe_filename(title, artist):
+                        """Create safe filename patterns for search"""
+                        safe_title = re.sub(r'[^\w\s-]', '', title or '').strip()
+                        safe_artist = re.sub(r'[^\w\s-]', '', artist or '').strip()
+
+                        patterns = []
+                        if safe_artist and safe_title:
+                            patterns.append(f"{safe_artist}_-_{safe_title}")
+                            patterns.append(f"{safe_artist}_{safe_title}")
+                            patterns.append(f"{safe_title}")  # Sometimes only title is used
+                        elif safe_title:
+                            patterns.append(safe_title)
+                        elif safe_artist:
+                            patterns.append(safe_artist)
+
+                        # Handle spaces in different ways
+                        final_patterns = []
+                        for pattern in patterns:
+                            final_patterns.append(re.sub(r'\s+', '_', pattern))
+                            final_patterns.append(re.sub(r'\s+', ' ', pattern))
+                            final_patterns.append(re.sub(r'\s+', '', pattern))
+
+                        return final_patterns
+
+                    search_patterns = create_safe_filename(title, artist)
+                    log_to_file(f"🔍 Search patterns: {search_patterns}")
+                    current_app.logger.info(f"🔍 Search patterns: {search_patterns}")
+
+                    # Search for matching files in music directory
+                    music_dir = Path('media/music')
+                    for pattern in search_patterns:
+                        if not pattern:
+                            continue
+
+                        # Try exact match first
+                        exact_file = music_dir / f"{pattern}.mp3"
+                        if exact_file.exists():
+                            actual_filename = exact_file.name
+                            current_app.logger.info(f"✅ Found file using exact pattern: {actual_filename}")
+                            break
+
+                        # Try glob pattern matching
+                        glob_pattern = f"*{pattern}*.mp3"
+                        matches = list(music_dir.glob(glob_pattern))
+                        if matches:
+                            actual_filename = matches[0].name
+                            current_app.logger.info(f"✅ Found file using glob pattern '{glob_pattern}': {actual_filename}")
+                            break
+
+                    # If still not found, try fuzzy matching with all files
+                    if not actual_filename:
+                        log_to_file(f"🔍 Trying fuzzy matching for: '{title}'")
+                        current_app.logger.info(f"🔍 Trying fuzzy matching for: '{title}'")
+                        title_words = re.sub(r'[^\w\s]', '', title.lower()).split()
+
+                        best_match = None
+                        best_score = 0
+
+                        for mp3_file in music_dir.glob("*.mp3"):
+                            filename_lower = mp3_file.stem.lower()
+                            score = sum(1 for word in title_words if word in filename_lower)
+
+                            if score > best_score and score >= len(title_words) * 0.5:  # At least 50% match
+                                best_match = mp3_file.name
+                                best_score = score
+
+                        if best_match:
+                            actual_filename = best_match
+                            log_to_file(f"✅ Found file using fuzzy matching: {actual_filename} (score: {best_score})")
+                            current_app.logger.info(f"✅ Found file using fuzzy matching: {actual_filename} (score: {best_score})")
+
+                if actual_filename:
                     # Update database entry with filename and status
+                    log_to_file(f"✅ Found file, updating database with: {actual_filename}")
                     music_request = MusicQueue.query.get(music_request_id)  # Re-query to avoid stale session
                     if music_request:
-                        music_request.filename = copied_filename
+                        music_request.filename = actual_filename
                         music_request.status = 'ready'
                         try:
                             db.session.commit()
-                            current_app.logger.info(f"✅ Background download complete: {copied_filename} (ID: {music_request_id})")
+                            log_to_file(f"✅ Background download complete: {actual_filename}")
+                            current_app.logger.info(f"✅ Background download complete: {actual_filename} (ID: {music_request_id})")
                         except Exception as db_error:
                             db.session.rollback()
+                            log_to_file(f"❌ Database commit failed: {db_error}")
                             current_app.logger.error(f"❌ Database commit failed for {music_request_id}: {db_error}")
                             raise
                     else:
+                        log_to_file("❌ Music request disappeared from database")
                         current_app.logger.error(f"❌ Music request {music_request_id} disappeared from database")
                 else:
-                    current_app.logger.error(f"❌ Downloaded file not found: {file_path}")
-                    raise FileNotFoundError(f"Downloaded file not found: {file_path}")
-            else:
-                current_app.logger.error(f"❌ YouTube download returned no filename for: {video_url}")
-                raise Exception("YouTube download failed - no filename returned")
-                
-        except Exception as e:
-            # Mark as error with more robust error handling
-            current_app.logger.error(f"❌ Background YouTube download error for {music_request_id}: {e}")
-            current_app.logger.error(f"❌ Full traceback: {traceback.format_exc()}")
-            
-            try:
-                if music_request_id:
-                    music_request = MusicQueue.query.get(music_request_id)  # Re-query to avoid stale session
-                    if music_request:
-                        music_request.status = 'error'
-                        db.session.commit()
-                        current_app.logger.info(f"⚠️ Marked request {music_request_id} as error")
-                    else:
-                        current_app.logger.error(f"❌ Could not mark {music_request_id} as error - not found in database")
-            except Exception as db_error:
-                db.session.rollback()
-                current_app.logger.error(f"❌ Failed to update error status for {music_request_id}: {db_error}")
+                    error_msg = f"Downloaded file not found for '{title}' by '{artist}'"
+                    log_to_file(f"❌ {error_msg}")
+                    current_app.logger.error(f"❌ {error_msg}")
+                    current_app.logger.info(f"📁 Available files: {[f.name for f in Path('media/music').glob('*.mp3')]}")
+                    raise FileNotFoundError(error_msg)
+
+            except Exception as e:
+                # Mark as error with more robust error handling
+                log_to_file(f"❌ Download error: {e}")
+                log_to_file(f"❌ Full traceback: {traceback.format_exc()}")
+                current_app.logger.error(f"❌ Background YouTube download error for {music_request_id}: {e}")
+                current_app.logger.error(f"❌ Full traceback: {traceback.format_exc()}")
+
+                try:
+                    if music_request_id:
+                        music_request = MusicQueue.query.get(music_request_id)  # Re-query to avoid stale session
+                        if music_request:
+                            music_request.status = 'error'
+                            db.session.commit()
+                            log_to_file("✅ Marked as error in database")
+                            current_app.logger.info(f"⚠️ Marked request {music_request_id} as error")
+                        else:
+                            current_app.logger.error(f"❌ Could not mark {music_request_id} as error - not found in database")
+                except Exception as db_error:
+                    db.session.rollback()
+                    log_to_file(f"❌ Failed to update error status: {db_error}")
+                    current_app.logger.error(f"❌ Failed to update error status for {music_request_id}: {db_error}")
+
+    except Exception as thread_error:
+        # Catch any thread-level errors
+        error_msg = f"❌ Thread crashed: {thread_error}"
+        log_to_file(error_msg)
+        log_to_file(f"❌ Thread traceback: {traceback.format_exc()}")
+
+        try:
+            # Try to mark as error in database
+            with app.app_context():
+                from app import db
+                from app.models import MusicQueue
+                music_request = MusicQueue.query.get(music_request_id)
+                if music_request:
+                    music_request.status = 'error'
+                    db.session.commit()
+                    log_to_file("✅ Marked as error in database")
+        except Exception as final_error:
+            log_to_file(f"❌ Final error marking failed: {final_error}")
+
+    log_to_file("🏁 Thread finished")
 
 
 @mobile_bp.route('/')
@@ -174,48 +321,34 @@ def upload():
 
 @mobile_bp.route('/submit_memory', methods=['POST'])
 def submit_memory():
-    """Handle photo upload and wish submission - creates guest if needed."""
+    """Handle photo upload and wish submission - session-free form-based submission."""
     guest_name = request.form.get('guest_name', '').strip()
-    
+
     # Log the submission attempt
     with open('submission_debug.log', 'a') as f:
         f.write(f"\n=== SUBMISSION ATTEMPT ===\n")
         f.write(f"Form keys: {list(request.form.keys())}\n")
         f.write(f"Files keys: {list(request.files.keys())}\n")
         f.write(f"guest_name: '{guest_name}'\n")
-    
+
     # Validate guest name
     if not guest_name:
         with open('submission_debug.log', 'a') as f:
             f.write(f"FAIL: No guest name\n")
         flash('Please enter your name', 'error')
         return redirect(url_for('mobile.main_form'))
-    
+
     with open('submission_debug.log', 'a') as f:
         f.write(f"PASS: Guest name validation\n")
-    
-    # Create or get guest
-    if 'guest_id' not in session:
-        session_id = str(uuid.uuid4())
-        guest = Guest.query.filter_by(name=guest_name).first()
-        
-        if not guest:
-            guest = Guest(name=guest_name, session_id=session_id)
-            db.session.add(guest)
-            db.session.commit()
-        
-        # Store in session
-        session['guest_id'] = guest.id
-        session['guest_name'] = guest.name
-        session['session_id'] = guest.session_id
-    else:
-        # Get existing guest from session
-        guest = Guest.query.get(session['guest_id'])
-        if not guest:
-            # Session is invalid, clear it and redirect
-            session.clear()
-            flash('Session expired. Please enter your name again.', 'error')
-            return redirect(url_for('mobile.main_form'))
+
+    # Always create or get guest based on form name (no session dependencies)
+    session_id = str(uuid.uuid4())
+    guest = Guest.query.filter_by(name=guest_name).first()
+
+    if not guest:
+        guest = Guest(name=guest_name, session_id=session_id)
+        db.session.add(guest)
+        db.session.commit()
     
     # Get form data
     wish_message = request.form.get('wish_message', '').strip()
@@ -379,24 +512,19 @@ def submit_memory():
                         current_app.logger.warning(f"Continuing without music due to error: {e}")
                         
                 elif song_data.get('source') == 'youtube':
-                    # Start YouTube download in background
-                    try:
-                        video_url = song_data.get('url', '')
-                        title = song_data.get('title', '')
-                        artist = song_data.get('artist', '')
-                        
-                        current_app.logger.info(f"🚀 Starting background YouTube download: {title} by {artist}")
-                        
-                        if video_url and title and song_data.get('source') == 'youtube':
-                            # We'll start the download after creating the database entry
-                            youtube_download_needed = True
-                            youtube_data = (video_url, title, artist)
-                        else:
-                            current_app.logger.error(f"Missing YouTube URL or title for download")
-                            youtube_download_needed = False
-                            
-                    except Exception as e:
-                        current_app.logger.error(f"Failed to start YouTube download: {e}")
+                    # Prepare YouTube download data (will start after database entry)
+                    video_url = song_data.get('url', '')
+                    title = song_data.get('title', '')
+                    artist = song_data.get('artist', '')
+
+                    current_app.logger.info(f"🚀 Preparing YouTube download: {title} by {artist} from {video_url}")
+
+                    if video_url and title:
+                        youtube_download_needed = True
+                        youtube_data = (video_url, title, artist)
+                    else:
+                        current_app.logger.error(f"Missing YouTube data - URL: {bool(video_url)}, Title: {bool(title)}")
+                        youtube_download_needed = False
                 
                 # Only create music request if we have valid data
                 if song_data.get('title'):
@@ -419,17 +547,21 @@ def submit_memory():
                     db.session.flush()  # Get the ID without committing
                     
                     # Start YouTube download if needed (after we have the ID)
-                    if 'youtube_download_needed' in locals() and youtube_download_needed:
+                    if youtube_download_needed:
                         try:
+                            current_app.logger.info(f"🎵 Starting download thread for: {youtube_data[1]} by {youtube_data[2]} (ID: {music_request.id})")
                             download_thread = threading.Thread(
                                 target=download_youtube_async,
-                                args=(youtube_data[0], youtube_data[1], youtube_data[2], current_app._get_current_object(), music_request.id)
+                                args=(youtube_data[0], youtube_data[1], youtube_data[2], current_app._get_current_object(), music_request.id),
+                                name=f"YouTubeDownload-{music_request.id}"
                             )
                             download_thread.daemon = True
                             download_thread.start()
-                            current_app.logger.info(f"✅ Background download started for: {youtube_data[1]} by {youtube_data[2]}")
+                            current_app.logger.info(f"✅ Download thread started successfully for ID {music_request.id}")
                         except Exception as e:
-                            current_app.logger.error(f"Failed to start YouTube download thread: {e}")
+                            current_app.logger.error(f"❌ Failed to start download thread: {e}")
+                            import traceback
+                            current_app.logger.error(f"❌ Thread start traceback: {traceback.format_exc()}")
                             
             except Exception as e:
                 current_app.logger.error(f"Error adding selected song: {e}")
@@ -439,19 +571,15 @@ def submit_memory():
         
         db.session.commit()
         
-        # Store success info in session for redirect
-        session['last_submission_success'] = True
-        session['last_submission_music_added'] = bool(selected_song)
-        
         # Handle HTMX requests differently than regular form submissions
         if is_htmx_request():
             # For HTMX, return the success page content directly
-            return render_template("mobile/success.html", 
+            return render_template("mobile/success.html",
                                  guest_name=guest.name,
                                  music_added=bool(selected_song))
         else:
-            # For regular form submission, redirect to success page
-            return redirect(url_for('mobile.success'))
+            # For regular form submission, redirect to success page with guest info
+            return redirect(url_for('mobile.success', guest_name=guest.name, music_added=bool(selected_song)))
             
     except Exception as e:
         current_app.logger.error(f"Error uploading file: {e}")

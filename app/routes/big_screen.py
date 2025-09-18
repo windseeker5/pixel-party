@@ -96,7 +96,8 @@ def search_music():
 def get_music_queue():
     """Get current music queue."""
     queue = MusicQueue.query.filter(
-        MusicQueue.played_at.is_(None)
+        MusicQueue.played_at.is_(None),
+        MusicQueue.status == 'ready'
     ).order_by(MusicQueue.submitted_at.asc()).limit(10).all()
     
     queue_data = []
