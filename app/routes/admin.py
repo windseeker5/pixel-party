@@ -242,7 +242,7 @@ def update_settings():
         'party_title', 'host_name', 'slideshow_duration',
         'max_submissions_per_guest', 'auto_play_music',
         'welcome_screen_interval_type', 'welcome_screen_interval_value',
-        'welcome_screen_duration'
+        'welcome_screen_duration', 'enable_ai_suggestions'
     ]
 
     for key in settings_to_update:

@@ -9,9 +9,18 @@
     {% if photo.wish_message %}
     <div class="tiktok-overlay tiktok-position-{{ (photo.id % 5) + 1 }}">
         <!-- Main wish text with random animation style and dynamic sizing -->
-        <div class="tiktok-wish tiktok-style-{{ (photo.id % 3) + 1 }} {% if photo.wish_message|length <= 40 %}text-short{% elif photo.wish_message|length <= 80 %}text-medium{% else %}text-long{% endif %}">
-            "{{ photo.wish_message }}"
-        </div>
+        {% if (photo.id % 3) + 1 == 1 %}
+            <!-- Style 1: Typewriter effect with JavaScript -->
+            <div class="tiktok-wish tiktok-style-1 {% if photo.wish_message|length <= 30 %}text-extra-large{% elif photo.wish_message|length <= 60 %}text-large{% elif photo.wish_message|length <= 100 %}text-medium{% else %}text-small{% endif %}"
+                 data-text="{{ photo.wish_message|e }}">
+                {{ photo.wish_message }}
+            </div>
+        {% else %}
+            <!-- Style 2 & 3: Direct text display (no JavaScript) -->
+            <div class="tiktok-wish tiktok-style-{{ (photo.id % 3) + 1 }} {% if photo.wish_message|length <= 30 %}text-extra-large{% elif photo.wish_message|length <= 60 %}text-large{% elif photo.wish_message|length <= 100 %}text-medium{% else %}text-small{% endif %}">
+                {{ photo.wish_message }}
+            </div>
+        {% endif %}
         
         <!-- Sender name with random color -->
         <div class="tiktok-name name-color-{{ (photo.id % 8) + 1 }}">
@@ -90,17 +99,21 @@
     word-wrap: break-word;
 }
 
-/* Dynamic font sizing based on text length */
-.tiktok-wish.text-short {
-    font-size: clamp(3rem, 7vw, 6rem); /* 1-40 chars */
+/* Enhanced dynamic font sizing based on text length */
+.tiktok-wish.text-extra-large {
+    font-size: clamp(3.5rem, 8vw, 6rem); /* 1-30 chars */
+}
+
+.tiktok-wish.text-large {
+    font-size: clamp(3rem, 7vw, 5rem); /* 31-60 chars */
 }
 
 .tiktok-wish.text-medium {
-    font-size: clamp(2.5rem, 6vw, 5rem); /* 41-80 chars */
+    font-size: clamp(2.5rem, 6vw, 4rem); /* 61-100 chars */
 }
 
-.tiktok-wish.text-long {
-    font-size: clamp(2rem, 5vw, 4rem); /* 81-140 chars */
+.tiktok-wish.text-small {
+    font-size: clamp(2rem, 5vw, 3.5rem); /* 101-140 chars */
 }
 
 .tiktok-name {
@@ -120,40 +133,39 @@
 .name-color-7 { color: #FF6347; } /* Tomato */
 .name-color-8 { color: #40E0D0; } /* Turquoise */
 
-/* STYLE 1: Typewriter effect (pure CSS) - Fixed for multi-line */
+/* STYLE 1: JavaScript typewriter effect */
 .tiktok-style-1 {
-    animation: typewriterReveal 3s steps(50, end) forwards;
-    overflow: hidden;
     white-space: pre-wrap;
     word-wrap: break-word;
     max-width: 100%;
-    border-right: 2px solid white;
+    opacity: 1;
+    position: relative;
 }
 
-@keyframes typewriterReveal {
-    0% {
-        max-height: 0;
-        border-right: 2px solid white;
-    }
-    90% {
-        max-height: 20rem;
-        border-right: 2px solid white;
-    }
-    100% {
-        max-height: 20rem;
-        border-right: transparent;
-    }
+/* Typewriter cursor */
+.tiktok-style-1::after {
+    content: '|';
+    animation: blinkCursor 1s infinite;
+    color: white;
 }
 
-/* STYLE 2: Neon glow effect - reduced intensity */
+.tiktok-style-1.typing-complete::after {
+    display: none;
+}
+
+@keyframes blinkCursor {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* STYLE 2: Clean neon glow effect - NO BLACK BORDERS */
 .tiktok-style-2 {
     color: #FFFFFF;
     text-shadow:
         0 0 3px #FFFFFF,
         0 0 6px #FFFFFF,
         0 0 9px #00FFFF,
-        0 0 12px #00FFFF,
-        0 0 18px #00FFFF;
+        0 0 12px #00FFFF;
     animation: neonPulse 2s ease-in-out forwards;
 }
 
@@ -161,17 +173,16 @@
     0% {
         opacity: 0;
         transform: scale(0.8);
-        text-shadow: 0 0 3px #FFFFFF;
+        text-shadow: 0 0 2px #FFFFFF;
     }
     50% {
         opacity: 0.9;
         transform: scale(1.05);
         text-shadow:
-            0 0 5px #FFFFFF,
-            0 0 10px #FFFFFF,
-            0 0 15px #00FFFF,
-            0 0 20px #00FFFF,
-            0 0 30px #00FFFF;
+            0 0 4px #FFFFFF,
+            0 0 8px #FFFFFF,
+            0 0 12px #00FFFF,
+            0 0 16px #00FFFF;
     }
     100% {
         opacity: 1;
@@ -180,8 +191,7 @@
             0 0 3px #FFFFFF,
             0 0 6px #FFFFFF,
             0 0 9px #00FFFF,
-            0 0 12px #00FFFF,
-            0 0 18px #00FFFF;
+            0 0 12px #00FFFF;
     }
 }
 
@@ -215,20 +225,22 @@
     }
 }
 
-/* Name animation - always the same */
+/* Name animation - fixed timing and visibility */
 .tiktok-name {
-    animation: nameSlideUp 2s 1s ease-out forwards;
+    animation: nameSlideUp 1.5s 2.5s ease-out forwards;
     opacity: 0;
+    position: relative;
+    z-index: 20;
 }
 
 @keyframes nameSlideUp {
     0% {
         opacity: 0;
-        transform: translateX(-50%) translateY(30px);
+        transform: translateY(20px);
     }
     100% {
         opacity: 1;
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
     }
 }
 
@@ -246,4 +258,58 @@
     }
 }
 </style>
+
+<script>
+// True character-by-character typewriter effect - ONLY for Style 1
+function startTypewriter() {
+    // Only select Style 1 elements that have data-text attribute and are not already processing
+    const typewriterElements = document.querySelectorAll('.tiktok-style-1[data-text]:not([data-typewriter-started])');
+
+    typewriterElements.forEach(element => {
+        const text = element.getAttribute('data-text');
+        if (!text) return; // Safety check
+
+        // Mark as started to prevent multiple executions
+        element.setAttribute('data-typewriter-started', 'true');
+
+        // Clear content and start typing
+        element.textContent = '';
+
+        let index = 0;
+        const speed = 80; // Slightly slower for better effect
+
+        function typeChar() {
+            if (index < text.length) {
+                // Only add character if we haven't been interrupted
+                if (element.hasAttribute('data-typewriter-started')) {
+                    element.textContent = text.substring(0, index + 1);
+                    index++;
+                    setTimeout(typeChar, speed);
+                }
+            } else {
+                // Typing complete, hide cursor and mark as done
+                element.classList.add('typing-complete');
+                element.setAttribute('data-typewriter-done', 'true');
+            }
+        }
+
+        // Start typing after a small delay
+        setTimeout(typeChar, 500);
+    });
+}
+
+// Only run once when page loads
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startTypewriter);
+} else {
+    startTypewriter();
+}
+
+// Handle HTMX updates - debounced to prevent multiple calls
+let htmxTimeout;
+document.addEventListener('htmx:afterSwap', function() {
+    clearTimeout(htmxTimeout);
+    htmxTimeout = setTimeout(startTypewriter, 100);
+});
+</script>
 

@@ -11,7 +11,7 @@ class OllamaClient:
     
     def __init__(self):
         self.base_url = "http://127.0.0.1:11434"
-        self.model = "deepseek-r1:8b"
+        self.model = "llama3.2:1b"
         self.session = None
     
     async def _get_session(self):
@@ -58,11 +58,31 @@ class OllamaClient:
         """Get song suggestions based on mood or search query."""
         try:
             session = await self._get_session()
-            
-            prompt = f"""Suggest 3 songs for this mood or request: "{mood_or_query}"
+
+            # Detect if it's a mood or artist/song query
+            mood_words = ['romantic', 'party', 'chill', 'upbeat', 'slow', 'dance', 'happy', 'sad', 'energetic', 'relaxing']
+            is_mood_query = any(word in mood_or_query.lower() for word in mood_words)
+
+            if is_mood_query:
+                prompt = f"""Suggest 5 songs that match this mood: "{mood_or_query}"
 
 Return ONLY a JSON array with this exact format:
 [
+  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
+  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
+  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
+  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
+  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}}
+]
+
+No other text, just the JSON array."""
+            else:
+                prompt = f"""Suggest 5 songs similar in style to "{mood_or_query}" or that would remind people of memories with this artist/song:
+
+Return ONLY a JSON array with this exact format:
+[
+  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
+  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
   {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
   {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
   {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}}
@@ -76,27 +96,32 @@ No other text, just the JSON array."""
                 "stream": False,
                 "temperature": 0.7
             }
-            
-            async with session.post(f"{self.base_url}/api/generate", json=payload) as response:
+
+            # Add 10-second timeout for Raspberry Pi
+            timeout = aiohttp.ClientTimeout(total=10)
+            async with session.post(f"{self.base_url}/api/generate", json=payload, timeout=timeout) as response:
                 if response.status == 200:
                     data = await response.json()
                     response_text = data.get('response', '').strip()
-                    
+
                     # Try to parse the JSON response
                     try:
                         suggestions = json.loads(response_text)
                         if isinstance(suggestions, list):
-                            return suggestions[:3]  # Limit to 3 suggestions
+                            return suggestions[:5]  # Return up to 5 suggestions
                     except json.JSONDecodeError:
                         current_app.logger.warning(f"Could not parse Ollama response as JSON: {response_text}")
-                        
+
                         # Fallback: create generic suggestions based on the query
                         return [
-                            {"title": f"Song for '{mood_or_query}'", "artist": "Various Artists", "album": "AI Suggestion"}
+                            {"title": f"Memory song for '{mood_or_query}'", "artist": "Various Artists", "album": "AI Suggestion"}
                         ]
-                
+
                 return []
-                
+
+        except asyncio.TimeoutError:
+            current_app.logger.warning(f"Ollama request timed out for query: {mood_or_query}")
+            return []
         except Exception as e:
             current_app.logger.error(f"Error calling Ollama API: {e}")
             return []

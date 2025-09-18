@@ -590,9 +590,9 @@ def music():
 
 @mobile_bp.route('/search_music', methods=['POST'])
 def search_music():
-    """HTMX endpoint for music search."""
+    """HTMX endpoint for music search with progressive loading (local/YouTube first, AI later)."""
     # No authentication required - this is a party app!
-    
+
     try:
         # Handle both HTMX form data and JSON
         if request.content_type == 'application/json':
@@ -600,56 +600,55 @@ def search_music():
             search_query = data.get('query', '').strip()
         else:
             search_query = request.form.get('query', '').strip()
-        
+
         if not search_query:
             if is_htmx_request():
                 return '<div class="text-sm opacity-70 p-2">Type to search...</div>'
             return jsonify({'results': []})
-        
-        # Search music library first
+
+        # Step 1: Search local library first (up to 25 results)
         from utils.music_library import music_search
-        
-        # Try different search types - search for "Bob Dylan" should find Bob Dylan songs!
-        search_results = music_search.search_all(search_query, limit=20)
-        
-        # Format results properly
+
+        search_results = music_search.search_all(search_query, limit=25)
+
+        # Format local results
         formatted_results = []
         for result in search_results:
             formatted_results.append({
                 'title': result['title'],
-                'artist': result['artist'], 
+                'artist': result['artist'],
                 'album': result['album'],
                 'duration': result['duration_formatted'],
                 'file_path': result['file_path'],
                 'source': 'local'
             })
-        
-        # Always try to reach 20 total suggestions by adding YouTube results
-        target_total = 20
+
+        # Step 2: Fill remaining spots with YouTube results (if less than 25 local)
+        target_total = 25
         local_count = len(formatted_results)
-        
+
         if local_count < target_total:
             try:
                 from app.services.youtube_service import get_youtube_service
                 youtube_service = get_youtube_service()
-                
+
                 # Calculate how many more results we need
                 youtube_needed = target_total - local_count
-                
-                # Search YouTube for music (get more than needed in case of duplicates)
+
+                # Search YouTube for music
                 youtube_results = youtube_service.search_youtube(search_query, max_results=youtube_needed + 3)
-                
+
                 # Format YouTube results and avoid duplicates with local results
                 local_song_keys = set()
                 for local_result in formatted_results:
                     key = f"{local_result['title'].lower()}|||{local_result['artist'].lower()}"
                     local_song_keys.add(key)
-                
+
                 youtube_added = 0
                 for result in youtube_results:
                     # Check if this YouTube song is already in local results
                     youtube_key = f"{result['title'].lower()}|||{result['artist'].lower()}"
-                    
+
                     if youtube_key not in local_song_keys and youtube_added < youtube_needed:
                         formatted_results.append({
                             'title': result['title'],
@@ -661,157 +660,193 @@ def search_music():
                         })
                         local_song_keys.add(youtube_key)  # Track to avoid future duplicates
                         youtube_added += 1
-                    
+
             except Exception as e:
                 current_app.logger.error(f"YouTube search error: {e}")
-        
-        # Return results (local or YouTube)
-        if formatted_results:
-            if is_htmx_request():
-                # Return HTML for HTMX
-                html_results = ""
-                for idx, song in enumerate(formatted_results):
-                    # Use HTML escaping for display
-                    import html
-                    title_display = html.escape(song['title'])
-                    artist_display = html.escape(song['artist'])
-                    album_display = html.escape(song.get('album', ''))
-                    
-                    # Alternate background colors for better distinction
-                    bg_class = "bg-base-200" if idx % 2 == 0 else "bg-base-300 bg-opacity-50"
-                    
-                    html_results += f'''
-                    <div class="card {bg_class} shadow-sm border border-base-300 hover:shadow-md transition-all duration-200">
-                        <div class="card-body p-2">
-                            <div class="flex justify-between items-center">
-                                <div class="flex-1">
-                                    <div class="text-sm font-medium text-base-content">{title_display}</div>
-                                    <div class="text-xs opacity-70 mt-1">{artist_display}{' • ' + album_display if album_display else ''}</div>
-                                    <div class="flex items-center gap-2 mt-2">
-                                        <div class="badge badge-sm {'badge-info' if song['source'] == 'local' else 'badge-error text-white'}" style="border-radius: 4px;">{'local' if song['source'] == 'local' else 'youtube'}</div>
-                                        <div class="text-xs opacity-60">{song['duration']}</div>
-                                    </div>
+
+        # Step 3: Generate HTML for local/YouTube results (immediate response)
+        if is_htmx_request():
+            html_results = ""
+
+            # Add local/YouTube results
+            for idx, song in enumerate(formatted_results):
+                import html
+                title_display = html.escape(song['title'])
+                artist_display = html.escape(song['artist'])
+                album_display = html.escape(song.get('album', ''))
+
+                # Alternate background colors for better distinction
+                bg_class = "bg-base-200" if idx % 2 == 0 else "bg-base-300 bg-opacity-50"
+
+                html_results += f'''
+                <div class="card {bg_class} shadow-sm border border-base-300 hover:shadow-md transition-all duration-200">
+                    <div class="card-body p-2">
+                        <div class="flex justify-between items-center">
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-base-content">{title_display}</div>
+                                <div class="text-xs opacity-70 mt-1">{artist_display}{' • ' + album_display if album_display else ''}</div>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <div class="badge badge-sm {'badge-info' if song['source'] == 'local' else 'badge-error text-white'}" style="border-radius: 4px;">{'local' if song['source'] == 'local' else 'youtube'}</div>
+                                    <div class="text-xs opacity-60">{song['duration']}</div>
                                 </div>
-                                <button type="button" 
-                                        class="btn btn-success btn-sm btn-circle ml-3 select-song-btn"
-                                        data-title="{html.escape(song['title'])}"
-                                        data-artist="{html.escape(song['artist'])}"
-                                        data-source="{song['source']}"
-                                        data-file-path="{html.escape(song.get('file_path', ''))}"
-                                        data-url="{html.escape(song.get('url', ''))}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                </button>
                             </div>
+                            <button type="button"
+                                    class="btn btn-success btn-sm btn-circle ml-3 select-song-btn"
+                                    data-title="{html.escape(song['title'])}"
+                                    data-artist="{html.escape(song['artist'])}"
+                                    data-source="{song['source']}"
+                                    data-file-path="{html.escape(song.get('file_path', ''))}"
+                                    data-url="{html.escape(song.get('url', ''))}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                    '''
-                return html_results
-            else:
-                return jsonify({'results': formatted_results})
-            
-        # If no local results, use Ollama for mood-based suggestions
-        try:
-            from utils.ollama_client import OllamaClient
-            ollama = OllamaClient()
-            
-            # Get AI suggestions
-            ai_suggestions = ollama.get_song_suggestions(search_query)
-            ollama_results = [
-                {
-                    'title': suggestion.get('title', search_query),
-                    'artist': suggestion.get('artist', 'Various Artists'),
-                    'album': suggestion.get('album', ''),
-                    'duration': '0:00',
-                    'source': 'ai_suggestion'
-                }
-                for suggestion in ai_suggestions[:3]
-            ]
-            
-            if ollama_results:
-                if is_htmx_request():
-                    # Return HTML for HTMX
-                    html_results = ""
-                    for song in ollama_results:
-                        title_escaped = song['title'].replace("'", "\\'")
-                        artist_escaped = song['artist'].replace("'", "\\'")
-                        
-                        html_results += f'''
-                        <div class="card bg-base-200 shadow-sm border border-base-300 hover:shadow-md transition-all duration-200">
-                            <div class="card-body p-3">
-                                <div class="flex justify-between items-center">
-                                    <div class="flex-1">
-                                        <div class="text-sm font-medium text-base-content">{song['title']}</div>
-                                        <div class="text-xs opacity-70 mt-1">{song['artist']}{' • ' + song['album'] if song['album'] else ''}</div>
-                                        <div class="flex items-center gap-2 mt-2">
-                                            <div class="badge badge-sm badge-warning" style="border-radius: 4px;">AI suggestion</div>
-                                            <div class="text-xs opacity-60">{song['duration']}</div>
-                                        </div>
-                                    </div>
-                                    <button type="button" 
-                                            class="btn btn-success btn-sm btn-circle ml-3"
-                                            onclick="selectSong('{title_escaped}', '{artist_escaped}', '{song['source']}', '')">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                        </svg>
-                                    </button>
+                </div>
+                '''
+
+            # Step 4: Add AI suggestions container (will load async if enabled)
+            from app.models import get_setting
+            ai_enabled = get_setting('enable_ai_suggestions', 'true') == 'true'
+
+            if ai_enabled:
+                # Add AI suggestions section that will load async
+                html_results += f'''
+                <div id="ai-suggestions-container"
+                     hx-get="/mobile/search_music_ai?query={html.escape(search_query)}"
+                     hx-trigger="load delay:500ms"
+                     hx-swap="innerHTML">
+                    <div class="divider">AI Suggestions</div>
+                    <div class="text-center py-4">
+                        <span class="loading loading-spinner loading-sm"></span>
+                        <span class="text-sm opacity-70 ml-2">Getting AI suggestions...</span>
+                    </div>
+                </div>
+                '''
+
+            return html_results
+        else:
+            # For JSON API (non-HTMX), return just the local/YouTube results
+            return jsonify({'results': formatted_results})
+
+        # Fallback if no results found at all
+        if not formatted_results:
+            fallback_results = [{
+                'title': f'"{search_query}"',
+                'artist': 'User Request',
+                'album': 'Manual Search',
+                'duration': '0:00',
+                'source': 'request'
+            }]
+
+            if is_htmx_request():
+                title_escaped = fallback_results[0]['title'].replace("'", "\\'")
+                artist_escaped = fallback_results[0]['artist'].replace("'", "\\'")
+
+                html_result = f'''
+                <div class="card bg-base-200 shadow-sm border border-base-300 hover:shadow-md transition-all duration-200">
+                    <div class="card-body p-3">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-base-content">{fallback_results[0]['title']}</div>
+                                <div class="text-xs opacity-70 mt-1">{fallback_results[0]['artist']}</div>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <div class="badge badge-sm badge-secondary" style="border-radius: 4px;">Manual request</div>
+                                    <div class="text-xs opacity-60">{fallback_results[0]['duration']}</div>
                                 </div>
                             </div>
+                            <button type="button"
+                                    class="btn btn-success btn-sm btn-circle ml-3 select-song-btn"
+                                    data-title="{html.escape(fallback_results[0]['title'])}"
+                                    data-artist="{html.escape(fallback_results[0]['artist'])}"
+                                    data-source="request"
+                                    data-file-path=""
+                                    data-url="">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                            </button>
                         </div>
-                        '''
-                    return html_results
-                else:
-                    return jsonify({'results': ollama_results})
-                
-        except Exception as e:
-            current_app.logger.error(f"Ollama search error: {e}")
-        
-        # Fallback to generic suggestion
-        fallback_results = [{
-            'title': f'"{search_query}"',
-            'artist': 'User Request', 
-            'album': 'Manual Search',
-            'duration': '0:00',
-            'source': 'request'
-        }]
-        
-        if is_htmx_request():
-            # Return HTML for fallback
-            title_escaped = fallback_results[0]['title'].replace("'", "\\'")
-            artist_escaped = fallback_results[0]['artist'].replace("'", "\\'")
-            
-            html_result = f'''
-            <div class="card bg-base-200 shadow-sm border border-base-300 hover:shadow-md transition-all duration-200">
-                <div class="card-body p-3">
-                    <div class="flex justify-between items-start">
+                    </div>
+                </div>
+                '''
+                return html_result
+            else:
+                return jsonify({'results': fallback_results})
+
+    except Exception as e:
+        current_app.logger.error(f"Error in music search: {e}")
+        return jsonify({'results': []})
+
+
+@mobile_bp.route('/search_music_ai', methods=['GET'])
+def search_music_ai():
+    """Async endpoint for AI music suggestions (called after main search)."""
+    try:
+        search_query = request.args.get('query', '').strip()
+
+        if not search_query:
+            return '<div class="text-sm opacity-70 p-2">No query provided</div>'
+
+        # Check if AI suggestions are enabled
+        from app.models import get_setting
+        ai_enabled = get_setting('enable_ai_suggestions', 'true') == 'true'
+
+        if not ai_enabled:
+            return '<div class="text-sm opacity-70 p-2 text-center">AI suggestions disabled</div>'
+
+        # Get AI suggestions from Ollama
+        from utils.ollama_client import OllamaClient
+        ollama = OllamaClient()
+
+        ai_suggestions = ollama.get_song_suggestions(search_query)
+
+        if not ai_suggestions:
+            return '<div class="text-sm opacity-70 p-2 text-center">No AI suggestions available</div>'
+
+        # Format AI suggestions as HTML
+        html_results = ""
+        for idx, suggestion in enumerate(ai_suggestions[:5]):  # Max 5 AI suggestions
+            import html
+            title_display = html.escape(suggestion.get('title', 'Unknown'))
+            artist_display = html.escape(suggestion.get('artist', 'Unknown'))
+            album_display = html.escape(suggestion.get('album', ''))
+
+            # Special styling for AI suggestions
+            html_results += f'''
+            <div class="card bg-purple-50 shadow-sm border border-purple-200 hover:shadow-md transition-all duration-200">
+                <div class="card-body p-2">
+                    <div class="flex justify-between items-center">
                         <div class="flex-1">
-                            <div class="text-sm font-medium text-base-content">{fallback_results[0]['title']}</div>
-                            <div class="text-xs opacity-70 mt-1">{fallback_results[0]['artist']}</div>
+                            <div class="text-sm font-medium text-purple-800">{title_display}</div>
+                            <div class="text-xs opacity-70 mt-1 text-purple-600">{artist_display}{' • ' + album_display if album_display else ''}</div>
                             <div class="flex items-center gap-2 mt-2">
-                                <div class="badge badge-sm badge-secondary" style="border-radius: 4px;">Manual request</div>
-                                <div class="text-xs opacity-60">{fallback_results[0]['duration']}</div>
+                                <div class="badge badge-sm bg-purple-500 text-white" style="border-radius: 4px;">🤖 AI</div>
+                                <div class="text-xs opacity-60">Memory suggestion</div>
                             </div>
                         </div>
-                        <button type="button" 
-                                class="btn btn-success btn-sm btn-circle ml-3"
-                                onclick="selectSong('{title_escaped}', '{artist_escaped}', 'request', '')">
+                        <button type="button"
+                                class="btn btn-success btn-sm btn-circle ml-3 select-song-btn"
+                                data-title="{html.escape(suggestion.get('title', ''))}"
+                                data-artist="{html.escape(suggestion.get('artist', ''))}"
+                                data-source="ai_suggestion"
+                                data-file-path=""
+                                data-url="">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
-                            Select
                         </button>
                     </div>
                 </div>
             </div>
             '''
-            return html_result
-        else:
-            return jsonify({'results': fallback_results})
-        
+
+        return html_results
+
     except Exception as e:
-        current_app.logger.error(f"Error in music search: {e}")
-        return jsonify({'results': []})
+        current_app.logger.error(f"Error in AI music search: {e}")
+        return '<div class="text-sm opacity-70 p-2 text-center text-error">AI suggestions unavailable</div>'
 
 
 @mobile_bp.route('/suggest_music', methods=['POST'])

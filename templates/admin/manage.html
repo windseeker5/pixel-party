@@ -376,6 +376,17 @@
                                     <span class="label-text ml-3">Auto-play Music</span>
                                 </label>
                             </div>
+                            <div class="form-control">
+                                <label class="label cursor-pointer justify-start">
+                                    <input type="checkbox" name="enable_ai_suggestions" value="true"
+                                           {% if settings.get('enable_ai_suggestions', 'true') == 'true' %}checked{% endif %}
+                                           class="checkbox checkbox-secondary">
+                                    <span class="label-text ml-3">Enable AI Song Suggestions (Llama 3.2)</span>
+                                </label>
+                                <div class="label">
+                                    <span class="label-text-alt text-warning">⚠️ May add 5-10 seconds to search time on Raspberry Pi</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

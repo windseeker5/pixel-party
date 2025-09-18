@@ -106,6 +106,7 @@ def init_default_settings():
         ('welcome_screen_interval_type', 'photos'),
         ('welcome_screen_interval_value', '5'),
         ('welcome_screen_duration', '8'),
+        ('enable_ai_suggestions', 'true'),
     ]
     
     for key, value in default_settings:
