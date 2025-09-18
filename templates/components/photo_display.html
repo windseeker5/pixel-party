@@ -7,7 +7,7 @@
     
     <!-- SIMPLE TikTok-style text overlay - NO JAVASCRIPT -->
     {% if photo.wish_message %}
-    <div class="tiktok-overlay">
+    <div class="tiktok-overlay tiktok-position-{{ (photo.id % 5) + 1 }}">
         <!-- Main wish text with random animation style -->
         <div class="tiktok-wish tiktok-style-{{ (photo.id % 3) + 1 }}">
             "{{ photo.wish_message }}"
@@ -32,17 +32,49 @@
     animation: kenBurnsSimple 8s ease-out forwards;
 }
 
-/* TikTok overlay container */
+/* TikTok overlay container - Base positioning */
 .tiktok-overlay {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
     text-align: center;
     pointer-events: none;
     z-index: 10;
+    padding: 0 5%;
+}
+
+/* Position 1: Top area */
+.tiktok-position-1 {
+    justify-content: flex-start;
+    padding-top: 20%;
+}
+
+/* Position 2: Upper-middle area */
+.tiktok-position-2 {
+    justify-content: flex-start;
+    padding-top: 35%;
+}
+
+/* Position 3: Center (original) */
+.tiktok-position-3 {
+    justify-content: center;
+}
+
+/* Position 4: Lower-middle area */
+.tiktok-position-4 {
+    justify-content: flex-end;
+    padding-bottom: 35%;
+}
+
+/* Position 5: Bottom area */
+.tiktok-position-5 {
+    justify-content: flex-end;
+    padding-bottom: 20%;
 }
 
 /* Base TikTok text style */
@@ -60,14 +92,11 @@
 }
 
 .tiktok-name {
-    position: absolute;
-    bottom: 15%;
-    left: 50%;
-    transform: translateX(-50%);
     font-size: clamp(1.8rem, 4vw, 3rem);
     font-weight: 700;
     color: #FFD700;
     text-shadow: 2px 2px 0px rgba(0,0,0,1);
+    margin-top: 1rem;
 }
 
 /* STYLE 1: Typewriter effect (pure CSS) */
