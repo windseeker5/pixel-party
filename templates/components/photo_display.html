@@ -17,9 +17,19 @@
             </div>
         {% else %}
             <!-- Style 2, 3 & 4: Direct text display (no JavaScript) -->
-            <div class="tiktok-wish tiktok-style-{{ (photo.id % 4) + 1 }} {% if photo.wish_message|length <= 30 %}text-extra-large{% elif photo.wish_message|length <= 60 %}text-large{% elif photo.wish_message|length <= 100 %}text-medium{% else %}text-small{% endif %}">
-                {{ photo.wish_message }}
-            </div>
+            {% set style_num = (photo.id % 4) + 1 %}
+            {% if style_num == 2 %}
+                <!-- Style 2 with color rotation -->
+                {% set color_variant = ['blue', 'pink', 'orange'][photo.id % 3] %}
+                <div class="tiktok-wish tiktok-style-2-{{ color_variant }} {% if photo.wish_message|length <= 30 %}text-extra-large{% elif photo.wish_message|length <= 60 %}text-large{% elif photo.wish_message|length <= 100 %}text-medium{% else %}text-small{% endif %}">
+                    {{ photo.wish_message }}
+                </div>
+            {% else %}
+                <!-- Other styles (3 & 4) -->
+                <div class="tiktok-wish tiktok-style-{{ style_num }} {% if photo.wish_message|length <= 30 %}text-extra-large{% elif photo.wish_message|length <= 60 %}text-large{% elif photo.wish_message|length <= 100 %}text-medium{% else %}text-small{% endif %}">
+                    {{ photo.wish_message }}
+                </div>
+            {% endif %}
         {% endif %}
         
         <!-- Sender name with random color -->
@@ -166,6 +176,37 @@
     animation: neonPulse 2s ease-in-out forwards;
 }
 
+/* STYLE 2 Color Variants */
+.tiktok-style-2-blue {
+    color: #FFFFFF;
+    text-shadow:
+        0 0 3px #FFFFFF,
+        0 0 6px #FFFFFF,
+        0 0 9px #00FFFF,
+        0 0 12px #00FFFF;
+    animation: neonPulseBlue 2s ease-in-out forwards;
+}
+
+.tiktok-style-2-pink {
+    color: #FFFFFF;
+    text-shadow:
+        0 0 3px #FFFFFF,
+        0 0 6px #FFFFFF,
+        0 0 9px #FF69B4,
+        0 0 12px #FF69B4;
+    animation: neonPulsePink 2s ease-in-out forwards;
+}
+
+.tiktok-style-2-orange {
+    color: #FFFFFF;
+    text-shadow:
+        0 0 3px #FFFFFF,
+        0 0 6px #FFFFFF,
+        0 0 9px #FFA500,
+        0 0 12px #FFA500;
+    animation: neonPulseOrange 2s ease-in-out forwards;
+}
+
 @keyframes neonPulse {
     0% {
         opacity: 0;
@@ -189,6 +230,84 @@
             0 0 6px #FFFFFF,
             0 0 9px #00FFFF,
             0 0 12px #00FFFF;
+    }
+}
+
+@keyframes neonPulseBlue {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+        text-shadow: 0 0 2px #FFFFFF;
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.05);
+        text-shadow:
+            0 0 4px #FFFFFF,
+            0 0 8px #FFFFFF,
+            0 0 12px #00FFFF,
+            0 0 16px #00FFFF;
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        text-shadow:
+            0 0 3px #FFFFFF,
+            0 0 6px #FFFFFF,
+            0 0 9px #00FFFF,
+            0 0 12px #00FFFF;
+    }
+}
+
+@keyframes neonPulsePink {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+        text-shadow: 0 0 2px #FFFFFF;
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.05);
+        text-shadow:
+            0 0 4px #FFFFFF,
+            0 0 8px #FFFFFF,
+            0 0 12px #FF69B4,
+            0 0 16px #FF69B4;
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        text-shadow:
+            0 0 3px #FFFFFF,
+            0 0 6px #FFFFFF,
+            0 0 9px #FF69B4,
+            0 0 12px #FF69B4;
+    }
+}
+
+@keyframes neonPulseOrange {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+        text-shadow: 0 0 2px #FFFFFF;
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.05);
+        text-shadow:
+            0 0 4px #FFFFFF,
+            0 0 8px #FFFFFF,
+            0 0 12px #FFA500,
+            0 0 16px #FFA500;
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        text-shadow:
+            0 0 3px #FFFFFF,
+            0 0 6px #FFFFFF,
+            0 0 9px #FFA500,
+            0 0 12px #FFA500;
     }
 }
 
