@@ -251,15 +251,21 @@ def get_current_song():
     if current_song and current_song.filename:
         # Get guest information
         guest_name = "Anonymous"
+        guest_wish = None
         if current_song.guest_id:
             guest = Guest.query.get(current_song.guest_id)
             if guest:
                 guest_name = guest.name
-        
+
+                # Look up guest's photo with wish
+                guest_photo = Photo.query.filter_by(guest_id=current_song.guest_id).first()
+                if guest_photo and guest_photo.wish_message:
+                    guest_wish = guest_photo.wish_message
+
         # Construct file URL
         file_url = f"/media/music/{current_song.filename}"
-        
-        return jsonify({
+
+        response_data = {
             'id': current_song.id,
             'title': current_song.song_title,
             'artist': current_song.artist,
@@ -269,7 +275,13 @@ def get_current_song():
             'status': current_song.status,
             'guest_name': guest_name,
             'submitted_at': current_song.submitted_at.isoformat() if current_song.submitted_at else None
-        })
+        }
+
+        # Add wish if available
+        if guest_wish:
+            response_data['guest_wish'] = guest_wish
+
+        return jsonify(response_data)
     
     return jsonify({'error': 'No ready song available'})
 
@@ -302,14 +314,20 @@ def next_song():
     if next_song and next_song.filename:
         # Get guest information
         guest_name = "Anonymous"
+        guest_wish = None
         if next_song.guest_id:
             guest = Guest.query.get(next_song.guest_id)
             if guest:
                 guest_name = guest.name
-        
+
+                # Look up guest's photo with wish
+                guest_photo = Photo.query.filter_by(guest_id=next_song.guest_id).first()
+                if guest_photo and guest_photo.wish_message:
+                    guest_wish = guest_photo.wish_message
+
         file_url = f"/media/music/{next_song.filename}"
-        
-        return jsonify({
+
+        response_data = {
             'id': next_song.id,
             'title': next_song.song_title,
             'artist': next_song.artist,
@@ -319,7 +337,13 @@ def next_song():
             'status': next_song.status,
             'guest_name': guest_name,
             'submitted_at': next_song.submitted_at.isoformat() if next_song.submitted_at else None
-        })
+        }
+
+        # Add wish if available
+        if guest_wish:
+            response_data['guest_wish'] = guest_wish
+
+        return jsonify(response_data)
     
     return jsonify({'error': 'No next ready song available'})
 
@@ -344,14 +368,20 @@ def previous_song():
         
         # Get guest information
         guest_name = "Anonymous"
+        guest_wish = None
         if previous_song.guest_id:
             guest = Guest.query.get(previous_song.guest_id)
             if guest:
                 guest_name = guest.name
-        
+
+                # Look up guest's photo with wish
+                guest_photo = Photo.query.filter_by(guest_id=previous_song.guest_id).first()
+                if guest_photo and guest_photo.wish_message:
+                    guest_wish = guest_photo.wish_message
+
         file_url = f"/media/music/{previous_song.filename}"
-        
-        return jsonify({
+
+        response_data = {
             'id': previous_song.id,
             'title': previous_song.song_title,
             'artist': previous_song.artist,
@@ -361,7 +391,13 @@ def previous_song():
             'status': previous_song.status,
             'guest_name': guest_name,
             'submitted_at': previous_song.submitted_at.isoformat() if previous_song.submitted_at else None
-        })
+        }
+
+        # Add wish if available
+        if guest_wish:
+            response_data['guest_wish'] = guest_wish
+
+        return jsonify(response_data)
     
     return jsonify({'error': 'No previous ready song available'})
 

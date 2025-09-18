@@ -10,14 +10,20 @@
             <!-- Song info -->
             <div class="flex-1 overflow-hidden">
                 <div class="font-semibold text-xs truncate">{{ song.song_title or 'Unknown Song' }}</div>
-                <div class="text-xs opacity-70 truncate">{{ song.artist or 'Unknown Artist' }}</div>
+                <div class="text-xs opacity-70 truncate flex items-center gap-1">
+                    {{ song.artist or 'Unknown Artist' }}
+                    <!-- Source badge moved here -->
+                    <div class="badge badge-xs {% if song.source == 'local' %}badge-info{% else %}badge-error text-white{% endif %}" style="border-radius: 3px; font-size: 8px;">
+                        {{ song.source }}
+                    </div>
+                </div>
             </div>
-            <!-- Right side: Submitter name and badges -->
+            <!-- Right side: Submitter name -->
             <div class="flex-shrink-0 text-right">
-                <div class="font-semibold text-sm">{{ song.guest_name or 'Anonymous' }}</div>
-                <!-- Status and source indicators on right -->
+                <div class="font-semibold" style="font-size: 1.09375rem;">{{ song.guest_name or 'Anonymous' }}</div>
+                <!-- Status indicator only -->
+                {% if song.status == 'downloading' or song.status == 'error' or song.status == 'pending' %}
                 <div class="flex items-center justify-end gap-1 mt-1">
-                    <!-- Status indicator -->
                     {% if song.status == 'downloading' %}
                     <div class="badge badge-xs badge-warning text-white" style="border-radius: 3px; font-size: 8px;">
                         downloading...
@@ -31,11 +37,8 @@
                         pending
                     </div>
                     {% endif %}
-                    <!-- Source badge -->
-                    <div class="badge badge-xs {% if song.source == 'local' %}badge-info{% else %}badge-error text-white{% endif %}" style="border-radius: 3px; font-size: 8px;">
-                        {{ song.source }}
-                    </div>
                 </div>
+                {% endif %}
             </div>
             <!-- Reserved space for indicator (always present for alignment) -->
             <div class="flex-shrink-0 w-4 flex justify-center">

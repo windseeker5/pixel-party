@@ -166,7 +166,6 @@
                                 </div>
                                 <!-- Wish message below name -->
                                 <div class="text-sm italic text-gray-300 mt-1 pr-8 leading-5" id="submitter-wish" style="display: none;">
-                                    Joyeux anniversaire! Que cette musique te fasse danser!
                                 </div>
                             </div>
                             <!-- Larger QR Code for when photos start -->
@@ -460,8 +459,14 @@
                         sourceElement.className = data.source === 'local' ? 'badge badge-xs badge-info' : 'badge badge-xs badge-error text-white';
                         document.getElementById('submitter-info').style.display = 'flex';
 
-                        // Show placeholder wish for testing
-                        document.getElementById('submitter-wish').style.display = 'block';
+                        // Show real wish if available
+                        const wishElement = document.getElementById('submitter-wish');
+                        if (data.guest_wish) {
+                            wishElement.textContent = data.guest_wish;
+                            wishElement.style.display = 'block';
+                        } else {
+                            wishElement.style.display = 'none';
+                        }
                         
                         if (data.file_url && audioPlayer.src !== window.location.origin + data.file_url) {
                             audioPlayer.src = data.file_url;
@@ -496,8 +501,14 @@
                     sourceElement.className = data.source === 'local' ? 'badge badge-xs badge-info' : 'badge badge-xs badge-error text-white';
                     document.getElementById('submitter-info').style.display = 'flex';
 
-                    // Show placeholder wish for testing
-                    document.getElementById('submitter-wish').style.display = 'block';
+                    // Show real wish if available
+                    const wishElement = document.getElementById('submitter-wish');
+                    if (data.guest_wish) {
+                        wishElement.textContent = data.guest_wish;
+                        wishElement.style.display = 'block';
+                    } else {
+                        wishElement.style.display = 'none';
+                    }
                     
                     if (data.file_url) {
                         audioPlayer.src = data.file_url;
@@ -537,8 +548,14 @@
                     sourceElement.className = data.source === 'local' ? 'badge badge-xs badge-info' : 'badge badge-xs badge-error text-white';
                     document.getElementById('submitter-info').style.display = 'flex';
 
-                    // Show placeholder wish for testing
-                    document.getElementById('submitter-wish').style.display = 'block';
+                    // Show real wish if available
+                    const wishElement = document.getElementById('submitter-wish');
+                    if (data.guest_wish) {
+                        wishElement.textContent = data.guest_wish;
+                        wishElement.style.display = 'block';
+                    } else {
+                        wishElement.style.display = 'none';
+                    }
                     
                     if (data.file_url) {
                         audioPlayer.src = data.file_url;
