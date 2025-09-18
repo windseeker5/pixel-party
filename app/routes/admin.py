@@ -353,7 +353,10 @@ def export_standalone():
         })
     
     # Generate standalone HTML
-    html_content = render_template('admin/memory_book_standalone.html', memories=memories)
+    current_date = datetime.datetime.now()
+    html_content = render_template('admin/memory_book_standalone.html',
+                                 memories=memories,
+                                 current_date=current_date)
     
     # Save standalone HTML file
     with open(f'{export_dir}/index.html', 'w', encoding='utf-8') as f:

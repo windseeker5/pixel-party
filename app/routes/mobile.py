@@ -403,9 +403,9 @@ def submit_memory():
             flash(error_msg, 'error')
             return redirect(url_for('mobile.upload'))
     
-    # Limit wish message to 180 characters
-    if len(wish_message) > 180:
-        wish_message = wish_message[:180]
+    # Limit wish message to 100 characters
+    if len(wish_message) > 100:
+        wish_message = wish_message[:100]
     
     try:
         # Save file
@@ -1091,3 +1091,4 @@ def success():
     return render_template("mobile/success.html",
                          guest_name=guest_name,
                          music_added=music_added)
+# Force reload

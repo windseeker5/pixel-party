@@ -11,7 +11,7 @@ class Guest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)  # First name or full name
     session_id = db.Column(db.String(255), unique=True, index=True, nullable=False)
-    first_seen = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    first_seen = db.Column(db.DateTime, default=datetime.datetime.now)
     total_submissions = db.Column(db.Integer, default=0)
     
     # Relationships
@@ -29,7 +29,7 @@ class Photo(db.Model):
     filename = db.Column(db.String(255), nullable=False)
     original_filename = db.Column(db.String(255), nullable=False)
     wish_message = db.Column(db.String(140), nullable=False)  # Birthday wish/note (max 140 chars)
-    uploaded_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    uploaded_at = db.Column(db.DateTime, default=datetime.datetime.now)
     displayed_at = db.Column(db.DateTime, nullable=True)
     display_duration = db.Column(db.Integer, default=10)  # Seconds to show on screen
     file_size = db.Column(db.Integer, default=0)  # bytes
@@ -48,7 +48,7 @@ class MusicQueue(db.Model):
     source = db.Column(db.String(20), nullable=False)  # 'local' or 'youtube'
     status = db.Column(db.String(20), default='pending')  # 'pending', 'downloading', 'ready', 'error'
     played_at = db.Column(db.DateTime, nullable=True)
-    submitted_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    submitted_at = db.Column(db.DateTime, default=datetime.datetime.now)
 
 
 class MusicLibrary(db.Model):
@@ -64,7 +64,7 @@ class MusicLibrary(db.Model):
     duration = db.Column(db.Integer, nullable=True)  # seconds
     file_path = db.Column(db.String(500), nullable=False, unique=True, index=True)
     file_size = db.Column(db.Integer, default=0)
-    indexed_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    indexed_at = db.Column(db.DateTime, default=datetime.datetime.now)
     
     # Lowercase fields for case-insensitive search
     title_lower = db.Column(db.String(200), nullable=True, index=True)
@@ -91,7 +91,7 @@ class Settings(db.Model):
     
     key = db.Column(db.String(100), primary_key=True)
     value = db.Column(db.Text, nullable=False)
-    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.now)
 
 
 def init_default_settings():
@@ -129,7 +129,7 @@ def update_setting(key, value):
     setting = Settings.query.filter_by(key=key).first()
     if setting:
         setting.value = value
-        setting.updated_at = datetime.datetime.utcnow()
+        setting.updated_at = datetime.datetime.now()
     else:
         setting = Settings(key=key, value=value)
         db.session.add(setting)

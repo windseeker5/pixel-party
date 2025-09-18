@@ -32,7 +32,7 @@ def slideshow():
 def get_photos():
     """API endpoint to get photos for slideshow with HTMX support."""
     # Get photos that haven't been displayed recently (last 30 minutes)
-    recent_cutoff = datetime.utcnow() - timedelta(minutes=30)
+    recent_cutoff = datetime.now() - timedelta(minutes=30)
     
     photos = Photo.query.filter(
         (Photo.displayed_at.is_(None)) | 
@@ -61,7 +61,7 @@ def get_photos():
 def mark_photo_displayed(photo_id):
     """Mark a photo as displayed."""
     photo = Photo.query.get_or_404(photo_id)
-    photo.displayed_at = datetime.utcnow()
+    photo.displayed_at = datetime.now()
     
     from app import db
     db.session.commit()
@@ -118,7 +118,7 @@ def get_music_queue():
 def mark_music_played(queue_id):
     """Mark a music item as played."""
     queue_item = MusicQueue.query.get_or_404(queue_id)
-    queue_item.played_at = datetime.utcnow()
+    queue_item.played_at = datetime.now()
     
     from app import db
     db.session.commit()

@@ -288,7 +288,7 @@ def next_song():
     ).order_by(MusicQueue.submitted_at.asc()).first()
     
     if current_song:
-        current_song.played_at = datetime.utcnow()
+        current_song.played_at = datetime.now()
         db.session.commit()
     
     # Get next ready song

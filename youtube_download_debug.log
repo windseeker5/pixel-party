@@ -54,3 +54,17 @@
 [2025-09-17 23:26:23] ID:4 - ✅ Found file, updating database with: Charlotte_Cardin_-_Feel_Good.mp3
 [2025-09-17 23:26:23] ID:4 - ✅ Background download complete: Charlotte_Cardin_-_Feel_Good.mp3
 [2025-09-17 23:26:23] ID:4 - 🏁 Thread finished
+[2025-09-18 00:25:59] ID:5 - 🚀 Thread started: 'Happy' by 'Pharrell Williams' from https://www.youtube.com/watch?v=ZbZSe6N_BXs
+[2025-09-18 00:25:59] ID:5 - ✅ App context acquired
+[2025-09-18 00:25:59] ID:5 - 📊 Querying database for music request
+[2025-09-18 00:25:59] ID:5 - ✅ Found music request: Happy
+[2025-09-18 00:25:59] ID:5 - ✅ Status updated to 'downloading'
+[2025-09-18 00:25:59] ID:5 - 🔧 Getting YouTube service
+[2025-09-18 00:25:59] ID:5 - ✅ YouTube service acquired
+[2025-09-18 00:25:59] ID:5 - ⬇️ Starting download from: https://www.youtube.com/watch?v=ZbZSe6N_BXs
+[2025-09-18 00:26:11] ID:5 - 📁 Download returned filename: Pharrell_Williams_-_Happy.mp3
+[2025-09-18 00:26:11] ID:5 - 🔍 Checking for file: media/music/Pharrell_Williams_-_Happy.mp3
+[2025-09-18 00:26:11] ID:5 - ✅ Found file using exact filename: Pharrell_Williams_-_Happy.mp3
+[2025-09-18 00:26:11] ID:5 - ✅ Found file, updating database with: Pharrell_Williams_-_Happy.mp3
+[2025-09-18 00:26:11] ID:5 - ✅ Background download complete: Pharrell_Williams_-_Happy.mp3
+[2025-09-18 00:26:11] ID:5 - 🏁 Thread finished
