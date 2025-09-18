@@ -162,7 +162,6 @@
                                 <!-- Submitter Info - Right below "Now Playing" title -->
                                 <div class="flex items-center gap-2" id="submitter-info" style="display: none;">
                                     <div class="font-bold text-pink-400" id="submitter-name" style="font-size: 1.5625rem;">Elizabeth</div>
-                                    <div class="badge badge-xs badge-info" id="song-source" style="border-radius: 3px; font-size: 8px;">YouTube</div>
                                 </div>
                                 <!-- Wish message below name -->
                                 <div class="text-sm italic text-gray-300 mt-1 pr-8 leading-5" id="submitter-wish" style="display: none;">
@@ -454,9 +453,6 @@
                         
                         // Show submitter info
                         document.getElementById('submitter-name').textContent = data.guest_name || 'Anonymous';
-                        const sourceElement = document.getElementById('song-source');
-                        sourceElement.textContent = data.source || 'Unknown';
-                        sourceElement.className = data.source === 'local' ? 'badge badge-xs badge-info' : 'badge badge-xs badge-error text-white';
                         document.getElementById('submitter-info').style.display = 'flex';
 
                         // Show real wish if available

@@ -1,7 +1,7 @@
 <!-- Music queue component with enhanced styling -->
 {% if music_queue %}
     <div class="space-y-2">
-        {% for song in music_queue[:5] %}
+        {% for song in music_queue[:4] %}
         <div class="flex items-center space-x-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-lg p-1.5 hover:from-purple-600/30 hover:to-pink-600/30 transition-colors {% if loop.first %}ring-2 ring-purple-400 shadow-lg{% endif %}">
             <!-- Queue position -->
             <div class="w-4 h-4 bg-purple-600 rounded-full flex items-center justify-center font-bold text-white flex-shrink-0" style="font-size: 10px;">
@@ -20,7 +20,7 @@
             </div>
             <!-- Right side: Submitter name -->
             <div class="flex-shrink-0 text-right">
-                <div class="font-semibold" style="font-size: 1.09375rem;">{{ song.guest_name or 'Anonymous' }}</div>
+                <div class="font-semibold" style="font-size: 0.93rem;">{{ song.guest_name or 'Anonymous' }}</div>
                 <!-- Status indicator only -->
                 {% if song.status == 'downloading' or song.status == 'error' or song.status == 'pending' %}
                 <div class="flex items-center justify-end gap-1 mt-1">
@@ -40,22 +40,12 @@
                 </div>
                 {% endif %}
             </div>
-            <!-- Reserved space for indicator (always present for alignment) -->
-            <div class="flex-shrink-0 w-4 flex justify-center">
-                {% if loop.first %}
-                <div class="animate-pulse">
-                    <svg class="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"></path>
-                    </svg>
-                </div>
-                {% endif %}
-            </div>
         </div>
         {% endfor %}
     </div>
-    {% if music_queue|length > 5 %}
+    {% if music_queue|length > 4 %}
     <div class="text-xs text-center mt-2 opacity-75">
-        +{{ music_queue|length - 5 }} more songs in queue
+        +{{ music_queue|length - 4 }} more songs in queue
     </div>
     {% endif %}
 {% else %}

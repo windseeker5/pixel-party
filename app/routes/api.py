@@ -131,7 +131,7 @@ def photo_queue():
 
     # Reorder photos so current photo is first, then the next ones in sequence
     reordered_photos = []
-    for i in range(min(10, len(all_photos))):  # Show up to 10 photos
+    for i in range(min(8, len(all_photos))):  # Show up to 8 photos
         photo_index = (current_index + i) % len(all_photos)
         reordered_photos.append(all_photos[photo_index])
 
@@ -156,8 +156,8 @@ def music_queue():
             found_current = True
             continue
         queue.append(song)
-        # Limit to 5 songs as requested
-        if len(queue) >= 5:
+        # Limit to 4 songs as requested
+        if len(queue) >= 4:
             break
     
     # Get guest names for each song
