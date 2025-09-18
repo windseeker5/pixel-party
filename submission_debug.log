@@ -316,3 +316,27 @@ Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
 Files keys: ['photo']
 guest_name: 'Marie-France'
 PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+PASS: File exists - PXL_20250917_212628867.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie-France'
+PASS: Guest name validation
+PASS: File exists - pexels-sebastian-189349.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Philippe'
+PASS: Guest name validation
+PASS: File exists - pexels-sebastian-ervi-866902-1763075.jpg
+PASS: File type allowed

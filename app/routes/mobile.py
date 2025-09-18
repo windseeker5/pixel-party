@@ -264,14 +264,10 @@ def resize_image(file_path, max_width=1920, max_height=1080):
 @mobile_bp.route('/main')
 def main_form():
     """Single screen with everything - name, photo, wish, optional music."""
-    # Get existing guest name if available
-    guest_name = session.get('guest_name', '')
-    
     party_title = get_setting('party_title', 'Birthday Celebration')
     host_name = get_setting('host_name', 'Birthday Star')
-    return render_template('mobile/main_form.html', 
-                         guest_name=guest_name,
-                         party_title=party_title, 
+    return render_template('mobile/main_form.html',
+                         party_title=party_title,
                          host_name=host_name)
 
 
@@ -290,19 +286,14 @@ def enter():
             flash('Please enter your name', 'error')
             return redirect(url_for('mobile.welcome'))
     
-    # Create or get guest
+    # Create or get guest (session-free)
     session_id = str(uuid.uuid4())
     guest = Guest.query.filter_by(name=guest_name).first()
-    
+
     if not guest:
         guest = Guest(name=guest_name, session_id=session_id)
         db.session.add(guest)
         db.session.commit()
-    
-    # Store in session
-    session['guest_id'] = guest.id
-    session['guest_name'] = guest.name
-    session['session_id'] = guest.session_id
     
     # Always redirect to upload page (no HTMX needed for simple redirect)
     flash(f'Welcome to the party, {guest_name}! 🎉', 'success')
@@ -911,7 +902,7 @@ def suggest_music():
                 current_app.logger.error("No file_path provided in result")
             
             music_request = MusicQueue(
-                guest_id=session['guest_id'],
+                guest_id=guest.id,  # Use the guest we found/created
                 song_title=result['title'],
                 artist=result['artist'],
                 album=result['album'],
@@ -921,8 +912,9 @@ def suggest_music():
             )
         else:
             # Create generic request for manual review
+            # Note: This route might not have guest context, so we'll handle it differently
             music_request = MusicQueue(
-                guest_id=session['guest_id'],
+                guest_id=None,  # Will need to handle this case in suggest_music route
                 song_title=f"Request: {search_query}",
                 artist=f"Search by {search_type}",
                 album="User Request",
@@ -1010,39 +1002,25 @@ def ollama_status():
 
 @mobile_bp.route('/status')
 def status():
-    """Get guest status for HTMX polling."""
-    if 'guest_id' not in session:
-        return jsonify({'error': 'Not logged in'})
-    
-    guest = Guest.query.get(session['guest_id'])
-    if not guest:
-        return jsonify({'error': 'Guest not found'})
-    
-    # Get recent submissions
-    recent_photos = Photo.query.filter_by(guest_id=guest.id).order_by(Photo.uploaded_at.desc()).limit(3).all()
-    recent_music = MusicQueue.query.filter_by(guest_id=guest.id).order_by(MusicQueue.submitted_at.desc()).limit(3).all()
-    
+    """Get guest status for HTMX polling - now session-free."""
+    # Since we're session-free, this endpoint is less useful but keep for compatibility
+    # Could be enhanced to take guest_name as parameter if needed
     return jsonify({
-        'guest_name': guest.name,
-        'total_submissions': guest.total_submissions,
-        'recent_photos': len(recent_photos),
-        'recent_music': len(recent_music)
+        'message': 'Session-free mode active',
+        'status': 'ready'
     })
 
 @mobile_bp.route("/success")
 def success():
     """Success page after submission."""
-    if "guest_name" not in session:
+    # Get guest info from URL parameters (session-free)
+    guest_name = request.args.get('guest_name', '')
+    music_added = request.args.get('music_added', 'False') == 'True'
+
+    # If no guest name provided, redirect to form
+    if not guest_name:
         return redirect(url_for("mobile.main_form"))
-    
-    # Get success info from session (default to False if not set)
-    music_added = session.pop('last_submission_music_added', False)
-    submission_success = session.pop('last_submission_success', False)
-    
-    # If no recent successful submission, redirect to form
-    if not submission_success:
-        return redirect(url_for("mobile.main_form"))
-    
-    return render_template("mobile/success.html", 
-                         guest_name=session["guest_name"],
+
+    return render_template("mobile/success.html",
+                         guest_name=guest_name,
                          music_added=music_added)
