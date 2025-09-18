@@ -33,8 +33,11 @@ class MusicSearch:
                 # Normalize artist name to handle variations like "R.E.M." vs "REM"
                 normalized_artist = (result.artist_lower or '').replace('.', '').replace(' ', '').replace('-', '')
 
+                # Normalize title to handle punctuation variations like "Don't Worry, Be Happy" vs "Don't Worry Be Happy"
+                normalized_title = (result.title_lower or '').replace(',', '').replace('.', '').replace('!', '').replace('?', '').replace(':', '').replace(';', '').replace(' ', '').replace('-', '').replace('_', '')
+
                 # Create unique key using normalized title, artist, and duration
-                unique_key = f"{result.title_lower}|||{normalized_artist}|||{result.duration}"
+                unique_key = f"{normalized_title}|||{normalized_artist}|||{result.duration}"
 
                 if unique_key not in seen_songs:
                     seen_songs[unique_key] = True

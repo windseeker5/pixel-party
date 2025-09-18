@@ -628,46 +628,9 @@ def search_music():
                 'source': 'local'
             })
 
-        # Step 2: Fill remaining spots with YouTube results (if less than 25 local)
+        # Step 2: Note we need more results but will load them progressively
         target_total = 25
         local_count = len(formatted_results)
-
-        if local_count < target_total:
-            try:
-                from app.services.youtube_service import get_youtube_service
-                youtube_service = get_youtube_service()
-
-                # Calculate how many more results we need
-                youtube_needed = target_total - local_count
-
-                # Search YouTube for music
-                youtube_results = youtube_service.search_youtube(search_query, max_results=youtube_needed + 3)
-
-                # Format YouTube results and avoid duplicates with local results
-                local_song_keys = set()
-                for local_result in formatted_results:
-                    key = f"{local_result['title'].lower()}|||{local_result['artist'].lower()}"
-                    local_song_keys.add(key)
-
-                youtube_added = 0
-                for result in youtube_results:
-                    # Check if this YouTube song is already in local results
-                    youtube_key = f"{result['title'].lower()}|||{result['artist'].lower()}"
-
-                    if youtube_key not in local_song_keys and youtube_added < youtube_needed:
-                        formatted_results.append({
-                            'title': result['title'],
-                            'artist': result['artist'],
-                            'album': result.get('album', ''),
-                            'duration': result['duration_formatted'],
-                            'url': result['url'],  # Store YouTube URL for download
-                            'source': 'youtube'
-                        })
-                        local_song_keys.add(youtube_key)  # Track to avoid future duplicates
-                        youtube_added += 1
-
-            except Exception as e:
-                current_app.logger.error(f"YouTube search error: {e}")
 
         # Step 3: Generate HTML for local/YouTube results (immediate response)
         if is_htmx_request():
@@ -711,6 +674,23 @@ def search_music():
                 </div>
                 '''
 
+            # Step 3.5: Add YouTube loading indicator if we need to search YouTube
+            if local_count < target_total:
+                html_results += '''
+                <div id="youtube-loading-indicator"
+                     hx-get="/mobile/search_youtube_results"
+                     hx-trigger="load delay:800ms"
+                     hx-target="this"
+                     hx-swap="outerHTML"
+                     hx-include="[name='query']"
+                     hx-vals='{"existing_count": ''' + str(local_count) + '''}'>
+                    <div class="text-center py-3 bg-base-200 rounded-lg mt-2">
+                        <span class="loading loading-spinner loading-sm"></span>
+                        <span class="text-sm opacity-70 ml-2">Searching YouTube for more songs...</span>
+                    </div>
+                </div>
+                '''
+
             # Step 4: Add AI suggestions container (only for mood queries when enabled)
             from app.models import get_setting
             ai_enabled = get_setting('enable_ai_suggestions', 'true') == 'true'
@@ -726,11 +706,12 @@ def search_music():
                 is_mood = False
 
             if ai_enabled and is_mood:
+                current_app.logger.info(f"🤖 Adding AI suggestions container for mood query: '{search_query}'")
                 # Add AI suggestions section that will load async
                 html_results += f'''
                 <div id="ai-suggestions-container"
                      hx-get="/mobile/search_music_ai?query={html.escape(search_query)}"
-                     hx-trigger="load delay:500ms"
+                     hx-trigger="load delay:1000ms"
                      hx-target="this"
                      hx-swap="outerHTML">
                     <div class="divider">🎵 Mood detected: {html.escape(search_query.title())}</div>
@@ -740,6 +721,8 @@ def search_music():
                     </div>
                 </div>
                 '''
+            else:
+                current_app.logger.info(f"❌ NOT adding AI suggestions: ai_enabled={ai_enabled}, is_mood={is_mood} for query '{search_query}'")
 
             return html_results
         else:
@@ -801,16 +784,20 @@ def search_music_ai():
     """Async endpoint for AI music suggestions (called after main search)."""
     try:
         search_query = request.args.get('query', '').strip()
+        current_app.logger.info(f"🎯 AI endpoint called with query: '{search_query}'")
 
         if not search_query:
+            current_app.logger.warning("❌ AI endpoint: No search query provided")
             # Return empty div that disappears gracefully
             return '<div id="ai-suggestions-container" style="display: none;"></div>'
 
         # Check if AI suggestions are enabled
         from app.models import get_setting
         ai_enabled = get_setting('enable_ai_suggestions', 'true') == 'true'
+        current_app.logger.info(f"📊 AI endpoint: ai_enabled={ai_enabled}")
 
         if not ai_enabled:
+            current_app.logger.warning("❌ AI endpoint: AI suggestions disabled")
             # Return empty div that disappears gracefully
             return '<div id="ai-suggestions-container" style="display: none;"></div>'
 
@@ -830,24 +817,29 @@ def search_music_ai():
                 return '<div id="ai-suggestions-container" style="display: none;"></div>'
 
             ai_suggestions = ollama.get_song_suggestions(search_query)
-            current_app.logger.info(f"Got {len(ai_suggestions) if ai_suggestions else 0} AI suggestions")
+            current_app.logger.info(f"✨ AI suggestions received: {len(ai_suggestions) if ai_suggestions else 0} suggestions")
+
+            if ai_suggestions:
+                current_app.logger.info(f"🎵 First suggestion: {ai_suggestions[0].get('title', 'N/A')} by {ai_suggestions[0].get('artist', 'N/A')}")
 
             if not ai_suggestions:
-                # Return message explaining why no suggestions
-                return '''
+                current_app.logger.warning("❌ No AI suggestions returned")
+                # Return message with retry button for better UX
+                return f'''
                 <div id="ai-suggestions-container">
-                    <div class="text-xs opacity-50 text-center py-2">
-                        AI mood suggestions temporarily unavailable
+                    <div class="text-center py-3">
+                        <div class="text-xs opacity-70 mb-2">AI couldn't generate {search_query} suggestions</div>
+                        <button onclick="location.reload()" class="btn btn-xs btn-outline">Try Again</button>
                     </div>
                 </div>
                 '''
 
             # Format AI suggestions as HTML with proper container
+            import html
             html_results = '<div id="ai-suggestions-container">'
             html_results += f'<div class="divider">🎵 Mood detected: {html.escape(search_query.title())} - Click to search</div>'
 
             for idx, suggestion in enumerate(ai_suggestions[:5]):  # Max 5 AI suggestions
-                import html
                 title_display = html.escape(suggestion.get('title', 'Unknown'))
                 artist_display = html.escape(suggestion.get('artist', 'Unknown'))
                 album_display = html.escape(suggestion.get('album', ''))
@@ -901,6 +893,95 @@ def search_music_ai():
         current_app.logger.error(f"Unexpected error in AI music search: {e}")
         # Always return valid HTML that won't break the page
         return '<div id="ai-suggestions-container" style="display: none;"></div>'
+
+
+@mobile_bp.route('/search_youtube_results', methods=['GET'])
+def search_youtube_results():
+    """Progressive loading endpoint for YouTube search results."""
+    try:
+        search_query = request.args.get('query', '').strip()
+        existing_count = int(request.args.get('existing_count', '0'))
+
+        current_app.logger.info(f"🔍 YouTube endpoint called: query='{search_query}', existing={existing_count}")
+
+        if not search_query:
+            return '<div id="youtube-loading-indicator" style="display: none;"></div>'
+
+        target_total = 25
+        youtube_needed = target_total - existing_count
+
+        if youtube_needed <= 0:
+            return '<div id="youtube-loading-indicator" style="display: none;"></div>'
+
+        try:
+            from app.services.youtube_service import get_youtube_service
+            youtube_service = get_youtube_service()
+
+            # Search YouTube
+            youtube_results = youtube_service.search_youtube(search_query, max_results=youtube_needed + 3)
+            current_app.logger.info(f"📺 YouTube search returned {len(youtube_results)} results")
+
+            if not youtube_results:
+                return '''
+                <div id="youtube-loading-indicator">
+                    <div class="text-center py-2">
+                        <span class="text-xs opacity-50">No additional results from YouTube</span>
+                    </div>
+                </div>
+                '''
+
+            # Format YouTube results
+            html_results = '<div id="youtube-loading-indicator">'
+
+            for idx, result in enumerate(youtube_results[:youtube_needed]):
+                import html
+                title_display = html.escape(result['title'])
+                artist_display = html.escape(result['artist'])
+
+                html_results += f'''
+                <div class="card bg-base-200 shadow-sm border border-base-300 hover:shadow-md transition-all duration-200 mb-1">
+                    <div class="card-body p-2">
+                        <div class="flex justify-between items-center">
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-base-content">{title_display}</div>
+                                <div class="text-xs opacity-70 mt-1">{artist_display}</div>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <div class="badge badge-sm badge-error text-white" style="border-radius: 4px;">youtube</div>
+                                    <div class="text-xs opacity-60">{result['duration_formatted']}</div>
+                                </div>
+                            </div>
+                            <button type="button"
+                                    class="btn btn-success btn-sm btn-circle ml-3 select-song-btn"
+                                    data-title="{html.escape(result['title'])}"
+                                    data-artist="{html.escape(result['artist'])}"
+                                    data-source="youtube"
+                                    data-file-path=""
+                                    data-url="{html.escape(result['url'])}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                '''
+
+            html_results += '</div>'
+            return html_results
+
+        except Exception as e:
+            current_app.logger.error(f"YouTube search error: {e}")
+            return '''
+            <div id="youtube-loading-indicator">
+                <div class="text-center py-2">
+                    <span class="text-xs opacity-50">YouTube search temporarily unavailable</span>
+                </div>
+            </div>
+            '''
+
+    except Exception as e:
+        current_app.logger.error(f"Unexpected error in YouTube search: {e}")
+        return '<div id="youtube-loading-indicator" style="display: none;"></div>'
 
 
 @mobile_bp.route('/suggest_music', methods=['POST'])

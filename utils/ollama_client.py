@@ -42,8 +42,21 @@ class OllamaClient:
     
     def is_mood_query(self, query: str) -> bool:
         """Check if the query is a mood-based search."""
+        query_lower = query.lower().strip()
+
+        # If query contains specific song/artist indicators, it's NOT a mood query
+        song_indicators = [
+            'by ', ' - ', "'", '"', 'song', 'track', 'album',
+            'don\'t', 'can\'t', 'won\'t', 'i\'m', 'it\'s', 'he\'s', 'she\'s'
+        ]
+
+        for indicator in song_indicators:
+            if indicator in query_lower:
+                return False
+
+        # Check for mood words only if it's not a specific song reference
         mood_words = [
-            # Basic emotions
+            # Basic emotions (only standalone or with music descriptors)
             'romantic', 'party', 'chill', 'upbeat', 'slow', 'dance', 'happy', 'sad', 'energetic', 'relaxing',
             # Additional feelings
             'melancholic', 'nostalgic', 'groovy', 'mellow', 'peaceful', 'aggressive',
@@ -52,7 +65,13 @@ class OllamaClient:
             # Contexts
             'birthday', 'road trip', 'workout', 'study', 'dinner', 'morning', 'night', 'cooking'
         ]
-        return any(word in query.lower() for word in mood_words)
+
+        # Check if query is ONLY mood words (not embedded in song titles)
+        words = query_lower.split()
+        if len(words) <= 3:  # Short queries are more likely to be moods
+            return any(word in mood_words for word in words)
+
+        return False
 
     def get_song_suggestions(self, mood_or_query: str) -> List[Dict[str, Any]]:
         """Get song suggestions synchronously (for Flask routes)."""
@@ -127,19 +146,30 @@ class OllamaClient:
             is_mood_query = any(word in mood_or_query.lower() for word in mood_words)
 
             if is_mood_query:
-                prompt = f"""You are a music expert. Suggest exactly 5 songs that match this mood: "{mood_or_query}"
+                # Add some randomness to prevent caching
+                import time
+                import random
+                seed = int(time.time()) % 1000 + random.randint(1, 100)
 
-IMPORTANT: Respond with ONLY a valid JSON array. Each song must be an object with title, artist, and album fields.
+                prompt = f"""You are a music expert. Generate exactly 5 different songs that perfectly match this specific mood: "{mood_or_query}". Be creative and diverse in your suggestions.
 
-Format:
+CRITICAL INSTRUCTIONS:
+1. Songs MUST match the "{mood_or_query}" mood specifically
+2. Return ONLY a valid JSON array
+3. Each song must be an object with title, artist, and album fields
+4. Provide real, well-known songs
+5. Vary genres and artists for diversity
+
+Example JSON format:
 [
-  {{"title": "Happy", "artist": "Pharrell Williams", "album": "Girl"}},
-  {{"title": "I Gotta Feeling", "artist": "The Black Eyed Peas", "album": "The E.N.D."}},
-  {{"title": "Can't Stop the Feeling!", "artist": "Justin Timberlake", "album": "Trolls Soundtrack"}},
-  {{"title": "Uptown Funk", "artist": "Mark Ronson ft. Bruno Mars", "album": "Uptown Special"}},
-  {{"title": "All About That Bass", "artist": "Meghan Trainor", "album": "Title"}}
+  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
+  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
+  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
+  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}},
+  {{"title": "Song Title", "artist": "Artist Name", "album": "Album Name"}}
 ]
 
+Request seed: {seed}
 Return only the JSON array, no other text."""
             else:
                 prompt = f"""You are a music expert. Suggest exactly 5 songs similar to "{mood_or_query}":
@@ -170,65 +200,108 @@ Return only the JSON array, no other text."""
                     data = await response.json()
                     response_text = data.get('response', '').strip()
 
-                    # Try to parse the JSON response (handle markdown code blocks)
+                    # Enhanced JSON parsing with better error handling
+                    self.logger.info(f"Raw Ollama response for '{mood_or_query}': {response_text[:300]}...")
+
+                    # Try multiple parsing strategies
+                    parsing_attempts = []
+
+                    # Strategy 1: Direct JSON parsing
                     try:
-                        # First try direct parsing
                         suggestions = json.loads(response_text)
-                        if isinstance(suggestions, list):
-                            return suggestions[:5]  # Return up to 5 suggestions
-                    except json.JSONDecodeError:
-                        # Try to extract JSON from markdown code blocks
-                        try:
-                            import re
-                            # Look for JSON inside ```json``` or ``` blocks
-                            json_pattern = r'```(?:json)?\s*(\[.*?\])\s*```'
-                            match = re.search(json_pattern, response_text, re.DOTALL)
-                            if match:
-                                json_str = match.group(1)
+                        if isinstance(suggestions, list) and len(suggestions) > 0:
+                            # Validate first item has required fields
+                            if all(key in suggestions[0] for key in ['title', 'artist']):
+                                self.logger.info(f"✅ Direct JSON parsing successful: {len(suggestions)} songs")
+                                return suggestions[:5]
+                        parsing_attempts.append("Direct JSON: Invalid structure")
+                    except json.JSONDecodeError as e:
+                        parsing_attempts.append(f"Direct JSON: {str(e)[:50]}")
+
+                    # Strategy 2: Markdown code block extraction with truncation handling
+                    try:
+                        import re
+                        # Extract content between ```...``` blocks (or just ``` to end of string if truncated)
+                        json_pattern = r'```(?:json)?\s*(.*?)(?:\s*```|$)'
+                        match = re.search(json_pattern, response_text, re.DOTALL)
+                        if match:
+                            json_str = match.group(1).strip()
+
+                            # Handle truncated JSON - try to complete it
+                            if not json_str.endswith(']'):
+                                # Find complete objects and create valid JSON from them
+                                complete_objects = []
+                                objects = re.findall(r'\{[^{}]*\}', json_str, re.DOTALL)
+
+                                for obj_str in objects:
+                                    try:
+                                        # Clean up the object
+                                        obj_str = obj_str.strip()
+                                        # Remove trailing comma if it exists
+                                        if obj_str.endswith(','):
+                                            obj_str = obj_str[:-1]
+
+                                        obj = json.loads(obj_str)
+                                        if 'title' in obj and 'artist' in obj:
+                                            complete_objects.append(obj)
+                                    except json.JSONDecodeError:
+                                        continue
+
+                                if complete_objects:
+                                    self.logger.info(f"✅ Recovered {len(complete_objects)} songs from truncated JSON")
+                                    return complete_objects[:5]
+
+                            # Try normal parsing if not truncated
+                            try:
                                 suggestions = json.loads(json_str)
-                                if isinstance(suggestions, list):
-                                    return suggestions[:5]
-                        except (json.JSONDecodeError, AttributeError):
-                            pass
+                                if isinstance(suggestions, list) and len(suggestions) > 0:
+                                    if all(isinstance(item, dict) and 'title' in item for item in suggestions):
+                                        self.logger.info(f"✅ Markdown JSON parsing successful: {len(suggestions)} songs")
+                                        return suggestions[:5]
+                            except json.JSONDecodeError:
+                                pass
 
-                        # Try to parse if it returned a string array instead of objects
-                        try:
-                            # Parse as simple string array
-                            song_strings = json.loads(response_text)
-                            if isinstance(song_strings, list) and all(isinstance(s, str) for s in song_strings):
-                                # Convert string array to object format
-                                suggestions = []
-                                for song_str in song_strings[:5]:
-                                    # Try to parse "Title by Artist" format
-                                    if ' by ' in song_str:
-                                        parts = song_str.split(' by ', 1)
-                                        title = parts[0].strip().strip('"')
-                                        artist = parts[1].strip().strip('"')
-                                        suggestions.append({
-                                            "title": title,
-                                            "artist": artist,
-                                            "album": "Unknown"
-                                        })
-                                    else:
-                                        # If no "by" found, treat whole string as title
-                                        suggestions.append({
-                                            "title": song_str.strip().strip('"'),
-                                            "artist": "Unknown",
-                                            "album": "Unknown"
-                                        })
+                        parsing_attempts.append("Markdown JSON: No valid content found")
+                    except (json.JSONDecodeError, AttributeError) as e:
+                        parsing_attempts.append(f"Markdown JSON: {str(e)[:50]}")
 
-                                if suggestions:
-                                    self.logger.info(f"Successfully parsed string array format: {len(suggestions)} songs")
-                                    return suggestions
-                        except (json.JSONDecodeError, AttributeError):
-                            pass
+                    # Strategy 3: String array parsing
+                    try:
+                        song_strings = json.loads(response_text)
+                        if isinstance(song_strings, list) and all(isinstance(s, str) for s in song_strings):
+                            suggestions = []
+                            for song_str in song_strings[:5]:
+                                if ' by ' in song_str:
+                                    parts = song_str.split(' by ', 1)
+                                    title = parts[0].strip().strip('"')
+                                    artist = parts[1].strip().strip('"')
+                                    suggestions.append({
+                                        "title": title,
+                                        "artist": artist,
+                                        "album": "Unknown"
+                                    })
+                                else:
+                                    suggestions.append({
+                                        "title": song_str.strip().strip('"'),
+                                        "artist": "Unknown",
+                                        "album": "Unknown"
+                                    })
 
-                        self.logger.warning(f"Could not parse Ollama response as JSON: {response_text[:200]}...")
+                            if suggestions:
+                                self.logger.info(f"✅ String array parsing successful: {len(suggestions)} songs")
+                                return suggestions
+                        parsing_attempts.append("String array: Not a string array")
+                    except (json.JSONDecodeError, AttributeError) as e:
+                        parsing_attempts.append(f"String array: {str(e)[:50]}")
 
-                        # Fallback: create generic suggestions based on the query
-                        return [
-                            {"title": f"Memory song for '{mood_or_query}'", "artist": "Various Artists", "album": "AI Suggestion"}
-                        ]
+                    # All parsing failed - log details
+                    self.logger.error(f"❌ All JSON parsing strategies failed for '{mood_or_query}':")
+                    for attempt in parsing_attempts:
+                        self.logger.error(f"  - {attempt}")
+                    self.logger.error(f"Raw response: {repr(response_text[:500])}")
+
+                    # Return empty list instead of fallback message - let the caller handle this
+                    return []
 
                 return []
 

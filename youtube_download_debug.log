@@ -68,3 +68,17 @@
 [2025-09-18 00:26:11] ID:5 - ✅ Found file, updating database with: Pharrell_Williams_-_Happy.mp3
 [2025-09-18 00:26:11] ID:5 - ✅ Background download complete: Pharrell_Williams_-_Happy.mp3
 [2025-09-18 00:26:11] ID:5 - 🏁 Thread finished
+[2025-09-18 08:34:35] ID:7 - 🚀 Thread started: 'I Gotta Feeling' by 'The Black Eyed Peas' from https://www.youtube.com/watch?v=uSD4vsh1zDA
+[2025-09-18 08:34:35] ID:7 - ✅ App context acquired
+[2025-09-18 08:34:35] ID:7 - 📊 Querying database for music request
+[2025-09-18 08:34:35] ID:7 - ✅ Found music request: I Gotta Feeling
+[2025-09-18 08:34:35] ID:7 - ✅ Status updated to 'downloading'
+[2025-09-18 08:34:35] ID:7 - 🔧 Getting YouTube service
+[2025-09-18 08:34:35] ID:7 - ✅ YouTube service acquired
+[2025-09-18 08:34:35] ID:7 - ⬇️ Starting download from: https://www.youtube.com/watch?v=uSD4vsh1zDA
+[2025-09-18 08:34:48] ID:7 - 📁 Download returned filename: The_Black_Eyed_Peas_-_I_Gotta_Feeling.mp3
+[2025-09-18 08:34:48] ID:7 - 🔍 Checking for file: media/music/The_Black_Eyed_Peas_-_I_Gotta_Feeling.mp3
+[2025-09-18 08:34:48] ID:7 - ✅ Found file using exact filename: The_Black_Eyed_Peas_-_I_Gotta_Feeling.mp3
+[2025-09-18 08:34:48] ID:7 - ✅ Found file, updating database with: The_Black_Eyed_Peas_-_I_Gotta_Feeling.mp3
+[2025-09-18 08:34:48] ID:7 - ✅ Background download complete: The_Black_Eyed_Peas_-_I_Gotta_Feeling.mp3
+[2025-09-18 08:34:48] ID:7 - 🏁 Thread finished

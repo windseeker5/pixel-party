@@ -356,3 +356,19 @@ guest_name: 'Eddy Vedder'
 PASS: Guest name validation
 PASS: File exists - pexels-sebastian-ervi-866902-1763075.jpg
 PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie-Blow Girl'
+PASS: Guest name validation
+PASS: File exists - pexels-fr3nks-352093.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Carl B'
+PASS: Guest name validation
+PASS: File exists - pexels-apg-graphics-709181-1604746.jpg
+PASS: File type allowed
