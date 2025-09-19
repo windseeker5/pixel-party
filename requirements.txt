@@ -11,3 +11,4 @@ tqdm==4.66.1
 yt-dlp==2025.9.5
 rembg
 netifaces==0.11.0
+qrcode
