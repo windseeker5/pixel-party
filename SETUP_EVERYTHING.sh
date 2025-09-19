@@ -67,18 +67,13 @@ log "🛡️ STEP 5: Setting up iptables rules"
 run_cmd "iptables -t nat -F" "Flush NAT table"
 run_cmd "iptables -F FORWARD" "Flush FORWARD chain"
 
-# Detect which interface has internet (wlan0 or eth0)
-INTERNET_IFACE=""
-if ip route | grep -q "default.*wlan0"; then
-    INTERNET_IFACE="wlan0"
-    log "Detected internet on wlan0 (hotspot)"
-elif ip route | grep -q "default.*eth0"; then
+# Detect which interface has internet (use lowest metric = highest priority)
+INTERNET_IFACE=$(ip route | grep "^default" | sort -k9 -n | head -1 | awk '{print $5}')
+if [ -z "$INTERNET_IFACE" ]; then
+    log "WARNING: No default route found, using eth0"
     INTERNET_IFACE="eth0"
-    log "Detected internet on eth0 (ethernet)"
-else
-    log "WARNING: No default route found, using wlan0"
-    INTERNET_IFACE="wlan0"
 fi
+log "Detected primary internet interface: $INTERNET_IFACE"
 
 # Set up NAT and forwarding with detected interface
 run_cmd "iptables -t nat -A POSTROUTING -o $INTERNET_IFACE -j MASQUERADE" "Set up NAT masquerading to $INTERNET_IFACE"
