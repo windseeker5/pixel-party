@@ -67,10 +67,23 @@ log "🛡️ STEP 5: Setting up iptables rules"
 run_cmd "iptables -t nat -F" "Flush NAT table"
 run_cmd "iptables -F FORWARD" "Flush FORWARD chain"
 
-# Set up NAT and forwarding
-run_cmd "iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE" "Set up NAT masquerading"
-run_cmd "iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT" "Allow forward wlan1->wlan0"
-run_cmd "iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT" "Allow return traffic"
+# Detect which interface has internet (wlan0 or eth0)
+INTERNET_IFACE=""
+if ip route | grep -q "default.*wlan0"; then
+    INTERNET_IFACE="wlan0"
+    log "Detected internet on wlan0 (hotspot)"
+elif ip route | grep -q "default.*eth0"; then
+    INTERNET_IFACE="eth0"
+    log "Detected internet on eth0 (ethernet)"
+else
+    log "WARNING: No default route found, using wlan0"
+    INTERNET_IFACE="wlan0"
+fi
+
+# Set up NAT and forwarding with detected interface
+run_cmd "iptables -t nat -A POSTROUTING -o $INTERNET_IFACE -j MASQUERADE" "Set up NAT masquerading to $INTERNET_IFACE"
+run_cmd "iptables -A FORWARD -i wlan1 -o $INTERNET_IFACE -j ACCEPT" "Allow forward wlan1->$INTERNET_IFACE"
+run_cmd "iptables -A FORWARD -i $INTERNET_IFACE -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT" "Allow return traffic from $INTERNET_IFACE"
 
 # STEP 6: CONFIGURE HOSTAPD
 log "📡 STEP 6: Configuring hostapd"
@@ -79,11 +92,12 @@ interface=wlan1
 driver=nl80211
 ssid=ValerieParty
 hw_mode=g
-channel=6
-wmm_enabled=0
+channel=1
+wmm_enabled=1
 macaddr_acl=0
 auth_algs=1
 ignore_broadcast_ssid=0
+ieee80211n=1
 EOF
 run_cmd "cat /etc/hostapd/hostapd.conf" "Show hostapd config"
 

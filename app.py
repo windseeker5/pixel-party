@@ -15,5 +15,5 @@ with app.app_context():
     init_default_settings()
 
 if __name__ == '__main__':
-    # For party: bind only to guest network to avoid routing issues
-    app.run(host='192.168.4.1', port=5001, debug=True)
+    # Bind to all interfaces so guests can access via WiFi
+    app.run(host='0.0.0.0', port=5001, debug=True)
