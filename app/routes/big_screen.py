@@ -157,17 +157,29 @@ def update_settings():
 def get_stats():
     """Get party statistics for big screen."""
     from app.models import Guest
-    
+
     total_photos = Photo.query.count()
     total_music_requests = MusicQueue.query.count()
     total_guests = Guest.query.count()
-    
+
     # Get music library stats
     music_stats = music_search.get_library_stats()
-    
+
     return jsonify({
         'photos': total_photos,
         'music_requests': total_music_requests,
         'guests': total_guests,
         'music_library': music_stats
     })
+
+
+@big_screen_bp.route('/print/wifi')
+def print_wifi_instructions():
+    """Print page for WiFi connection instructions."""
+    return current_app.send_static_file('print/wifi_instructions.html')
+
+
+@big_screen_bp.route('/print/qr')
+def print_qr_code():
+    """Print page for QR code."""
+    return current_app.send_static_file('print/qr_code.html')

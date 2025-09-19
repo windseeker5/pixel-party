@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructions WiFi - Fête de Valérie</title>
+    <style>
+        @page {
+            margin: 2cm;
+            size: A4;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #718096;
+            margin-bottom: 60px;
+        }
+
+        .wifi-icon {
+            width: 200px;
+            height: 200px;
+            margin: 40px auto;
+            color: #4a5568;
+        }
+
+        .instruction {
+            font-size: 2rem;
+            color: #2d3748;
+            margin: 30px 0;
+            font-weight: 600;
+        }
+
+        .network-name {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin: 40px 0;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 15px;
+            border: 3px solid #e2e8f0;
+        }
+
+        .note {
+            font-size: 1.2rem;
+            color: #718096;
+            margin-top: 30px;
+            font-style: italic;
+        }
+
+        .step {
+            background: #f0f4f8;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 6px solid #667eea;
+        }
+
+        .step-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+            }
+            .container {
+                box-shadow: none !important;
+                border: 2px solid #e2e8f0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Fête de Valérie</h1>
+        <h2 class="subtitle">50e anniversaire</h2>
+
+        <div class="step">
+            <div class="step-number">Étape 1</div>
+            <p class="instruction">Connectez-vous au réseau WiFi</p>
+        </div>
+
+        <!-- Large WiFi Icon -->
+        <svg class="wifi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.111 16.404a5.5 5.5 0 717.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+        </svg>
+
+        <div class="network-name">ValerieParty</div>
+
+        <p class="note">Aucun mot de passe requis</p>
+        <p class="note">Connectez-vous simplement en sélectionnant le réseau</p>
+
+        <div style="margin-top: 60px; padding-top: 30px; border-top: 2px solid #e2e8f0;">
+            <p style="font-size: 1.1rem; color: #4a5568;">
+                Une fois connecté, scannez le code QR<br>
+                pour partager vos photos et souvenirs
+            </p>
+        </div>
+    </div>
+</body>
+</html>

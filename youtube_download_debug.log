@@ -96,3 +96,17 @@
 [2025-09-18 10:30:16] ID:8 - ✅ Found file, updating database with: Mad_World_feat_Gary_Jules_-_Official_Music_Video.mp3
 [2025-09-18 10:30:16] ID:8 - ✅ Background download complete: Mad_World_feat_Gary_Jules_-_Official_Music_Video.mp3
 [2025-09-18 10:30:16] ID:8 - 🏁 Thread finished
+[2025-09-19 09:43:11] ID:1 - 🚀 Thread started: 'Fast Car (2015 Remaster)' by 'Tracy Chapman' from https://www.youtube.com/watch?v=JpscHOoGIqQ
+[2025-09-19 09:43:11] ID:1 - ✅ App context acquired
+[2025-09-19 09:43:11] ID:1 - 📊 Querying database for music request
+[2025-09-19 09:43:11] ID:1 - ✅ Found music request: Fast Car (2015 Remaster)
+[2025-09-19 09:43:11] ID:1 - ✅ Status updated to 'downloading'
+[2025-09-19 09:43:11] ID:1 - 🔧 Getting YouTube service
+[2025-09-19 09:43:11] ID:1 - ✅ YouTube service acquired
+[2025-09-19 09:43:11] ID:1 - ⬇️ Starting download from: https://www.youtube.com/watch?v=JpscHOoGIqQ
+[2025-09-19 09:43:24] ID:1 - 📁 Download returned filename: Tracy_Chapman_-_Fast_Car_2015_Remaster.mp3
+[2025-09-19 09:43:24] ID:1 - 🔍 Checking for file: media/music/Tracy_Chapman_-_Fast_Car_2015_Remaster.mp3
+[2025-09-19 09:43:24] ID:1 - ✅ Found file using exact filename: Tracy_Chapman_-_Fast_Car_2015_Remaster.mp3
+[2025-09-19 09:43:24] ID:1 - ✅ Found file, updating database with: Tracy_Chapman_-_Fast_Car_2015_Remaster.mp3
+[2025-09-19 09:43:24] ID:1 - ✅ Background download complete: Tracy_Chapman_-_Fast_Car_2015_Remaster.mp3
+[2025-09-19 09:43:24] ID:1 - 🏁 Thread finished

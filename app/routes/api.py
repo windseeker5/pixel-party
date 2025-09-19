@@ -9,11 +9,20 @@ from app.utils.network_utils import get_network_ip, get_server_url
 
 api_bp = Blueprint('api', __name__)
 
+# Flag to track if welcome screen has been shown since app startup
+_first_load_welcome_shown = False
+
 
 @api_bp.route('/current_photo')
 def current_photo():
     """Get current photo for slideshow with cycling and periodic welcome screen."""
+    global _first_load_welcome_shown
     import time
+
+    # On first load after startup, always show welcome screen first
+    if not _first_load_welcome_shown:
+        _first_load_welcome_shown = True
+        return render_template('components/welcome_screen.html')
 
     photos = Photo.query.order_by(Photo.uploaded_at.asc()).all()
 
