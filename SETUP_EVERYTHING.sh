@@ -115,7 +115,6 @@ cat >> /etc/dnsmasq.conf << 'EOF'
 # PixelParty Guest Network
 interface=wlan1
 dhcp-range=192.168.4.2,192.168.4.254,255.255.255.0,24h
-address=/#/192.168.4.1
 EOF
 
 run_cmd "tail -10 /etc/dnsmasq.conf" "Show dnsmasq config"
