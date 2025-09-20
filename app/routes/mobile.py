@@ -407,9 +407,12 @@ def submit_memory():
             flash(error_msg, 'error')
             return redirect(url_for('mobile.upload'))
     
-    # Limit wish message to 100 characters
-    if len(wish_message) > 100:
-        wish_message = wish_message[:100]
+    # Limit wish message to 140 characters (with proper emoji handling)
+    # Note: We count actual characters, not bytes, and allow full emoji support
+    # Since we're using db.Text, we can be more generous with the limit
+    if len(wish_message) > 140:
+        # Truncate at character boundary, not byte boundary
+        wish_message = wish_message[:140]
     
     try:
         # Save file

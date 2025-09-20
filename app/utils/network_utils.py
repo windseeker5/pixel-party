@@ -4,12 +4,24 @@ import socket
 import subprocess
 import platform
 
-def get_network_ip():
+def get_network_ip(prefer_interface=None):
     """
     Get the network IP address of the machine.
     Returns the IP address that other devices on the network can use to connect.
+
+    Args:
+        prefer_interface: Preferred network interface name (e.g., 'wlan1')
     """
     try:
+        # PRIORITY: Check for ValerieParty AP (wlan1) first
+        # This is the guest network for the party
+        try:
+            result = subprocess.run(['ip', 'addr', 'show', 'wlan1'],
+                                  capture_output=True, text=True, timeout=1)
+            if result.returncode == 0 and '192.168.4.1' in result.stdout:
+                return '192.168.4.1'  # Return wlan1 IP for party network
+        except:
+            pass
         # Method 1: Try using netifaces if available
         try:
             import netifaces

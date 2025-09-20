@@ -183,3 +183,9 @@ def print_wifi_instructions():
 def print_qr_code():
     """Print page for QR code."""
     return current_app.send_static_file('print/qr_code.html')
+
+
+@big_screen_bp.route('/share')
+def share_link():
+    """Share link page for Messenger."""
+    return render_template('share.html')

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Party Link - PixelParty</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.24/dist/full.min.css" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-900 to-pink-900">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title text-3xl text-center w-full mb-4">
+                        Share Party Link
+                    </h2>
+
+                    <div class="alert alert-warning mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div>
+                            <h3 class="font-bold">Important!</h3>
+                            <p>Guests must be connected to <strong>ValerieParty</strong> WiFi to access the app</p>
+                        </div>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Party App URL (Copy this for Messenger):</span>
+                        </label>
+                        <div class="join">
+                            <input type="text" id="party-url" value="http://192.168.4.1:5001/mobile"
+                                   class="input input-bordered join-item flex-1" readonly>
+                            <button class="btn btn-primary join-item" onclick="copyUrl()">Copy</button>
+                        </div>
+                    </div>
+
+                    <div class="divider">Instructions to Share</div>
+
+                    <div class="mockup-code">
+                        <pre><code>🎉 Join Valerie's 50th Birthday Party! 🎂
+
+📱 Share your photos and wishes:
+1️⃣ Connect to WiFi: ValerieParty
+2️⃣ Password: party2025
+3️⃣ Open: http://192.168.4.1:5001/mobile
+
+See you at the party! 🥳</code></pre>
+                        <button class="btn btn-sm btn-ghost absolute top-2 right-2" onclick="copyMessage()">
+                            Copy Message
+                        </button>
+                    </div>
+
+                    <div class="stats shadow mt-6">
+                        <div class="stat">
+                            <div class="stat-title">Network</div>
+                            <div class="stat-value text-primary">ValerieParty</div>
+                            <div class="stat-desc">WiFi SSID</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-title">Password</div>
+                            <div class="stat-value text-secondary">party2025</div>
+                            <div class="stat-desc">WiFi Password</div>
+                        </div>
+                    </div>
+
+                    <div class="card-actions justify-center mt-6">
+                        <a href="/" class="btn btn-ghost">Back to Display</a>
+                        <a href="/mobile" class="btn btn-primary">Test Mobile Interface</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyUrl() {
+            const urlInput = document.getElementById('party-url');
+            urlInput.select();
+            document.execCommand('copy');
+
+            // Show feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            btn.classList.add('btn-success');
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('btn-success');
+            }, 2000);
+        }
+
+        function copyMessage() {
+            const message = `🎉 Join Valerie's 50th Birthday Party! 🎂
+
+📱 Share your photos and wishes:
+1️⃣ Connect to WiFi: ValerieParty
+2️⃣ Password: party2025
+3️⃣ Open: http://192.168.4.1:5001/mobile
+
+See you at the party! 🥳`;
+
+            navigator.clipboard.writeText(message).then(() => {
+                // Show feedback
+                const btn = event.currentTarget;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

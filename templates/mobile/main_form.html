@@ -222,13 +222,13 @@
                         </svg>
                         Birthday Wish
                     </span>
-                    <span class="label-text-alt text-base" id="char-counter">0/100</span>
+                    <span class="label-text-alt text-base" id="char-counter">0/140</span>
                 </label>
                 <textarea name="wish_message"
                           class="textarea textarea-bordered textarea-primary h-32 text-lg"
                           placeholder="Happy Birthday {{ host_name }}! Remember that time we..."
-                          maxlength="100"
-                          oninput="updateCharCounter(this, 'char-counter', 100)"
+                          maxlength="140"
+                          oninput="updateCharCounter(this, 'char-counter', 140)"
                           required></textarea>
             </div>
             
@@ -429,16 +429,47 @@
         console.log('Song selected:', { title, artist, source, file_path, url });
     }
     
-    // Character counter for wish message
+    // Character counter for wish message with proper emoji support
     function updateCharCounter(textarea, counterId, maxLength) {
         const counter = document.getElementById(counterId);
-        const currentLength = textarea.value.length;
+        const text = textarea.value;
+
+        // Count grapheme clusters (visual characters) instead of code units
+        // This properly counts emojis like 👨‍👩‍👧‍👦 as 1 character
+        let currentLength;
+
+        // Use Intl.Segmenter if available (modern browsers)
+        if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+            const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
+            currentLength = Array.from(segmenter.segment(text)).length;
+        } else {
+            // Fallback: Simple approximation that handles most common emojis
+            // This regex matches emoji sequences including skin tones and ZWJ sequences
+            const emojiRegex = /\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\uD83C[\uDDE6-\uDDFF]\uD83C[\uDDE6-\uDDFF]|[\u200D\uFE0F\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\u{E0020}-\u{E007F}]+/gu;
+
+            // Replace emoji sequences with a single character for counting
+            const normalizedText = text.replace(emojiRegex, 'E');
+            currentLength = normalizedText.length;
+        }
+
         counter.textContent = `${currentLength}/${maxLength}`;
-        
+
         if (currentLength > maxLength * 0.9) {
             counter.classList.add('text-warning');
         } else {
             counter.classList.remove('text-warning');
+        }
+
+        // Prevent typing beyond limit (with proper emoji handling)
+        if (currentLength > maxLength) {
+            // Find the correct substring that respects grapheme boundaries
+            if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+                const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
+                const segments = Array.from(segmenter.segment(text));
+                textarea.value = segments.slice(0, maxLength).map(s => s.segment).join('');
+                // Update counter after truncation
+                counter.textContent = `${maxLength}/${maxLength}`;
+            }
         }
     }
     
