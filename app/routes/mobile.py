@@ -46,6 +46,7 @@ def download_youtube_async(video_url, title, artist, app, music_request_id):
                 if music_request:
                     log_to_file(f"✅ Found music request: {music_request.song_title}")
                     music_request.status = 'downloading'
+                    db.session.flush()  # Immediate flush for status visibility
                     db.session.commit()
                     log_to_file("✅ Status updated to 'downloading'")
                     current_app.logger.info(f"🎵 Starting background download: {title} by {artist} (ID: {music_request_id})")
@@ -168,6 +169,7 @@ def download_youtube_async(video_url, title, artist, app, music_request_id):
                         music_request.filename = actual_filename
                         music_request.status = 'ready'
                         try:
+                            db.session.flush()  # Immediate flush for status visibility
                             db.session.commit()
                             log_to_file(f"✅ Background download complete: {actual_filename}")
                             current_app.logger.info(f"✅ Background download complete: {actual_filename} (ID: {music_request_id})")
@@ -198,6 +200,7 @@ def download_youtube_async(video_url, title, artist, app, music_request_id):
                         music_request = MusicQueue.query.get(music_request_id)  # Re-query to avoid stale session
                         if music_request:
                             music_request.status = 'error'
+                            db.session.flush()  # Immediate flush for status visibility
                             db.session.commit()
                             log_to_file("✅ Marked as error in database")
                             current_app.logger.info(f"⚠️ Marked request {music_request_id} as error")
@@ -222,6 +225,7 @@ def download_youtube_async(video_url, title, artist, app, music_request_id):
                 music_request = MusicQueue.query.get(music_request_id)
                 if music_request:
                     music_request.status = 'error'
+                    db.session.flush()  # Immediate flush for status visibility
                     db.session.commit()
                     log_to_file("✅ Marked as error in database")
         except Exception as final_error:
