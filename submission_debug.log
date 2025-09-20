@@ -412,3 +412,67 @@ guest_name: 'Phil'
 PASS: Guest name validation
 PASS: File exists - pexels-sebastian-189349.jpg
 PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+PASS: File exists - 1000000947.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marc-Andre'
+PASS: Guest name validation
+PASS: File exists - IMG_2529.jpeg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Johnny boy'
+PASS: Guest name validation
+PASS: File exists - IMG_2531.jpeg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie-France'
+PASS: Guest name validation
+PASS: File exists - 707788d8fb7837e68836deab0963b026.jpeg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Kitesurfers'
+PASS: Guest name validation
+PASS: File exists - IMG_2252.jpeg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Gang des Iles'
+PASS: Guest name validation
+PASS: File exists - IMG_0349.jpeg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+PASS: File exists - P1014336.JPG
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+PASS: File exists - P1014336.JPG
+PASS: File type allowed

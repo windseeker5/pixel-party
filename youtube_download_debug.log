@@ -110,3 +110,59 @@
 [2025-09-19 09:43:24] ID:1 - ✅ Found file, updating database with: Tracy_Chapman_-_Fast_Car_2015_Remaster.mp3
 [2025-09-19 09:43:24] ID:1 - ✅ Background download complete: Tracy_Chapman_-_Fast_Car_2015_Remaster.mp3
 [2025-09-19 09:43:24] ID:1 - 🏁 Thread finished
+[2025-09-20 12:15:25] ID:1 - 🚀 Thread started: 'Les Étoiles Filantes' by 'Les Cowboys Fringants' from https://www.youtube.com/watch?v=9zC5dGT58rA
+[2025-09-20 12:15:25] ID:1 - ✅ App context acquired
+[2025-09-20 12:15:25] ID:1 - 📊 Querying database for music request
+[2025-09-20 12:15:25] ID:1 - ✅ Found music request: Les Étoiles Filantes
+[2025-09-20 12:15:25] ID:1 - ✅ Status updated to 'downloading'
+[2025-09-20 12:15:25] ID:1 - 🔧 Getting YouTube service
+[2025-09-20 12:15:25] ID:1 - ✅ YouTube service acquired
+[2025-09-20 12:15:25] ID:1 - ⬇️ Starting download from: https://www.youtube.com/watch?v=9zC5dGT58rA
+[2025-09-20 12:16:10] ID:1 - 📁 Download returned filename: Les_Cowboys_Fringants_-_Les_Étoiles_Filantes.mp3
+[2025-09-20 12:16:10] ID:1 - 🔍 Checking for file: media/music/Les_Cowboys_Fringants_-_Les_Étoiles_Filantes.mp3
+[2025-09-20 12:16:10] ID:1 - ✅ Found file using exact filename: Les_Cowboys_Fringants_-_Les_Étoiles_Filantes.mp3
+[2025-09-20 12:16:10] ID:1 - ✅ Found file, updating database with: Les_Cowboys_Fringants_-_Les_Étoiles_Filantes.mp3
+[2025-09-20 12:16:10] ID:1 - ✅ Background download complete: Les_Cowboys_Fringants_-_Les_Étoiles_Filantes.mp3
+[2025-09-20 12:16:10] ID:1 - 🏁 Thread finished
+[2025-09-20 12:29:32] ID:2 - 🚀 Thread started: 'Beautiful Day' by 'U2' from https://www.youtube.com/watch?v=co6WMzDOh1o
+[2025-09-20 12:29:32] ID:2 - ✅ App context acquired
+[2025-09-20 12:29:32] ID:2 - 📊 Querying database for music request
+[2025-09-20 12:29:32] ID:2 - ✅ Found music request: Beautiful Day
+[2025-09-20 12:29:32] ID:2 - ✅ Status updated to 'downloading'
+[2025-09-20 12:29:32] ID:2 - 🔧 Getting YouTube service
+[2025-09-20 12:29:32] ID:2 - ✅ YouTube service acquired
+[2025-09-20 12:29:32] ID:2 - ⬇️ Starting download from: https://www.youtube.com/watch?v=co6WMzDOh1o
+[2025-09-20 12:30:01] ID:2 - 📁 Download returned filename: U2_-_Beautiful_Day.mp3
+[2025-09-20 12:30:01] ID:2 - 🔍 Checking for file: media/music/U2_-_Beautiful_Day.mp3
+[2025-09-20 12:30:01] ID:2 - ✅ Found file using exact filename: U2_-_Beautiful_Day.mp3
+[2025-09-20 12:30:01] ID:2 - ✅ Found file, updating database with: U2_-_Beautiful_Day.mp3
+[2025-09-20 12:30:01] ID:2 - ✅ Background download complete: U2_-_Beautiful_Day.mp3
+[2025-09-20 12:30:01] ID:2 - 🏁 Thread finished
+[2025-09-20 12:36:23] ID:3 - 🚀 Thread started: 'A Sky Full Of Stars' by 'Coldplay' from https://www.youtube.com/watch?v=VPRjCeoBqrI
+[2025-09-20 12:36:23] ID:3 - ✅ App context acquired
+[2025-09-20 12:36:23] ID:3 - 📊 Querying database for music request
+[2025-09-20 12:36:23] ID:3 - ✅ Found music request: A Sky Full Of Stars
+[2025-09-20 12:36:23] ID:3 - ✅ Status updated to 'downloading'
+[2025-09-20 12:36:23] ID:3 - 🔧 Getting YouTube service
+[2025-09-20 12:36:23] ID:3 - ✅ YouTube service acquired
+[2025-09-20 12:36:23] ID:3 - ⬇️ Starting download from: https://www.youtube.com/watch?v=VPRjCeoBqrI
+[2025-09-20 12:37:10] ID:3 - 📁 Download returned filename: Coldplay_-_A_Sky_Full_Of_Stars.mp3
+[2025-09-20 12:37:10] ID:3 - 🔍 Checking for file: media/music/Coldplay_-_A_Sky_Full_Of_Stars.mp3
+[2025-09-20 12:37:10] ID:3 - ✅ Found file using exact filename: Coldplay_-_A_Sky_Full_Of_Stars.mp3
+[2025-09-20 12:37:10] ID:3 - ✅ Found file, updating database with: Coldplay_-_A_Sky_Full_Of_Stars.mp3
+[2025-09-20 12:37:10] ID:3 - ✅ Background download complete: Coldplay_-_A_Sky_Full_Of_Stars.mp3
+[2025-09-20 12:37:10] ID:3 - 🏁 Thread finished
+[2025-09-20 12:41:44] ID:4 - 🚀 Thread started: 'Poussé par le vent' by 'Eric Lapointe' from https://www.youtube.com/watch?v=urLrmSrj0fI
+[2025-09-20 12:41:44] ID:4 - ✅ App context acquired
+[2025-09-20 12:41:44] ID:4 - 📊 Querying database for music request
+[2025-09-20 12:41:44] ID:4 - ✅ Found music request: Poussé par le vent
+[2025-09-20 12:41:44] ID:4 - ✅ Status updated to 'downloading'
+[2025-09-20 12:41:44] ID:4 - 🔧 Getting YouTube service
+[2025-09-20 12:41:44] ID:4 - ✅ YouTube service acquired
+[2025-09-20 12:41:44] ID:4 - ⬇️ Starting download from: https://www.youtube.com/watch?v=urLrmSrj0fI
+[2025-09-20 12:42:19] ID:4 - 📁 Download returned filename: Eric_Lapointe_-_Poussé_par_le_vent.mp3
+[2025-09-20 12:42:19] ID:4 - 🔍 Checking for file: media/music/Eric_Lapointe_-_Poussé_par_le_vent.mp3
+[2025-09-20 12:42:19] ID:4 - ✅ Found file using exact filename: Eric_Lapointe_-_Poussé_par_le_vent.mp3
+[2025-09-20 12:42:19] ID:4 - ✅ Found file, updating database with: Eric_Lapointe_-_Poussé_par_le_vent.mp3
+[2025-09-20 12:42:19] ID:4 - ✅ Background download complete: Eric_Lapointe_-_Poussé_par_le_vent.mp3
+[2025-09-20 12:42:19] ID:4 - 🏁 Thread finished

@@ -1,0 +1,1932 @@
+[2025-09-19 03:47:18] Starting complete PixelParty network setup
+[2025-09-19 03:47:18] Target: wlan0=Kitesurfer, wlan1=ValerieParty with internet forwarding
+[2025-09-19 03:47:18] 🛑 STEP 1: Stopping all services
+[2025-09-19 03:47:18] Running: Stop hostapd
+[2025-09-19 03:47:18] Command: systemctl stop hostapd
+[2025-09-19 03:47:19] Exit code: 0
+[2025-09-19 03:47:19] Running: Stop dnsmasq
+[2025-09-19 03:47:19] Command: systemctl stop dnsmasq
+[2025-09-19 03:47:19] Exit code: 0
+[2025-09-19 03:47:19] Running: Kill any remaining hostapd processes
+[2025-09-19 03:47:19] Command: pkill -f hostapd
+[2025-09-19 03:47:19] Exit code: 1
+[2025-09-19 03:47:19] Running: Kill any remaining dnsmasq processes
+[2025-09-19 03:47:19] Command: pkill -f dnsmasq
+[2025-09-19 03:47:19] Exit code: 1
+[2025-09-19 03:47:19] 🧹 STEP 2: Cleaning up network interfaces
+[2025-09-19 03:47:19] Running: Flush wlan1 addresses
+[2025-09-19 03:47:19] Command: ip addr flush dev wlan1
+[2025-09-19 03:47:19] Exit code: 0
+[2025-09-19 03:47:19] Running: Bring wlan1 down
+[2025-09-19 03:47:19] Command: ip link set dev wlan1 down
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] Running: Bring wlan1 up
+[2025-09-19 03:47:20] Command: ip link set dev wlan1 up
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] 🔧 STEP 3: Setting up wlan1 interface
+[2025-09-19 03:47:20] Running: Add IP to wlan1
+[2025-09-19 03:47:20] Command: ip addr add 192.168.4.1/24 dev wlan1
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] Running: Ensure wlan1 is up
+[2025-09-19 03:47:20] Command: ip link set dev wlan1 up
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] 🔀 STEP 4: Enabling IP forwarding
+[2025-09-19 03:47:20] Running: Enable IP forwarding
+[2025-09-19 03:47:20] Command: sysctl -w net.ipv4.ip_forward=1
+net.ipv4.ip_forward = 1
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] 🛡️ STEP 5: Setting up iptables rules
+[2025-09-19 03:47:20] Running: Flush NAT table
+[2025-09-19 03:47:20] Command: iptables -t nat -F
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] Running: Flush FORWARD chain
+[2025-09-19 03:47:20] Command: iptables -F FORWARD
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] Running: Set up NAT masquerading
+[2025-09-19 03:47:20] Command: iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] Running: Allow forward wlan1->wlan0
+[2025-09-19 03:47:20] Command: iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] Running: Allow return traffic
+[2025-09-19 03:47:20] Command: iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] 📡 STEP 6: Configuring hostapd
+[2025-09-19 03:47:20] Running: Show hostapd config
+[2025-09-19 03:47:20] Command: cat /etc/hostapd/hostapd.conf
+interface=wlan1
+driver=nl80211
+ssid=ValerieParty
+hw_mode=g
+channel=6
+wmm_enabled=0
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] 🌐 STEP 7: Configuring dnsmasq
+[2025-09-19 03:47:20] Running: Backup dnsmasq config
+[2025-09-19 03:47:20] Command: cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup.1758250040
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] Running: Remove old PixelParty config
+[2025-09-19 03:47:20] Command: sed -i '/# PixelParty Guest Network/,/^$/d' /etc/dnsmasq.conf
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] Running: Show dnsmasq config
+[2025-09-19 03:47:20] Command: tail -10 /etc/dnsmasq.conf
+#dhcp-ignore-names=tag:wpad-ignore
+
+
+
+
+
+# PixelParty Guest Network
+interface=wlan1
+dhcp-range=192.168.4.2,192.168.4.254,255.255.255.0,24h
+address=/#/192.168.4.1
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:20] 🚀 STEP 8: Starting services
+[2025-09-19 03:47:20] Running: Start dnsmasq
+[2025-09-19 03:47:20] Command: systemctl start dnsmasq
+[2025-09-19 03:47:20] Exit code: 0
+[2025-09-19 03:47:23] Running: Start hostapd
+[2025-09-19 03:47:23] Command: systemctl start hostapd
+[2025-09-19 03:47:23] Exit code: 0
+[2025-09-19 03:47:28] ✅ STEP 9: Verifying setup
+[2025-09-19 03:47:28] Running: Check dnsmasq status
+[2025-09-19 03:47:28] Command: systemctl status dnsmasq
+● dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server
+     Loaded: loaded (/lib/systemd/system/dnsmasq.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 03:47:20 BST; 8s ago
+    Process: 6228 ExecStartPre=/usr/share/dnsmasq/systemd-helper checkconfig (code=exited, status=0/SUCCESS)
+    Process: 6233 ExecStart=/usr/share/dnsmasq/systemd-helper exec (code=exited, status=0/SUCCESS)
+    Process: 6239 ExecStartPost=/usr/share/dnsmasq/systemd-helper start-resolvconf (code=exited, status=0/SUCCESS)
+   Main PID: 6238 (dnsmasq)
+      Tasks: 1 (limit: 8750)
+        CPU: 49ms
+     CGroup: /system.slice/dnsmasq.service
+             └─6238 /usr/sbin/dnsmasq -x /run/dnsmasq/dnsmasq.pid -u dnsmasq -7 /etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new --local-service --trust-anchor=.,20326,8,2,E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D --trust-anchor=.,38696,8,2,683D2D0ACB8C9B712A1948B27F741219298D0A450D612C483AF444A4C0FB2B16
+
+Sep 19 03:47:20 raspberrypi systemd[1]: Starting dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server...
+Sep 19 03:47:20 raspberrypi dnsmasq[6238]: started, version 2.90 cachesize 150
+Sep 19 03:47:20 raspberrypi dnsmasq[6238]: compile time options: IPv6 GNU-getopt DBus no-UBus i18n IDN2 DHCP DHCPv6 no-Lua TFTP conntrack ipset nftset auth cryptohash DNSSEC loop-detect inotify dumpfile
+Sep 19 03:47:20 raspberrypi dnsmasq-dhcp[6238]: DHCP, IP range 192.168.4.2 -- 192.168.4.254, lease time 1d
+Sep 19 03:47:20 raspberrypi dnsmasq[6238]: reading /etc/resolv.conf
+Sep 19 03:47:20 raspberrypi dnsmasq[6238]: using nameserver 10.228.15.40#53
+Sep 19 03:47:20 raspberrypi dnsmasq[6238]: using nameserver 192.168.1.254#53
+Sep 19 03:47:20 raspberrypi dnsmasq[6238]: using nameserver 2001:56b:de84:a000:a2b5:3cff:fe3e:e604#53
+Sep 19 03:47:20 raspberrypi dnsmasq[6238]: read /etc/hosts - 7 names
+Sep 19 03:47:20 raspberrypi systemd[1]: Started dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server.
+[2025-09-19 03:47:28] Exit code: 0
+[2025-09-19 03:47:28] Running: Check hostapd status
+[2025-09-19 03:47:28] Command: systemctl status hostapd
+● hostapd.service - Access point and authentication server for Wi-Fi and Ethernet
+     Loaded: loaded (/lib/systemd/system/hostapd.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 03:47:23 BST; 5s ago
+       Docs: man:hostapd(8)
+    Process: 6258 ExecStart=/usr/sbin/hostapd -B -P /run/hostapd.pid $DAEMON_OPTS ${DAEMON_CONF} (code=exited, status=0/SUCCESS)
+   Main PID: 6259 (hostapd)
+      Tasks: 1 (limit: 8750)
+        CPU: 23ms
+     CGroup: /system.slice/hostapd.service
+             └─6259 /usr/sbin/hostapd -B -P /run/hostapd.pid /etc/hostapd/hostapd.conf
+
+Sep 19 03:47:23 raspberrypi systemd[1]: Starting hostapd.service - Access point and authentication server for Wi-Fi and Ethernet...
+Sep 19 03:47:23 raspberrypi hostapd[6258]: wlan1: interface state UNINITIALIZED->ENABLED
+Sep 19 03:47:23 raspberrypi hostapd[6258]: wlan1: AP-ENABLED
+Sep 19 03:47:23 raspberrypi systemd[1]: Started hostapd.service - Access point and authentication server for Wi-Fi and Ethernet.
+[2025-09-19 03:47:28] Exit code: 0
+[2025-09-19 03:47:28] Running: Check wireless interfaces
+[2025-09-19 03:47:28] Command: iwconfig
+lo        no wireless extensions.
+
+eth0      no wireless extensions.
+
+wlan0     IEEE 802.11bgn  ESSID:"Kitesurfer"  Nickname:"<WIFI@REALTEK>"
+          Mode:Managed  Frequency:2.437 GHz  Access Point: 0A:F4:63:E5:90:FF   
+          Bit Rate:144.4 Mb/s   Sensitivity:0/0  
+          Retry:off   RTS thr:off   Fragment thr:off
+          Encryption key:****-****-****-****-****-****-****-****   Security mode:open
+          Power Management:off
+          Link Quality=98/100  Signal level=71/100  Noise level=0/100
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:0  Invalid misc:0   Missed beacon:0
+
+wlan1     IEEE 802.11  Mode:Master  Tx-Power=31 dBm   
+          Retry short limit:7   RTS thr:off   Fragment thr:off
+          Power Management:on
+          
+[2025-09-19 03:47:28] Exit code: 0
+[2025-09-19 03:47:28] Running: Check IP addresses
+[2025-09-19 03:47:28] Command: ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+    link/ether e4:5f:01:10:68:9c brd ff:ff:ff:ff:ff:ff
+    inet 192.168.1.118/24 brd 192.168.1.255 scope global dynamic noprefixroute eth0
+       valid_lft 85627sec preferred_lft 85627sec
+    inet6 2001:56b:de84:a000:c977:1866:d9cd:92fe/64 scope global dynamic noprefixroute 
+       valid_lft 13485sec preferred_lft 13185sec
+    inet6 fe80::ad1e:bd5e:24c4:a12/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+3: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 2312 qdisc mq state UP group default qlen 1000
+    link/ether e4:be:ed:f8:1f:42 brd ff:ff:ff:ff:ff:ff
+    inet 10.228.15.232/24 brd 10.228.15.255 scope global dynamic noprefixroute wlan0
+       valid_lft 2729sec preferred_lft 2729sec
+    inet6 fe80::211b:1ff5:b92b:1167/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+4: wlan1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether e4:5f:01:10:68:9e brd ff:ff:ff:ff:ff:ff
+    inet 192.168.4.1/24 scope global wlan1
+       valid_lft forever preferred_lft forever
+[2025-09-19 03:47:28] Exit code: 0
+[2025-09-19 03:47:28] Running: Check NAT rules
+[2025-09-19 03:47:28] Command: iptables -t nat -L POSTROUTING
+Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination         
+MASQUERADE  all  --  anywhere             anywhere            
+[2025-09-19 03:47:28] Exit code: 0
+[2025-09-19 03:47:28] Running: Check forward rules
+[2025-09-19 03:47:28] Command: iptables -L FORWARD
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+ACCEPT     all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
+[2025-09-19 03:47:28] Exit code: 0
+[2025-09-19 03:47:28] 🧪 STEP 10: Testing connectivity
+[2025-09-19 03:47:28] Running: Test local IP
+[2025-09-19 03:47:28] Command: ping -c 2 192.168.4.1
+PING 192.168.4.1 (192.168.4.1) 56(84) bytes of data.
+64 bytes from 192.168.4.1: icmp_seq=1 ttl=64 time=0.109 ms
+64 bytes from 192.168.4.1: icmp_seq=2 ttl=64 time=0.127 ms
+
+--- 192.168.4.1 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1024ms
+rtt min/avg/max/mdev = 0.109/0.118/0.127/0.009 ms
+[2025-09-19 03:47:29] Exit code: 0
+[2025-09-19 03:47:29] Running: Scan for ValerieParty
+[2025-09-19 03:47:29] Command: iwlist scan | grep -A3 -B3 ValerieParty || echo 'ValerieParty not found'
+lo        Interface doesn't support scanning.
+
+eth0      Interface doesn't support scanning.
+
+                    Quality=48/100  Signal level=17/100  
+                    Extra:fm=0003
+          Cell 03 - Address: E4:5F:01:10:68:9E
+                    ESSID:"ValerieParty"
+                    Protocol:IEEE 802.11bgn
+                    Mode:Master
+                    Frequency:2.437 GHz (Channel 6)
+[2025-09-19 03:47:37] Exit code: 0
+[2025-09-19 03:47:37] 📊 STEP 11: Final status check
+[2025-09-19 03:47:37] === SETUP COMPLETE ===
+[2025-09-19 03:47:37] wlan0 (Kitesurfer): 10.228.15.232/24
+[2025-09-19 03:47:37] wlan1 (ValerieParty): 192.168.4.1/24
+[2025-09-19 03:47:37] hostapd: active
+[2025-09-19 03:47:37] dnsmasq: active
+[2025-09-19 04:12:50] Starting complete PixelParty network setup
+[2025-09-19 04:12:50] Target: wlan0=Kitesurfer, wlan1=ValerieParty with internet forwarding
+[2025-09-19 04:12:50] 🛑 STEP 1: Stopping all services
+[2025-09-19 04:12:50] Running: Stop hostapd
+[2025-09-19 04:12:50] Command: systemctl stop hostapd
+[2025-09-19 04:12:50] Exit code: 0
+[2025-09-19 04:12:50] Running: Stop dnsmasq
+[2025-09-19 04:12:50] Command: systemctl stop dnsmasq
+[2025-09-19 04:12:50] Exit code: 0
+[2025-09-19 04:12:50] Running: Kill any remaining hostapd processes
+[2025-09-19 04:12:50] Command: pkill -f hostapd
+[2025-09-19 04:12:51] Exit code: 1
+[2025-09-19 04:12:51] Running: Kill any remaining dnsmasq processes
+[2025-09-19 04:12:51] Command: pkill -f dnsmasq
+[2025-09-19 04:12:51] Exit code: 1
+[2025-09-19 04:12:51] 🧹 STEP 2: Cleaning up network interfaces
+[2025-09-19 04:12:51] Running: Flush wlan1 addresses
+[2025-09-19 04:12:51] Command: ip addr flush dev wlan1
+[2025-09-19 04:12:51] Exit code: 0
+[2025-09-19 04:12:51] Running: Bring wlan1 down
+[2025-09-19 04:12:51] Command: ip link set dev wlan1 down
+[2025-09-19 04:12:51] Exit code: 0
+[2025-09-19 04:12:51] Running: Bring wlan1 up
+[2025-09-19 04:12:51] Command: ip link set dev wlan1 up
+[2025-09-19 04:12:51] Exit code: 0
+[2025-09-19 04:12:51] 🔧 STEP 3: Setting up wlan1 interface
+[2025-09-19 04:12:51] Running: Add IP to wlan1
+[2025-09-19 04:12:51] Command: ip addr add 192.168.4.1/24 dev wlan1
+[2025-09-19 04:12:51] Exit code: 0
+[2025-09-19 04:12:51] Running: Ensure wlan1 is up
+[2025-09-19 04:12:51] Command: ip link set dev wlan1 up
+[2025-09-19 04:12:51] Exit code: 0
+[2025-09-19 04:12:51] 🔀 STEP 4: Enabling IP forwarding
+[2025-09-19 04:12:51] Running: Enable IP forwarding
+[2025-09-19 04:12:51] Command: sysctl -w net.ipv4.ip_forward=1
+net.ipv4.ip_forward = 1
+[2025-09-19 04:12:51] Exit code: 0
+[2025-09-19 04:12:51] 🛡️ STEP 5: Setting up iptables rules
+[2025-09-19 04:12:51] Running: Flush NAT table
+[2025-09-19 04:12:51] Command: iptables -t nat -F
+[2025-09-19 04:12:52] Exit code: 0
+[2025-09-19 04:12:52] Running: Flush FORWARD chain
+[2025-09-19 04:12:52] Command: iptables -F FORWARD
+[2025-09-19 04:12:52] Exit code: 0
+[2025-09-19 04:12:52] Detected internet on wlan0 (hotspot)
+[2025-09-19 04:12:52] Running: Set up NAT masquerading to wlan0
+[2025-09-19 04:12:52] Command: iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+[2025-09-19 04:12:52] Exit code: 0
+[2025-09-19 04:12:52] Running: Allow forward wlan1->wlan0
+[2025-09-19 04:12:52] Command: iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
+[2025-09-19 04:12:52] Exit code: 0
+[2025-09-19 04:12:52] Running: Allow return traffic from wlan0
+[2025-09-19 04:12:52] Command: iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+[2025-09-19 04:12:52] Exit code: 0
+[2025-09-19 04:12:52] 📡 STEP 6: Configuring hostapd
+[2025-09-19 04:12:52] Running: Show hostapd config
+[2025-09-19 04:12:52] Command: cat /etc/hostapd/hostapd.conf
+interface=wlan1
+driver=nl80211
+ssid=ValerieParty
+hw_mode=g
+channel=1
+wmm_enabled=1
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+ieee80211n=1
+[2025-09-19 04:12:52] Exit code: 0
+[2025-09-19 04:12:52] 🌐 STEP 7: Configuring dnsmasq
+[2025-09-19 04:12:52] Running: Backup dnsmasq config
+[2025-09-19 04:12:52] Command: cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup.1758251572
+[2025-09-19 04:12:52] Exit code: 0
+[2025-09-19 04:12:52] Running: Remove old PixelParty config
+[2025-09-19 04:12:52] Command: sed -i '/# PixelParty Guest Network/,/^$/d' /etc/dnsmasq.conf
+[2025-09-19 04:12:52] Exit code: 0
+[2025-09-19 04:12:52] Running: Show dnsmasq config
+[2025-09-19 04:12:52] Command: tail -10 /etc/dnsmasq.conf
+
+
+
+
+
+
+# PixelParty Guest Network
+interface=wlan1
+dhcp-range=192.168.4.2,192.168.4.254,255.255.255.0,24h
+address=/#/192.168.4.1
+[2025-09-19 04:12:52] Exit code: 0
+[2025-09-19 04:12:52] 🚀 STEP 8: Starting services
+[2025-09-19 04:12:52] Running: Start dnsmasq
+[2025-09-19 04:12:52] Command: systemctl start dnsmasq
+[2025-09-19 04:12:52] Exit code: 0
+[2025-09-19 04:12:55] Running: Start hostapd
+[2025-09-19 04:12:55] Command: systemctl start hostapd
+[2025-09-19 04:12:55] Exit code: 0
+[2025-09-19 04:13:00] ✅ STEP 9: Verifying setup
+[2025-09-19 04:13:00] Running: Check dnsmasq status
+[2025-09-19 04:13:00] Command: systemctl status dnsmasq
+● dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server
+     Loaded: loaded (/lib/systemd/system/dnsmasq.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 04:12:52 BST; 8s ago
+    Process: 7933 ExecStartPre=/usr/share/dnsmasq/systemd-helper checkconfig (code=exited, status=0/SUCCESS)
+    Process: 7938 ExecStart=/usr/share/dnsmasq/systemd-helper exec (code=exited, status=0/SUCCESS)
+    Process: 7944 ExecStartPost=/usr/share/dnsmasq/systemd-helper start-resolvconf (code=exited, status=0/SUCCESS)
+   Main PID: 7943 (dnsmasq)
+      Tasks: 1 (limit: 8750)
+        CPU: 90ms
+     CGroup: /system.slice/dnsmasq.service
+             └─7943 /usr/sbin/dnsmasq -x /run/dnsmasq/dnsmasq.pid -u dnsmasq -7 /etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new --local-service --trust-anchor=.,20326,8,2,E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D --trust-anchor=.,38696,8,2,683D2D0ACB8C9B712A1948B27F741219298D0A450D612C483AF444A4C0FB2B16
+
+Sep 19 04:12:52 raspberrypi systemd[1]: Starting dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server...
+Sep 19 04:12:52 raspberrypi dnsmasq[7943]: started, version 2.90 cachesize 150
+Sep 19 04:12:52 raspberrypi dnsmasq[7943]: compile time options: IPv6 GNU-getopt DBus no-UBus i18n IDN2 DHCP DHCPv6 no-Lua TFTP conntrack ipset nftset auth cryptohash DNSSEC loop-detect inotify dumpfile
+Sep 19 04:12:52 raspberrypi dnsmasq-dhcp[7943]: DHCP, IP range 192.168.4.2 -- 192.168.4.254, lease time 1d
+Sep 19 04:12:52 raspberrypi dnsmasq[7943]: reading /etc/resolv.conf
+Sep 19 04:12:52 raspberrypi dnsmasq[7943]: using nameserver 192.168.1.254#53
+Sep 19 04:12:52 raspberrypi dnsmasq[7943]: using nameserver 2001:56b:de84:a000:a2b5:3cff:fe3e:e604#53
+Sep 19 04:12:52 raspberrypi dnsmasq[7943]: using nameserver 10.228.15.40#53
+Sep 19 04:12:52 raspberrypi dnsmasq[7943]: read /etc/hosts - 7 names
+Sep 19 04:12:52 raspberrypi systemd[1]: Started dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server.
+[2025-09-19 04:13:00] Exit code: 0
+[2025-09-19 04:13:00] Running: Check hostapd status
+[2025-09-19 04:13:00] Command: systemctl status hostapd
+● hostapd.service - Access point and authentication server for Wi-Fi and Ethernet
+     Loaded: loaded (/lib/systemd/system/hostapd.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 04:12:55 BST; 5s ago
+       Docs: man:hostapd(8)
+    Process: 7963 ExecStart=/usr/sbin/hostapd -B -P /run/hostapd.pid $DAEMON_OPTS ${DAEMON_CONF} (code=exited, status=0/SUCCESS)
+   Main PID: 7964 (hostapd)
+      Tasks: 1 (limit: 8750)
+        CPU: 26ms
+     CGroup: /system.slice/hostapd.service
+             └─7964 /usr/sbin/hostapd -B -P /run/hostapd.pid /etc/hostapd/hostapd.conf
+
+Sep 19 04:12:55 raspberrypi systemd[1]: Starting hostapd.service - Access point and authentication server for Wi-Fi and Ethernet...
+Sep 19 04:12:55 raspberrypi hostapd[7963]: wlan1: interface state UNINITIALIZED->ENABLED
+Sep 19 04:12:55 raspberrypi hostapd[7963]: wlan1: AP-ENABLED
+Sep 19 04:12:55 raspberrypi systemd[1]: Started hostapd.service - Access point and authentication server for Wi-Fi and Ethernet.
+[2025-09-19 04:13:00] Exit code: 0
+[2025-09-19 04:13:00] Running: Check wireless interfaces
+[2025-09-19 04:13:00] Command: iwconfig
+lo        no wireless extensions.
+
+eth0      no wireless extensions.
+
+wlan0     IEEE 802.11bgn  ESSID:"Kitesurfer"  Nickname:"<WIFI@REALTEK>"
+          Mode:Managed  Frequency:2.437 GHz  Access Point: 0A:F4:63:E5:90:FF   
+          Bit Rate:144.4 Mb/s   Sensitivity:0/0  
+          Retry:off   RTS thr:off   Fragment thr:off
+          Encryption key:****-****-****-****-****-****-****-****   Security mode:open
+          Power Management:off
+          Link Quality=100/100  Signal level=70/100  Noise level=0/100
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:0  Invalid misc:0   Missed beacon:0
+
+wlan1     IEEE 802.11  Mode:Master  Tx-Power=31 dBm   
+          Retry short limit:7   RTS thr:off   Fragment thr:off
+          Power Management:on
+          
+[2025-09-19 04:13:00] Exit code: 0
+[2025-09-19 04:13:00] Running: Check IP addresses
+[2025-09-19 04:13:00] Command: ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+    link/ether e4:5f:01:10:68:9c brd ff:ff:ff:ff:ff:ff
+    inet 192.168.1.118/24 brd 192.168.1.255 scope global dynamic noprefixroute eth0
+       valid_lft 85409sec preferred_lft 85409sec
+    inet6 2001:56b:de84:a000:c977:1866:d9cd:92fe/64 scope global dynamic noprefixroute 
+       valid_lft 11953sec preferred_lft 11653sec
+    inet6 fe80::ad1e:bd5e:24c4:a12/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+3: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 2312 qdisc mq state UP group default qlen 1000
+    link/ether e4:be:ed:f8:1f:42 brd ff:ff:ff:ff:ff:ff
+    inet 10.228.15.232/24 brd 10.228.15.255 scope global dynamic noprefixroute wlan0
+       valid_lft 2997sec preferred_lft 2997sec
+    inet6 fe80::211b:1ff5:b92b:1167/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+4: wlan1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether e4:5f:01:10:68:9e brd ff:ff:ff:ff:ff:ff
+    inet 192.168.4.1/24 scope global wlan1
+       valid_lft forever preferred_lft forever
+[2025-09-19 04:13:00] Exit code: 0
+[2025-09-19 04:13:00] Running: Check NAT rules
+[2025-09-19 04:13:00] Command: iptables -t nat -L POSTROUTING
+Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination         
+MASQUERADE  all  --  anywhere             anywhere            
+[2025-09-19 04:13:01] Exit code: 0
+[2025-09-19 04:13:01] Running: Check forward rules
+[2025-09-19 04:13:01] Command: iptables -L FORWARD
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+ACCEPT     all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
+[2025-09-19 04:13:01] Exit code: 0
+[2025-09-19 04:13:01] 🧪 STEP 10: Testing connectivity
+[2025-09-19 04:13:01] Running: Test local IP
+[2025-09-19 04:13:01] Command: ping -c 2 192.168.4.1
+PING 192.168.4.1 (192.168.4.1) 56(84) bytes of data.
+64 bytes from 192.168.4.1: icmp_seq=1 ttl=64 time=0.110 ms
+64 bytes from 192.168.4.1: icmp_seq=2 ttl=64 time=0.231 ms
+
+--- 192.168.4.1 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1030ms
+rtt min/avg/max/mdev = 0.110/0.170/0.231/0.060 ms
+[2025-09-19 04:13:02] Exit code: 0
+[2025-09-19 04:13:02] Running: Scan for ValerieParty
+[2025-09-19 04:13:02] Command: iwlist scan | grep -A3 -B3 ValerieParty || echo 'ValerieParty not found'
+lo        Interface doesn't support scanning.
+
+eth0      Interface doesn't support scanning.
+
+                    Quality=100/100  Signal level=70/100  
+                    Extra:fm=0003
+          Cell 02 - Address: E4:5F:01:10:68:9E
+                    ESSID:"ValerieParty"
+                    Protocol:IEEE 802.11bgn
+                    Mode:Master
+                    Frequency:2.412 GHz (Channel 1)
+[2025-09-19 04:13:09] Exit code: 0
+[2025-09-19 04:13:09] 📊 STEP 11: Final status check
+[2025-09-19 04:13:09] === SETUP COMPLETE ===
+[2025-09-19 04:13:09] wlan0 (Kitesurfer): 10.228.15.232/24
+[2025-09-19 04:13:09] wlan1 (ValerieParty): 192.168.4.1/24
+[2025-09-19 04:13:09] hostapd: active
+[2025-09-19 04:13:10] dnsmasq: active
+[2025-09-19 04:41:12] Starting complete PixelParty network setup
+[2025-09-19 04:41:13] Target: wlan0=Kitesurfer, wlan1=ValerieParty with internet forwarding
+[2025-09-19 04:41:13] 🛑 STEP 1: Stopping all services
+[2025-09-19 04:41:13] Running: Stop hostapd
+[2025-09-19 04:41:13] Command: systemctl stop hostapd
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] Running: Stop dnsmasq
+[2025-09-19 04:41:13] Command: systemctl stop dnsmasq
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] Running: Kill any remaining hostapd processes
+[2025-09-19 04:41:13] Command: pkill -f hostapd
+[2025-09-19 04:41:13] Exit code: 1
+[2025-09-19 04:41:13] Running: Kill any remaining dnsmasq processes
+[2025-09-19 04:41:13] Command: pkill -f dnsmasq
+[2025-09-19 04:41:13] Exit code: 1
+[2025-09-19 04:41:13] 🧹 STEP 2: Cleaning up network interfaces
+[2025-09-19 04:41:13] Running: Flush wlan1 addresses
+[2025-09-19 04:41:13] Command: ip addr flush dev wlan1
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] Running: Bring wlan1 down
+[2025-09-19 04:41:13] Command: ip link set dev wlan1 down
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] Running: Bring wlan1 up
+[2025-09-19 04:41:13] Command: ip link set dev wlan1 up
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] 🔧 STEP 3: Setting up wlan1 interface
+[2025-09-19 04:41:13] Running: Add IP to wlan1
+[2025-09-19 04:41:13] Command: ip addr add 192.168.4.1/24 dev wlan1
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] Running: Ensure wlan1 is up
+[2025-09-19 04:41:13] Command: ip link set dev wlan1 up
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] 🔀 STEP 4: Enabling IP forwarding
+[2025-09-19 04:41:13] Running: Enable IP forwarding
+[2025-09-19 04:41:13] Command: sysctl -w net.ipv4.ip_forward=1
+net.ipv4.ip_forward = 1
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] 🛡️ STEP 5: Setting up iptables rules
+[2025-09-19 04:41:13] Running: Flush NAT table
+[2025-09-19 04:41:13] Command: iptables -t nat -F
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] Running: Flush FORWARD chain
+[2025-09-19 04:41:13] Command: iptables -F FORWARD
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] Detected internet on wlan0 (hotspot)
+[2025-09-19 04:41:13] Running: Set up NAT masquerading to wlan0
+[2025-09-19 04:41:13] Command: iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] Running: Allow forward wlan1->wlan0
+[2025-09-19 04:41:13] Command: iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] Running: Allow return traffic from wlan0
+[2025-09-19 04:41:13] Command: iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] 📡 STEP 6: Configuring hostapd
+[2025-09-19 04:41:13] Running: Show hostapd config
+[2025-09-19 04:41:13] Command: cat /etc/hostapd/hostapd.conf
+interface=wlan1
+driver=nl80211
+ssid=ValerieParty
+hw_mode=g
+channel=1
+wmm_enabled=1
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+ieee80211n=1
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] 🌐 STEP 7: Configuring dnsmasq
+[2025-09-19 04:41:13] Running: Backup dnsmasq config
+[2025-09-19 04:41:13] Command: cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup.1758253273
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] Running: Remove old PixelParty config
+[2025-09-19 04:41:13] Command: sed -i '/# PixelParty Guest Network/,/^$/d' /etc/dnsmasq.conf
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] Running: Show dnsmasq config
+[2025-09-19 04:41:13] Command: tail -10 /etc/dnsmasq.conf
+
+
+
+
+
+
+
+# PixelParty Guest Network
+interface=wlan1
+dhcp-range=192.168.4.2,192.168.4.254,255.255.255.0,24h
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:13] 🚀 STEP 8: Starting services
+[2025-09-19 04:41:13] Running: Start dnsmasq
+[2025-09-19 04:41:13] Command: systemctl start dnsmasq
+[2025-09-19 04:41:13] Exit code: 0
+[2025-09-19 04:41:16] Running: Start hostapd
+[2025-09-19 04:41:16] Command: systemctl start hostapd
+[2025-09-19 04:41:16] Exit code: 0
+[2025-09-19 04:41:21] ✅ STEP 9: Verifying setup
+[2025-09-19 04:41:21] Running: Check dnsmasq status
+[2025-09-19 04:41:21] Command: systemctl status dnsmasq
+● dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server
+     Loaded: loaded (/lib/systemd/system/dnsmasq.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 04:41:13 BST; 8s ago
+    Process: 1740 ExecStartPre=/usr/share/dnsmasq/systemd-helper checkconfig (code=exited, status=0/SUCCESS)
+    Process: 1745 ExecStart=/usr/share/dnsmasq/systemd-helper exec (code=exited, status=0/SUCCESS)
+    Process: 1751 ExecStartPost=/usr/share/dnsmasq/systemd-helper start-resolvconf (code=exited, status=0/SUCCESS)
+   Main PID: 1750 (dnsmasq)
+      Tasks: 1 (limit: 8750)
+        CPU: 47ms
+     CGroup: /system.slice/dnsmasq.service
+             └─1750 /usr/sbin/dnsmasq -x /run/dnsmasq/dnsmasq.pid -u dnsmasq -7 /etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new --local-service --trust-anchor=.,20326,8,2,E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D --trust-anchor=.,38696,8,2,683D2D0ACB8C9B712A1948B27F741219298D0A450D612C483AF444A4C0FB2B16
+
+Sep 19 04:41:13 raspberrypi systemd[1]: Starting dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server...
+Sep 19 04:41:13 raspberrypi dnsmasq[1750]: started, version 2.90 cachesize 150
+Sep 19 04:41:13 raspberrypi dnsmasq[1750]: compile time options: IPv6 GNU-getopt DBus no-UBus i18n IDN2 DHCP DHCPv6 no-Lua TFTP conntrack ipset nftset auth cryptohash DNSSEC loop-detect inotify dumpfile
+Sep 19 04:41:13 raspberrypi dnsmasq-dhcp[1750]: DHCP, IP range 192.168.4.2 -- 192.168.4.254, lease time 1d
+Sep 19 04:41:13 raspberrypi dnsmasq[1750]: reading /etc/resolv.conf
+Sep 19 04:41:13 raspberrypi dnsmasq[1750]: using nameserver 192.168.1.254#53
+Sep 19 04:41:13 raspberrypi dnsmasq[1750]: using nameserver 2001:56b:de84:a000:a2b5:3cff:fe3e:e604#53
+Sep 19 04:41:13 raspberrypi dnsmasq[1750]: using nameserver 10.228.15.40#53
+Sep 19 04:41:13 raspberrypi dnsmasq[1750]: read /etc/hosts - 7 names
+Sep 19 04:41:13 raspberrypi systemd[1]: Started dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server.
+[2025-09-19 04:41:22] Exit code: 0
+[2025-09-19 04:41:22] Running: Check hostapd status
+[2025-09-19 04:41:22] Command: systemctl status hostapd
+● hostapd.service - Access point and authentication server for Wi-Fi and Ethernet
+     Loaded: loaded (/lib/systemd/system/hostapd.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 04:41:16 BST; 5s ago
+       Docs: man:hostapd(8)
+    Process: 1770 ExecStart=/usr/sbin/hostapd -B -P /run/hostapd.pid $DAEMON_OPTS ${DAEMON_CONF} (code=exited, status=0/SUCCESS)
+   Main PID: 1771 (hostapd)
+      Tasks: 1 (limit: 8750)
+        CPU: 11ms
+     CGroup: /system.slice/hostapd.service
+             └─1771 /usr/sbin/hostapd -B -P /run/hostapd.pid /etc/hostapd/hostapd.conf
+
+Sep 19 04:41:16 raspberrypi systemd[1]: Starting hostapd.service - Access point and authentication server for Wi-Fi and Ethernet...
+Sep 19 04:41:16 raspberrypi hostapd[1770]: wlan1: interface state UNINITIALIZED->ENABLED
+Sep 19 04:41:16 raspberrypi hostapd[1770]: wlan1: AP-ENABLED
+Sep 19 04:41:16 raspberrypi systemd[1]: Started hostapd.service - Access point and authentication server for Wi-Fi and Ethernet.
+[2025-09-19 04:41:22] Exit code: 0
+[2025-09-19 04:41:22] Running: Check wireless interfaces
+[2025-09-19 04:41:22] Command: iwconfig
+lo        no wireless extensions.
+
+eth0      no wireless extensions.
+
+wlan0     IEEE 802.11  ESSID:"Kitesurfer"  
+          Mode:Managed  Frequency:2.437 GHz  Access Point: 0A:F4:63:E5:90:FF   
+          Bit Rate=24 Mb/s   Tx-Power=31 dBm   
+          Retry short limit:7   RTS thr:off   Fragment thr:off
+          Encryption key:off
+          Power Management:on
+          Link Quality=70/70  Signal level=-14 dBm  
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:21  Invalid misc:0   Missed beacon:0
+
+wlan1     IEEE 802.11bgn  ESSID:"ValerieParty"  Nickname:"<WIFI@REALTEK>"
+          Mode:Master  Frequency:2.412 GHz  Access Point: E4:BE:ED:F8:1F:42   
+          Bit Rate:144.4 Mb/s   Sensitivity:0/0  
+          Retry:off   RTS thr:off   Fragment thr:off
+          Encryption key:off
+          Power Management:off
+          Link Quality:0  Signal level:0  Noise level:0
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:0  Invalid misc:0   Missed beacon:0
+
+[2025-09-19 04:41:22] Exit code: 0
+[2025-09-19 04:41:22] Running: Check IP addresses
+[2025-09-19 04:41:22] Command: ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+    link/ether e4:5f:01:10:68:9c brd ff:ff:ff:ff:ff:ff
+    inet 192.168.1.118/24 brd 192.168.1.255 scope global dynamic noprefixroute eth0
+       valid_lft 86296sec preferred_lft 86296sec
+    inet6 2001:56b:de84:a000:c977:1866:d9cd:92fe/64 scope global dynamic noprefixroute 
+       valid_lft 10252sec preferred_lft 9952sec
+    inet6 fe80::ad1e:bd5e:24c4:a12/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+3: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether e4:5f:01:10:68:9e brd ff:ff:ff:ff:ff:ff
+    inet 10.228.15.90/24 brd 10.228.15.255 scope global dynamic noprefixroute wlan0
+       valid_lft 3507sec preferred_lft 3507sec
+    inet6 fe80::211b:1ff5:b92b:1167/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+4: wlan1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 2312 qdisc mq state UP group default qlen 1000
+    link/ether e4:be:ed:f8:1f:42 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.4.1/24 scope global wlan1
+       valid_lft forever preferred_lft forever
+[2025-09-19 04:41:22] Exit code: 0
+[2025-09-19 04:41:22] Running: Check NAT rules
+[2025-09-19 04:41:22] Command: iptables -t nat -L POSTROUTING
+Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination         
+MASQUERADE  all  --  anywhere             anywhere            
+[2025-09-19 04:41:22] Exit code: 0
+[2025-09-19 04:41:22] Running: Check forward rules
+[2025-09-19 04:41:22] Command: iptables -L FORWARD
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+ACCEPT     all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
+[2025-09-19 04:41:22] Exit code: 0
+[2025-09-19 04:41:22] 🧪 STEP 10: Testing connectivity
+[2025-09-19 04:41:22] Running: Test local IP
+[2025-09-19 04:41:22] Command: ping -c 2 192.168.4.1
+PING 192.168.4.1 (192.168.4.1) 56(84) bytes of data.
+64 bytes from 192.168.4.1: icmp_seq=1 ttl=64 time=0.105 ms
+64 bytes from 192.168.4.1: icmp_seq=2 ttl=64 time=0.077 ms
+
+--- 192.168.4.1 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1015ms
+rtt min/avg/max/mdev = 0.077/0.091/0.105/0.014 ms
+[2025-09-19 04:41:23] Exit code: 0
+[2025-09-19 04:41:23] Running: Scan for ValerieParty
+[2025-09-19 04:41:23] Command: iwlist scan | grep -A3 -B3 ValerieParty || echo 'ValerieParty not found'
+lo        Interface doesn't support scanning.
+
+eth0      Interface doesn't support scanning.
+
+                    Frequency:2.412 GHz (Channel 1)
+                    Quality=70/70  Signal level=-31 dBm  
+                    Encryption key:off
+                    ESSID:"ValerieParty"
+                    Bit Rates:1 Mb/s; 2 Mb/s; 5.5 Mb/s; 11 Mb/s; 6 Mb/s
+                              9 Mb/s; 12 Mb/s; 18 Mb/s
+                    Bit Rates:24 Mb/s; 36 Mb/s; 48 Mb/s; 54 Mb/s
+[2025-09-19 04:41:30] Exit code: 0
+[2025-09-19 04:41:30] 📊 STEP 11: Final status check
+[2025-09-19 04:41:30] === SETUP COMPLETE ===
+[2025-09-19 04:41:30] wlan0 (Kitesurfer): 10.228.15.90/24
+[2025-09-19 04:41:30] wlan1 (ValerieParty): 192.168.4.1/24
+[2025-09-19 04:41:30] hostapd: active
+[2025-09-19 04:41:30] dnsmasq: active
+[2025-09-19 04:47:00] Starting complete PixelParty network setup
+[2025-09-19 04:47:00] Target: wlan0=Kitesurfer, wlan1=ValerieParty with internet forwarding
+[2025-09-19 04:47:00] 🛑 STEP 1: Stopping all services
+[2025-09-19 04:47:00] Running: Stop hostapd
+[2025-09-19 04:47:00] Command: systemctl stop hostapd
+[2025-09-19 04:47:00] Exit code: 0
+[2025-09-19 04:47:00] Running: Stop dnsmasq
+[2025-09-19 04:47:00] Command: systemctl stop dnsmasq
+[2025-09-19 04:47:00] Exit code: 0
+[2025-09-19 04:47:00] Running: Kill any remaining hostapd processes
+[2025-09-19 04:47:00] Command: pkill -f hostapd
+[2025-09-19 04:47:00] Exit code: 1
+[2025-09-19 04:47:00] Running: Kill any remaining dnsmasq processes
+[2025-09-19 04:47:00] Command: pkill -f dnsmasq
+[2025-09-19 04:47:01] Exit code: 1
+[2025-09-19 04:47:01] 🧹 STEP 2: Cleaning up network interfaces
+[2025-09-19 04:47:01] Running: Flush wlan1 addresses
+[2025-09-19 04:47:01] Command: ip addr flush dev wlan1
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] Running: Bring wlan1 down
+[2025-09-19 04:47:01] Command: ip link set dev wlan1 down
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] Running: Bring wlan1 up
+[2025-09-19 04:47:01] Command: ip link set dev wlan1 up
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] 🔧 STEP 3: Setting up wlan1 interface
+[2025-09-19 04:47:01] Running: Add IP to wlan1
+[2025-09-19 04:47:01] Command: ip addr add 192.168.4.1/24 dev wlan1
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] Running: Ensure wlan1 is up
+[2025-09-19 04:47:01] Command: ip link set dev wlan1 up
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] 🔀 STEP 4: Enabling IP forwarding
+[2025-09-19 04:47:01] Running: Enable IP forwarding
+[2025-09-19 04:47:01] Command: sysctl -w net.ipv4.ip_forward=1
+net.ipv4.ip_forward = 1
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] 🛡️ STEP 5: Setting up iptables rules
+[2025-09-19 04:47:01] Running: Flush NAT table
+[2025-09-19 04:47:01] Command: iptables -t nat -F
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] Running: Flush FORWARD chain
+[2025-09-19 04:47:01] Command: iptables -F FORWARD
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] Detected primary internet interface: wlan0
+[2025-09-19 04:47:01] Running: Set up NAT masquerading to wlan0
+[2025-09-19 04:47:01] Command: iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] Running: Allow forward wlan1->wlan0
+[2025-09-19 04:47:01] Command: iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] Running: Allow return traffic from wlan0
+[2025-09-19 04:47:01] Command: iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] 📡 STEP 6: Configuring hostapd
+[2025-09-19 04:47:01] Running: Show hostapd config
+[2025-09-19 04:47:01] Command: cat /etc/hostapd/hostapd.conf
+interface=wlan1
+driver=nl80211
+ssid=ValerieParty
+hw_mode=g
+channel=1
+wmm_enabled=1
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+ieee80211n=1
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] 🌐 STEP 7: Configuring dnsmasq
+[2025-09-19 04:47:01] Running: Backup dnsmasq config
+[2025-09-19 04:47:01] Command: cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup.1758253621
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] Running: Remove old PixelParty config
+[2025-09-19 04:47:01] Command: sed -i '/# PixelParty Guest Network/,/^$/d' /etc/dnsmasq.conf
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] Running: Show dnsmasq config
+[2025-09-19 04:47:01] Command: tail -10 /etc/dnsmasq.conf
+
+
+
+
+
+
+
+# PixelParty Guest Network
+interface=wlan1
+dhcp-range=192.168.4.2,192.168.4.254,255.255.255.0,24h
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:01] 🚀 STEP 8: Starting services
+[2025-09-19 04:47:01] Running: Start dnsmasq
+[2025-09-19 04:47:01] Command: systemctl start dnsmasq
+[2025-09-19 04:47:01] Exit code: 0
+[2025-09-19 04:47:04] Running: Start hostapd
+[2025-09-19 04:47:04] Command: systemctl start hostapd
+[2025-09-19 04:47:04] Exit code: 0
+[2025-09-19 04:47:09] ✅ STEP 9: Verifying setup
+[2025-09-19 04:47:09] Running: Check dnsmasq status
+[2025-09-19 04:47:09] Command: systemctl status dnsmasq
+● dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server
+     Loaded: loaded (/lib/systemd/system/dnsmasq.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 04:47:01 BST; 8s ago
+    Process: 2616 ExecStartPre=/usr/share/dnsmasq/systemd-helper checkconfig (code=exited, status=0/SUCCESS)
+    Process: 2621 ExecStart=/usr/share/dnsmasq/systemd-helper exec (code=exited, status=0/SUCCESS)
+    Process: 2627 ExecStartPost=/usr/share/dnsmasq/systemd-helper start-resolvconf (code=exited, status=0/SUCCESS)
+   Main PID: 2626 (dnsmasq)
+      Tasks: 1 (limit: 8750)
+        CPU: 50ms
+     CGroup: /system.slice/dnsmasq.service
+             └─2626 /usr/sbin/dnsmasq -x /run/dnsmasq/dnsmasq.pid -u dnsmasq -7 /etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new --local-service --trust-anchor=.,20326,8,2,E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D --trust-anchor=.,38696,8,2,683D2D0ACB8C9B712A1948B27F741219298D0A450D612C483AF444A4C0FB2B16
+
+Sep 19 04:47:01 raspberrypi dnsmasq[2626]: compile time options: IPv6 GNU-getopt DBus no-UBus i18n IDN2 DHCP DHCPv6 no-Lua TFTP conntrack ipset nftset auth cryptohash DNSSEC loop-detect inotify dumpfile
+Sep 19 04:47:01 raspberrypi dnsmasq-dhcp[2626]: DHCP, IP range 192.168.4.2 -- 192.168.4.254, lease time 1d
+Sep 19 04:47:01 raspberrypi dnsmasq[2626]: reading /etc/resolv.conf
+Sep 19 04:47:01 raspberrypi dnsmasq[2626]: using nameserver 192.168.1.254#53
+Sep 19 04:47:01 raspberrypi dnsmasq[2626]: using nameserver 2001:56b:de84:a000:a2b5:3cff:fe3e:e604#53
+Sep 19 04:47:01 raspberrypi dnsmasq[2626]: using nameserver 10.228.15.40#53
+Sep 19 04:47:01 raspberrypi dnsmasq[2626]: read /etc/hosts - 7 names
+Sep 19 04:47:01 raspberrypi systemd[1]: Started dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server.
+Sep 19 04:47:08 raspberrypi dnsmasq-dhcp[2626]: DHCPREQUEST(wlan1) 192.168.4.14 2e:d3:ef:6c:4a:20
+Sep 19 04:47:08 raspberrypi dnsmasq-dhcp[2626]: DHCPACK(wlan1) 192.168.4.14 2e:d3:ef:6c:4a:20 Ken-s-Tab-S6-Lite
+[2025-09-19 04:47:09] Exit code: 0
+[2025-09-19 04:47:09] Running: Check hostapd status
+[2025-09-19 04:47:09] Command: systemctl status hostapd
+● hostapd.service - Access point and authentication server for Wi-Fi and Ethernet
+     Loaded: loaded (/lib/systemd/system/hostapd.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 04:47:04 BST; 5s ago
+       Docs: man:hostapd(8)
+    Process: 2646 ExecStart=/usr/sbin/hostapd -B -P /run/hostapd.pid $DAEMON_OPTS ${DAEMON_CONF} (code=exited, status=0/SUCCESS)
+   Main PID: 2647 (hostapd)
+      Tasks: 1 (limit: 8750)
+        CPU: 13ms
+     CGroup: /system.slice/hostapd.service
+             └─2647 /usr/sbin/hostapd -B -P /run/hostapd.pid /etc/hostapd/hostapd.conf
+
+Sep 19 04:47:04 raspberrypi systemd[1]: Starting hostapd.service - Access point and authentication server for Wi-Fi and Ethernet...
+Sep 19 04:47:04 raspberrypi hostapd[2646]: wlan1: interface state UNINITIALIZED->ENABLED
+Sep 19 04:47:04 raspberrypi hostapd[2646]: wlan1: AP-ENABLED
+Sep 19 04:47:04 raspberrypi systemd[1]: Started hostapd.service - Access point and authentication server for Wi-Fi and Ethernet.
+Sep 19 04:47:08 raspberrypi hostapd[2647]: wlan1: STA 2e:d3:ef:6c:4a:20 IEEE 802.11: associated
+Sep 19 04:47:08 raspberrypi hostapd[2647]: wlan1: STA 2e:d3:ef:6c:4a:20 RADIUS: starting accounting session 78A6E41441EB3068
+[2025-09-19 04:47:09] Exit code: 0
+[2025-09-19 04:47:09] Running: Check wireless interfaces
+[2025-09-19 04:47:09] Command: iwconfig
+lo        no wireless extensions.
+
+eth0      no wireless extensions.
+
+wlan0     IEEE 802.11  ESSID:"Kitesurfer"  
+          Mode:Managed  Frequency:2.437 GHz  Access Point: 0A:F4:63:E5:90:FF   
+          Bit Rate=57.7 Mb/s   Tx-Power=31 dBm   
+          Retry short limit:7   RTS thr:off   Fragment thr:off
+          Encryption key:off
+          Power Management:on
+          Link Quality=70/70  Signal level=-14 dBm  
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:31  Invalid misc:0   Missed beacon:0
+
+wlan1     IEEE 802.11bgn  ESSID:"ValerieParty"  Nickname:"<WIFI@REALTEK>"
+          Mode:Master  Frequency:2.412 GHz  Access Point: E4:BE:ED:F8:1F:42   
+          Bit Rate:144.4 Mb/s   Sensitivity:0/0  
+          Retry:off   RTS thr:off   Fragment thr:off
+          Encryption key:off
+          Power Management:off
+          Link Quality=52/100  Signal level=35/100  Noise level=0/100
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:0  Invalid misc:0   Missed beacon:0
+
+[2025-09-19 04:47:09] Exit code: 0
+[2025-09-19 04:47:09] Running: Check IP addresses
+[2025-09-19 04:47:09] Command: ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+    link/ether e4:5f:01:10:68:9c brd ff:ff:ff:ff:ff:ff
+    inet 192.168.1.118/24 brd 192.168.1.255 scope global dynamic noprefixroute eth0
+       valid_lft 85948sec preferred_lft 85948sec
+    inet6 2001:56b:de84:a000:c977:1866:d9cd:92fe/64 scope global dynamic noprefixroute 
+       valid_lft 9904sec preferred_lft 9604sec
+    inet6 fe80::ad1e:bd5e:24c4:a12/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+3: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether e4:5f:01:10:68:9e brd ff:ff:ff:ff:ff:ff
+    inet 10.228.15.90/24 brd 10.228.15.255 scope global dynamic noprefixroute wlan0
+       valid_lft 3160sec preferred_lft 3160sec
+    inet6 fe80::211b:1ff5:b92b:1167/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+4: wlan1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 2312 qdisc mq state UP group default qlen 1000
+    link/ether e4:be:ed:f8:1f:42 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.4.1/24 scope global wlan1
+       valid_lft forever preferred_lft forever
+[2025-09-19 04:47:09] Exit code: 0
+[2025-09-19 04:47:09] Running: Check NAT rules
+[2025-09-19 04:47:09] Command: iptables -t nat -L POSTROUTING
+Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination         
+MASQUERADE  all  --  anywhere             anywhere            
+[2025-09-19 04:47:09] Exit code: 0
+[2025-09-19 04:47:09] Running: Check forward rules
+[2025-09-19 04:47:09] Command: iptables -L FORWARD
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+ACCEPT     all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
+[2025-09-19 04:47:09] Exit code: 0
+[2025-09-19 04:47:09] 🧪 STEP 10: Testing connectivity
+[2025-09-19 04:47:09] Running: Test local IP
+[2025-09-19 04:47:09] Command: ping -c 2 192.168.4.1
+PING 192.168.4.1 (192.168.4.1) 56(84) bytes of data.
+64 bytes from 192.168.4.1: icmp_seq=1 ttl=64 time=0.105 ms
+64 bytes from 192.168.4.1: icmp_seq=2 ttl=64 time=0.072 ms
+
+--- 192.168.4.1 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1004ms
+rtt min/avg/max/mdev = 0.072/0.088/0.105/0.016 ms
+[2025-09-19 04:47:10] Exit code: 0
+[2025-09-19 04:47:10] Running: Scan for ValerieParty
+[2025-09-19 04:47:10] Command: iwlist scan | grep -A3 -B3 ValerieParty || echo 'ValerieParty not found'
+lo        Interface doesn't support scanning.
+
+eth0      Interface doesn't support scanning.
+
+                    Frequency:2.412 GHz (Channel 1)
+                    Quality=70/70  Signal level=-28 dBm  
+                    Encryption key:off
+                    ESSID:"ValerieParty"
+                    Bit Rates:1 Mb/s; 2 Mb/s; 5.5 Mb/s; 11 Mb/s; 6 Mb/s
+                              9 Mb/s; 12 Mb/s; 18 Mb/s
+                    Bit Rates:24 Mb/s; 36 Mb/s; 48 Mb/s; 54 Mb/s
+[2025-09-19 04:47:23] Exit code: 0
+[2025-09-19 04:47:23] 📊 STEP 11: Final status check
+[2025-09-19 04:47:23] === SETUP COMPLETE ===
+[2025-09-19 04:47:23] wlan0 (Kitesurfer): 10.228.15.90/24
+[2025-09-19 04:47:23] wlan1 (ValerieParty): 192.168.4.1/24
+[2025-09-19 04:47:23] hostapd: active
+[2025-09-19 04:47:23] dnsmasq: active
+[2025-09-19 04:48:12] Starting complete PixelParty network setup
+[2025-09-19 04:48:12] Target: wlan0=Kitesurfer, wlan1=ValerieParty with internet forwarding
+[2025-09-19 04:48:12] 🛑 STEP 1: Stopping all services
+[2025-09-19 04:48:12] Running: Stop hostapd
+[2025-09-19 04:48:12] Command: systemctl stop hostapd
+[2025-09-19 04:48:12] Exit code: 0
+[2025-09-19 04:48:12] Running: Stop dnsmasq
+[2025-09-19 04:48:12] Command: systemctl stop dnsmasq
+[2025-09-19 04:48:12] Exit code: 0
+[2025-09-19 04:48:12] Running: Kill any remaining hostapd processes
+[2025-09-19 04:48:12] Command: pkill -f hostapd
+[2025-09-19 04:48:12] Exit code: 1
+[2025-09-19 04:48:12] Running: Kill any remaining dnsmasq processes
+[2025-09-19 04:48:12] Command: pkill -f dnsmasq
+[2025-09-19 04:48:12] Exit code: 1
+[2025-09-19 04:48:12] 🧹 STEP 2: Cleaning up network interfaces
+[2025-09-19 04:48:12] Running: Flush wlan1 addresses
+[2025-09-19 04:48:12] Command: ip addr flush dev wlan1
+[2025-09-19 04:48:12] Exit code: 0
+[2025-09-19 04:48:12] Running: Bring wlan1 down
+[2025-09-19 04:48:12] Command: ip link set dev wlan1 down
+[2025-09-19 04:48:12] Exit code: 0
+[2025-09-19 04:48:12] Running: Bring wlan1 up
+[2025-09-19 04:48:12] Command: ip link set dev wlan1 up
+[2025-09-19 04:48:12] Exit code: 0
+[2025-09-19 04:48:12] 🔧 STEP 3: Setting up wlan1 interface
+[2025-09-19 04:48:12] Running: Add IP to wlan1
+[2025-09-19 04:48:12] Command: ip addr add 192.168.4.1/24 dev wlan1
+[2025-09-19 04:48:12] Exit code: 0
+[2025-09-19 04:48:12] Running: Ensure wlan1 is up
+[2025-09-19 04:48:12] Command: ip link set dev wlan1 up
+[2025-09-19 04:48:12] Exit code: 0
+[2025-09-19 04:48:12] 🔀 STEP 4: Enabling IP forwarding
+[2025-09-19 04:48:12] Running: Enable IP forwarding
+[2025-09-19 04:48:12] Command: sysctl -w net.ipv4.ip_forward=1
+net.ipv4.ip_forward = 1
+[2025-09-19 04:48:12] Exit code: 0
+[2025-09-19 04:48:12] 🛡️ STEP 5: Setting up iptables rules
+[2025-09-19 04:48:12] Running: Flush NAT table
+[2025-09-19 04:48:12] Command: iptables -t nat -F
+[2025-09-19 04:48:12] Exit code: 0
+[2025-09-19 04:48:12] Running: Flush FORWARD chain
+[2025-09-19 04:48:12] Command: iptables -F FORWARD
+[2025-09-19 04:48:12] Exit code: 0
+[2025-09-19 04:48:12] Detected primary internet interface: wlan0
+[2025-09-19 04:48:12] Running: Set up NAT masquerading to wlan0
+[2025-09-19 04:48:12] Command: iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+[2025-09-19 04:48:12] Exit code: 0
+[2025-09-19 04:48:12] Running: Allow forward wlan1->wlan0
+[2025-09-19 04:48:12] Command: iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
+[2025-09-19 04:48:12] Exit code: 0
+[2025-09-19 04:48:12] Running: Allow return traffic from wlan0
+[2025-09-19 04:48:12] Command: iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+[2025-09-19 04:48:13] Exit code: 0
+[2025-09-19 04:48:13] 📡 STEP 6: Configuring hostapd
+[2025-09-19 04:48:13] Running: Show hostapd config
+[2025-09-19 04:48:13] Command: cat /etc/hostapd/hostapd.conf
+interface=wlan1
+driver=nl80211
+ssid=ValerieParty
+hw_mode=g
+channel=1
+wmm_enabled=1
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+ieee80211n=1
+[2025-09-19 04:48:13] Exit code: 0
+[2025-09-19 04:48:13] 🌐 STEP 7: Configuring dnsmasq
+[2025-09-19 04:48:13] Running: Backup dnsmasq config
+[2025-09-19 04:48:13] Command: cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup.1758253693
+[2025-09-19 04:48:13] Exit code: 0
+[2025-09-19 04:48:13] Running: Remove old PixelParty config
+[2025-09-19 04:48:13] Command: sed -i '/# PixelParty Guest Network/,/^$/d' /etc/dnsmasq.conf
+[2025-09-19 04:48:13] Exit code: 0
+[2025-09-19 04:48:13] Running: Show dnsmasq config
+[2025-09-19 04:48:13] Command: tail -10 /etc/dnsmasq.conf
+
+
+
+
+
+
+
+# PixelParty Guest Network
+interface=wlan1
+dhcp-range=192.168.4.2,192.168.4.254,255.255.255.0,24h
+[2025-09-19 04:48:13] Exit code: 0
+[2025-09-19 04:48:13] 🚀 STEP 8: Starting services
+[2025-09-19 04:48:13] Running: Start dnsmasq
+[2025-09-19 04:48:13] Command: systemctl start dnsmasq
+[2025-09-19 04:48:13] Exit code: 0
+[2025-09-19 04:58:46] Starting complete PixelParty network setup
+[2025-09-19 04:58:46] Target: wlan0=Kitesurfer, wlan1=ValerieParty with internet forwarding
+[2025-09-19 04:58:47] 🛑 STEP 1: Stopping all services
+[2025-09-19 04:58:47] Running: Stop hostapd
+[2025-09-19 04:58:47] Command: systemctl stop hostapd
+[2025-09-19 04:58:47] Exit code: 0
+[2025-09-19 04:58:47] Running: Stop dnsmasq
+[2025-09-19 04:58:47] Command: systemctl stop dnsmasq
+[2025-09-19 04:58:47] Exit code: 0
+[2025-09-19 04:58:47] Running: Kill any remaining hostapd processes
+[2025-09-19 04:58:47] Command: pkill -f hostapd
+[2025-09-19 04:58:47] Exit code: 1
+[2025-09-19 04:58:47] Running: Kill any remaining dnsmasq processes
+[2025-09-19 04:58:47] Command: pkill -f dnsmasq
+[2025-09-19 04:58:47] Exit code: 1
+[2025-09-19 04:58:47] 🧹 STEP 2: Cleaning up network interfaces
+[2025-09-19 04:58:47] Running: Flush wlan1 addresses
+[2025-09-19 04:58:47] Command: ip addr flush dev wlan1
+[2025-09-19 04:58:47] Exit code: 0
+[2025-09-19 04:58:47] Running: Bring wlan1 down
+[2025-09-19 04:58:47] Command: ip link set dev wlan1 down
+[2025-09-19 04:58:47] Exit code: 0
+[2025-09-19 04:58:47] Running: Bring wlan1 up
+[2025-09-19 04:58:47] Command: ip link set dev wlan1 up
+[2025-09-19 04:58:47] Exit code: 0
+[2025-09-19 04:58:47] 🔧 STEP 3: Setting up wlan1 interface
+[2025-09-19 04:58:47] Running: Add IP to wlan1
+[2025-09-19 04:58:47] Command: ip addr add 192.168.4.1/24 dev wlan1
+[2025-09-19 04:58:47] Exit code: 0
+[2025-09-19 04:58:47] Running: Ensure wlan1 is up
+[2025-09-19 04:58:47] Command: ip link set dev wlan1 up
+[2025-09-19 04:58:47] Exit code: 0
+[2025-09-19 04:58:47] 🔀 STEP 4: Enabling IP forwarding
+[2025-09-19 04:58:47] Running: Enable IP forwarding
+[2025-09-19 04:58:47] Command: sysctl -w net.ipv4.ip_forward=1
+net.ipv4.ip_forward = 1
+[2025-09-19 04:58:48] Exit code: 0
+[2025-09-19 04:58:48] 🛡️ STEP 5: Setting up iptables rules
+[2025-09-19 04:58:48] Running: Flush NAT table
+[2025-09-19 04:58:48] Command: iptables -t nat -F
+[2025-09-19 04:58:48] Exit code: 0
+[2025-09-19 04:58:48] Running: Flush FORWARD chain
+[2025-09-19 04:58:48] Command: iptables -F FORWARD
+[2025-09-19 04:58:48] Exit code: 0
+[2025-09-19 04:58:48] Detected primary internet interface: wlan0
+[2025-09-19 04:58:48] Running: Set up NAT masquerading to wlan0
+[2025-09-19 04:58:48] Command: iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+[2025-09-19 04:58:48] Exit code: 0
+[2025-09-19 04:58:48] Running: Allow forward wlan1->wlan0
+[2025-09-19 04:58:48] Command: iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
+[2025-09-19 04:58:48] Exit code: 0
+[2025-09-19 04:58:48] Running: Allow return traffic from wlan0
+[2025-09-19 04:58:48] Command: iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+[2025-09-19 04:58:48] Exit code: 0
+[2025-09-19 04:58:48] 📡 STEP 6: Configuring hostapd
+[2025-09-19 04:58:48] Running: Show hostapd config
+[2025-09-19 04:58:48] Command: cat /etc/hostapd/hostapd.conf
+interface=wlan1
+driver=nl80211
+ssid=ValerieParty
+hw_mode=g
+channel=1
+wmm_enabled=1
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+ieee80211n=1
+[2025-09-19 04:58:48] Exit code: 0
+[2025-09-19 04:58:48] 🌐 STEP 7: Configuring dnsmasq
+[2025-09-19 04:58:48] Running: Backup dnsmasq config
+[2025-09-19 04:58:48] Command: cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup.1758254328
+[2025-09-19 04:58:48] Exit code: 0
+[2025-09-19 04:58:48] Running: Remove old PixelParty config
+[2025-09-19 04:58:48] Command: sed -i '/# PixelParty Guest Network/,/^$/d' /etc/dnsmasq.conf
+[2025-09-19 04:58:48] Exit code: 0
+[2025-09-19 04:58:48] Running: Show dnsmasq config
+[2025-09-19 04:58:48] Command: tail -10 /etc/dnsmasq.conf
+
+
+
+
+
+
+
+# PixelParty Guest Network
+interface=wlan1
+dhcp-range=192.168.4.2,192.168.4.254,255.255.255.0,24h
+[2025-09-19 04:58:48] Exit code: 0
+[2025-09-19 04:58:48] 🚀 STEP 8: Starting services
+[2025-09-19 04:58:48] Running: Start dnsmasq
+[2025-09-19 04:58:48] Command: systemctl start dnsmasq
+[2025-09-19 04:58:48] Exit code: 0
+[2025-09-19 04:58:51] Running: Start hostapd
+[2025-09-19 04:58:51] Command: systemctl start hostapd
+[2025-09-19 04:58:51] Exit code: 0
+[2025-09-19 04:58:56] ✅ STEP 9: Verifying setup
+[2025-09-19 04:58:56] Running: Check dnsmasq status
+[2025-09-19 04:58:56] Command: systemctl status dnsmasq
+● dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server
+     Loaded: loaded (/lib/systemd/system/dnsmasq.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 04:58:48 BST; 8s ago
+    Process: 1699 ExecStartPre=/usr/share/dnsmasq/systemd-helper checkconfig (code=exited, status=0/SUCCESS)
+    Process: 1704 ExecStart=/usr/share/dnsmasq/systemd-helper exec (code=exited, status=0/SUCCESS)
+    Process: 1710 ExecStartPost=/usr/share/dnsmasq/systemd-helper start-resolvconf (code=exited, status=0/SUCCESS)
+   Main PID: 1709 (dnsmasq)
+      Tasks: 1 (limit: 8750)
+        CPU: 47ms
+     CGroup: /system.slice/dnsmasq.service
+             └─1709 /usr/sbin/dnsmasq -x /run/dnsmasq/dnsmasq.pid -u dnsmasq -7 /etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new --local-service --trust-anchor=.,20326,8,2,E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D --trust-anchor=.,38696,8,2,683D2D0ACB8C9B712A1948B27F741219298D0A450D612C483AF444A4C0FB2B16
+
+Sep 19 04:58:48 raspberrypi systemd[1]: Starting dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server...
+Sep 19 04:58:48 raspberrypi dnsmasq[1709]: started, version 2.90 cachesize 150
+Sep 19 04:58:48 raspberrypi dnsmasq[1709]: compile time options: IPv6 GNU-getopt DBus no-UBus i18n IDN2 DHCP DHCPv6 no-Lua TFTP conntrack ipset nftset auth cryptohash DNSSEC loop-detect inotify dumpfile
+Sep 19 04:58:48 raspberrypi dnsmasq-dhcp[1709]: DHCP, IP range 192.168.4.2 -- 192.168.4.254, lease time 1d
+Sep 19 04:58:48 raspberrypi dnsmasq[1709]: reading /etc/resolv.conf
+Sep 19 04:58:48 raspberrypi dnsmasq[1709]: using nameserver 10.228.15.40#53
+Sep 19 04:58:48 raspberrypi dnsmasq[1709]: read /etc/hosts - 7 names
+Sep 19 04:58:48 raspberrypi systemd[1]: Started dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server.
+[2025-09-19 04:58:56] Exit code: 0
+[2025-09-19 04:58:56] Running: Check hostapd status
+[2025-09-19 04:58:56] Command: systemctl status hostapd
+● hostapd.service - Access point and authentication server for Wi-Fi and Ethernet
+     Loaded: loaded (/lib/systemd/system/hostapd.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 04:58:51 BST; 5s ago
+       Docs: man:hostapd(8)
+    Process: 1729 ExecStart=/usr/sbin/hostapd -B -P /run/hostapd.pid $DAEMON_OPTS ${DAEMON_CONF} (code=exited, status=0/SUCCESS)
+   Main PID: 1730 (hostapd)
+      Tasks: 1 (limit: 8750)
+        CPU: 12ms
+     CGroup: /system.slice/hostapd.service
+             └─1730 /usr/sbin/hostapd -B -P /run/hostapd.pid /etc/hostapd/hostapd.conf
+
+Sep 19 04:58:51 raspberrypi systemd[1]: Starting hostapd.service - Access point and authentication server for Wi-Fi and Ethernet...
+Sep 19 04:58:51 raspberrypi hostapd[1729]: wlan1: interface state UNINITIALIZED->ENABLED
+Sep 19 04:58:51 raspberrypi hostapd[1729]: wlan1: AP-ENABLED
+Sep 19 04:58:51 raspberrypi systemd[1]: Started hostapd.service - Access point and authentication server for Wi-Fi and Ethernet.
+[2025-09-19 04:58:56] Exit code: 0
+[2025-09-19 04:58:56] Running: Check wireless interfaces
+[2025-09-19 04:58:56] Command: iwconfig
+lo        no wireless extensions.
+
+eth0      no wireless extensions.
+
+wlan0     IEEE 802.11bgn  ESSID:"Kitesurfer"  Nickname:"<WIFI@REALTEK>"
+          Mode:Managed  Frequency:2.437 GHz  Access Point: 0A:F4:63:E5:90:FF   
+          Bit Rate:144.4 Mb/s   Sensitivity:0/0  
+          Retry:off   RTS thr:off   Fragment thr:off
+          Encryption key:****-****-****-****-****-****-****-****   Security mode:open
+          Power Management:off
+          Link Quality=100/100  Signal level=71/100  Noise level=0/100
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:0  Invalid misc:0   Missed beacon:0
+
+wlan1     IEEE 802.11  Mode:Master  Tx-Power=31 dBm   
+          Retry short limit:7   RTS thr:off   Fragment thr:off
+          Power Management:on
+          
+[2025-09-19 04:58:56] Exit code: 0
+[2025-09-19 04:58:56] Running: Check IP addresses
+[2025-09-19 04:58:56] Command: ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: eth0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc mq state DOWN group default qlen 1000
+    link/ether e4:5f:01:10:68:9c brd ff:ff:ff:ff:ff:ff
+3: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 2312 qdisc mq state UP group default qlen 1000
+    link/ether e4:be:ed:f8:1f:42 brd ff:ff:ff:ff:ff:ff
+    inet 10.228.15.232/24 brd 10.228.15.255 scope global dynamic noprefixroute wlan0
+       valid_lft 3536sec preferred_lft 3536sec
+    inet6 fe80::211b:1ff5:b92b:1167/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+4: wlan1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether e4:5f:01:10:68:9e brd ff:ff:ff:ff:ff:ff
+    inet 192.168.4.1/24 scope global wlan1
+       valid_lft forever preferred_lft forever
+[2025-09-19 04:58:56] Exit code: 0
+[2025-09-19 04:58:56] Running: Check NAT rules
+[2025-09-19 04:58:56] Command: iptables -t nat -L POSTROUTING
+Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination         
+MASQUERADE  all  --  anywhere             anywhere            
+[2025-09-19 04:58:57] Exit code: 0
+[2025-09-19 04:58:57] Running: Check forward rules
+[2025-09-19 04:58:57] Command: iptables -L FORWARD
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+ACCEPT     all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
+[2025-09-19 04:58:57] Exit code: 0
+[2025-09-19 04:58:57] 🧪 STEP 10: Testing connectivity
+[2025-09-19 04:58:57] Running: Test local IP
+[2025-09-19 04:58:57] Command: ping -c 2 192.168.4.1
+PING 192.168.4.1 (192.168.4.1) 56(84) bytes of data.
+64 bytes from 192.168.4.1: icmp_seq=1 ttl=64 time=0.170 ms
+64 bytes from 192.168.4.1: icmp_seq=2 ttl=64 time=0.097 ms
+
+--- 192.168.4.1 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1032ms
+rtt min/avg/max/mdev = 0.097/0.133/0.170/0.036 ms
+[2025-09-19 04:58:58] Exit code: 0
+[2025-09-19 04:58:58] Running: Scan for ValerieParty
+[2025-09-19 04:58:58] Command: iwlist scan | grep -A3 -B3 ValerieParty || echo 'ValerieParty not found'
+lo        Interface doesn't support scanning.
+
+eth0      Interface doesn't support scanning.
+
+                    Quality=100/100  Signal level=71/100  
+                    Extra:fm=0003
+          Cell 02 - Address: E4:5F:01:10:68:9E
+                    ESSID:"ValerieParty"
+                    Protocol:IEEE 802.11bgn
+                    Mode:Master
+                    Frequency:2.412 GHz (Channel 1)
+[2025-09-19 04:59:05] Exit code: 0
+[2025-09-19 04:59:05] 📊 STEP 11: Final status check
+[2025-09-19 04:59:05] === SETUP COMPLETE ===
+[2025-09-19 04:59:05] wlan0 (Kitesurfer): 10.228.15.232/24
+[2025-09-19 04:59:05] wlan1 (ValerieParty): 192.168.4.1/24
+[2025-09-19 04:59:05] hostapd: active
+[2025-09-19 04:59:05] dnsmasq: active
+[2025-09-19 11:02:48] Starting complete PixelParty network setup
+[2025-09-19 11:02:48] Target: wlan0=Kitesurfer, wlan1=ValerieParty with internet forwarding
+[2025-09-19 11:02:48] 🛑 STEP 1: Stopping all services
+[2025-09-19 11:02:48] Running: Stop hostapd
+[2025-09-19 11:02:48] Command: systemctl stop hostapd
+[2025-09-19 11:02:48] Exit code: 0
+[2025-09-19 11:02:48] Running: Stop dnsmasq
+[2025-09-19 11:02:48] Command: systemctl stop dnsmasq
+[2025-09-19 11:02:48] Exit code: 0
+[2025-09-19 11:02:48] Running: Kill any remaining hostapd processes
+[2025-09-19 11:02:48] Command: pkill -f hostapd
+[2025-09-19 11:02:48] Exit code: 1
+[2025-09-19 11:02:48] Running: Kill any remaining dnsmasq processes
+[2025-09-19 11:02:48] Command: pkill -f dnsmasq
+[2025-09-19 11:02:48] Exit code: 1
+[2025-09-19 11:02:48] 🧹 STEP 2: Cleaning up network interfaces
+[2025-09-19 11:02:48] Running: Flush wlan1 addresses
+[2025-09-19 11:02:48] Command: ip addr flush dev wlan1
+[2025-09-19 11:02:48] Exit code: 0
+[2025-09-19 11:02:48] Running: Bring wlan1 down
+[2025-09-19 11:02:48] Command: ip link set dev wlan1 down
+[2025-09-19 11:02:48] Exit code: 0
+[2025-09-19 11:02:48] Running: Bring wlan1 up
+[2025-09-19 11:02:48] Command: ip link set dev wlan1 up
+[2025-09-19 11:02:48] Exit code: 0
+[2025-09-19 11:02:48] 🔧 STEP 3: Setting up wlan1 interface
+[2025-09-19 11:02:48] Running: Add IP to wlan1
+[2025-09-19 11:02:48] Command: ip addr add 192.168.4.1/24 dev wlan1
+[2025-09-19 11:02:48] Exit code: 0
+[2025-09-19 11:02:48] Running: Ensure wlan1 is up
+[2025-09-19 11:02:48] Command: ip link set dev wlan1 up
+[2025-09-19 11:02:48] Exit code: 0
+[2025-09-19 11:02:48] 🔀 STEP 4: Enabling IP forwarding
+[2025-09-19 11:02:48] Running: Enable IP forwarding
+[2025-09-19 11:02:48] Command: sysctl -w net.ipv4.ip_forward=1
+net.ipv4.ip_forward = 1
+[2025-09-19 11:02:48] Exit code: 0
+[2025-09-19 11:02:48] 🛡️ STEP 5: Setting up iptables rules
+[2025-09-19 11:02:48] Running: Flush NAT table
+[2025-09-19 11:02:48] Command: iptables -t nat -F
+[2025-09-19 11:02:48] Exit code: 0
+[2025-09-19 11:02:48] Running: Flush FORWARD chain
+[2025-09-19 11:02:48] Command: iptables -F FORWARD
+[2025-09-19 11:02:48] Exit code: 0
+[2025-09-19 11:02:48] Detected primary internet interface: wlan0
+[2025-09-19 11:02:48] Running: Set up NAT masquerading to wlan0
+[2025-09-19 11:02:48] Command: iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+[2025-09-19 11:02:48] Exit code: 0
+[2025-09-19 11:02:48] Running: Allow forward wlan1->wlan0
+[2025-09-19 11:02:48] Command: iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
+[2025-09-19 11:02:48] Exit code: 0
+[2025-09-19 11:02:49] Running: Allow return traffic from wlan0
+[2025-09-19 11:02:49] Command: iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+[2025-09-19 11:02:49] Exit code: 0
+[2025-09-19 11:02:49] 📡 STEP 6: Configuring hostapd
+[2025-09-19 11:02:49] Running: Show hostapd config
+[2025-09-19 11:02:49] Command: cat /etc/hostapd/hostapd.conf
+interface=wlan1
+driver=nl80211
+ssid=ValerieParty
+hw_mode=g
+channel=1
+wmm_enabled=1
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+ieee80211n=1
+[2025-09-19 11:02:49] Exit code: 0
+[2025-09-19 11:02:49] 🌐 STEP 7: Configuring dnsmasq
+[2025-09-19 11:02:49] Running: Backup dnsmasq config
+[2025-09-19 11:02:49] Command: cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup.1758294169
+[2025-09-19 11:02:49] Exit code: 0
+[2025-09-19 11:02:49] Running: Remove old PixelParty config
+[2025-09-19 11:02:49] Command: sed -i '/# PixelParty Guest Network/,/^$/d' /etc/dnsmasq.conf
+[2025-09-19 11:02:49] Exit code: 0
+[2025-09-19 11:02:49] Running: Show dnsmasq config
+[2025-09-19 11:02:49] Command: tail -10 /etc/dnsmasq.conf
+
+
+
+
+
+
+
+# PixelParty Guest Network
+interface=wlan1
+dhcp-range=192.168.4.2,192.168.4.254,255.255.255.0,24h
+[2025-09-19 11:02:49] Exit code: 0
+[2025-09-19 11:02:49] 🚀 STEP 8: Starting services
+[2025-09-19 11:02:49] Running: Start dnsmasq
+[2025-09-19 11:02:49] Command: systemctl start dnsmasq
+[2025-09-19 11:02:49] Exit code: 0
+[2025-09-19 11:02:52] Running: Start hostapd
+[2025-09-19 11:02:52] Command: systemctl start hostapd
+[2025-09-19 11:02:52] Exit code: 0
+[2025-09-19 11:02:57] ✅ STEP 9: Verifying setup
+[2025-09-19 11:02:57] Running: Check dnsmasq status
+[2025-09-19 11:02:57] Command: systemctl status dnsmasq
+● dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server
+     Loaded: loaded (/lib/systemd/system/dnsmasq.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 11:02:49 EDT; 8s ago
+    Process: 6680 ExecStartPre=/usr/share/dnsmasq/systemd-helper checkconfig (code=exited, status=0/SUCCESS)
+    Process: 6685 ExecStart=/usr/share/dnsmasq/systemd-helper exec (code=exited, status=0/SUCCESS)
+    Process: 6691 ExecStartPost=/usr/share/dnsmasq/systemd-helper start-resolvconf (code=exited, status=0/SUCCESS)
+   Main PID: 6690 (dnsmasq)
+      Tasks: 1 (limit: 8750)
+        CPU: 49ms
+     CGroup: /system.slice/dnsmasq.service
+             └─6690 /usr/sbin/dnsmasq -x /run/dnsmasq/dnsmasq.pid -u dnsmasq -7 /etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new --local-service --trust-anchor=.,20326,8,2,E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D --trust-anchor=.,38696,8,2,683D2D0ACB8C9B712A1948B27F741219298D0A450D612C483AF444A4C0FB2B16
+
+Sep 19 11:02:49 raspberrypi systemd[1]: Starting dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server...
+Sep 19 11:02:49 raspberrypi dnsmasq[6690]: started, version 2.90 cachesize 150
+Sep 19 11:02:49 raspberrypi dnsmasq[6690]: compile time options: IPv6 GNU-getopt DBus no-UBus i18n IDN2 DHCP DHCPv6 no-Lua TFTP conntrack ipset nftset auth cryptohash DNSSEC loop-detect inotify dumpfile
+Sep 19 11:02:49 raspberrypi dnsmasq-dhcp[6690]: DHCP, IP range 192.168.4.2 -- 192.168.4.254, lease time 1d
+Sep 19 11:02:49 raspberrypi dnsmasq[6690]: reading /etc/resolv.conf
+Sep 19 11:02:49 raspberrypi dnsmasq[6690]: using nameserver 10.228.15.40#53
+Sep 19 11:02:49 raspberrypi dnsmasq[6690]: read /etc/hosts - 7 names
+Sep 19 11:02:49 raspberrypi systemd[1]: Started dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server.
+[2025-09-19 11:02:57] Exit code: 0
+[2025-09-19 11:02:57] Running: Check hostapd status
+[2025-09-19 11:02:57] Command: systemctl status hostapd
+● hostapd.service - Access point and authentication server for Wi-Fi and Ethernet
+     Loaded: loaded (/lib/systemd/system/hostapd.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 11:02:52 EDT; 5s ago
+       Docs: man:hostapd(8)
+    Process: 6710 ExecStart=/usr/sbin/hostapd -B -P /run/hostapd.pid $DAEMON_OPTS ${DAEMON_CONF} (code=exited, status=0/SUCCESS)
+   Main PID: 6711 (hostapd)
+      Tasks: 1 (limit: 8750)
+        CPU: 12ms
+     CGroup: /system.slice/hostapd.service
+             └─6711 /usr/sbin/hostapd -B -P /run/hostapd.pid /etc/hostapd/hostapd.conf
+
+Sep 19 11:02:52 raspberrypi systemd[1]: Starting hostapd.service - Access point and authentication server for Wi-Fi and Ethernet...
+Sep 19 11:02:52 raspberrypi hostapd[6710]: wlan1: interface state UNINITIALIZED->ENABLED
+Sep 19 11:02:52 raspberrypi hostapd[6710]: wlan1: AP-ENABLED
+Sep 19 11:02:52 raspberrypi systemd[1]: Started hostapd.service - Access point and authentication server for Wi-Fi and Ethernet.
+[2025-09-19 11:02:57] Exit code: 0
+[2025-09-19 11:02:57] Running: Check wireless interfaces
+[2025-09-19 11:02:57] Command: iwconfig
+lo        no wireless extensions.
+
+eth0      no wireless extensions.
+
+wlan0     IEEE 802.11  ESSID:"Kitesurfer"  
+          Mode:Managed  Frequency:2.417 GHz  Access Point: 0A:F4:63:E5:90:FF   
+          Bit Rate=24 Mb/s   Tx-Power=31 dBm   
+          Retry short limit:7   RTS thr:off   Fragment thr:off
+          Encryption key:off
+          Power Management:on
+          Link Quality=70/70  Signal level=-11 dBm  
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:214  Invalid misc:0   Missed beacon:0
+
+wlan1     IEEE 802.11bgn  ESSID:"ValerieParty"  Nickname:"<WIFI@REALTEK>"
+          Mode:Master  Frequency:2.412 GHz  Access Point: E4:BE:ED:F8:1F:42   
+          Bit Rate:144.4 Mb/s   Sensitivity:0/0  
+          Retry:off   RTS thr:off   Fragment thr:off
+          Encryption key:off
+          Power Management:off
+          Link Quality:0  Signal level:0  Noise level:0
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:0  Invalid misc:0   Missed beacon:0
+
+[2025-09-19 11:02:57] Exit code: 0
+[2025-09-19 11:02:57] Running: Check IP addresses
+[2025-09-19 11:02:57] Command: ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: eth0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc mq state DOWN group default qlen 1000
+    link/ether e4:5f:01:10:68:9c brd ff:ff:ff:ff:ff:ff
+3: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether e4:5f:01:10:68:9e brd ff:ff:ff:ff:ff:ff
+    inet 10.228.15.232/24 brd 10.228.15.255 scope global dynamic noprefixroute wlan0
+       valid_lft 2095sec preferred_lft 2095sec
+    inet6 fe80::211b:1ff5:b92b:1167/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+4: wlan1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 2312 qdisc mq state UP group default qlen 1000
+    link/ether e4:be:ed:f8:1f:42 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.4.1/24 scope global wlan1
+       valid_lft forever preferred_lft forever
+[2025-09-19 11:02:57] Exit code: 0
+[2025-09-19 11:02:57] Running: Check NAT rules
+[2025-09-19 11:02:57] Command: iptables -t nat -L POSTROUTING
+Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination         
+MASQUERADE  all  --  anywhere             anywhere            
+[2025-09-19 11:02:57] Exit code: 0
+[2025-09-19 11:02:57] Running: Check forward rules
+[2025-09-19 11:02:57] Command: iptables -L FORWARD
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+ACCEPT     all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
+[2025-09-19 11:02:57] Exit code: 0
+[2025-09-19 11:02:57] 🧪 STEP 10: Testing connectivity
+[2025-09-19 11:02:57] Running: Test local IP
+[2025-09-19 11:02:57] Command: ping -c 2 192.168.4.1
+PING 192.168.4.1 (192.168.4.1) 56(84) bytes of data.
+64 bytes from 192.168.4.1: icmp_seq=1 ttl=64 time=0.115 ms
+64 bytes from 192.168.4.1: icmp_seq=2 ttl=64 time=0.109 ms
+
+--- 192.168.4.1 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1004ms
+rtt min/avg/max/mdev = 0.109/0.112/0.115/0.003 ms
+[2025-09-19 11:02:58] Exit code: 0
+[2025-09-19 11:02:58] Running: Scan for ValerieParty
+[2025-09-19 11:02:58] Command: iwlist scan | grep -A3 -B3 ValerieParty || echo 'ValerieParty not found'
+lo        Interface doesn't support scanning.
+
+eth0      Interface doesn't support scanning.
+
+                    Frequency:2.412 GHz (Channel 1)
+                    Quality=70/70  Signal level=-28 dBm  
+                    Encryption key:off
+                    ESSID:"ValerieParty"
+                    Bit Rates:1 Mb/s; 2 Mb/s; 5.5 Mb/s; 11 Mb/s; 6 Mb/s
+                              9 Mb/s; 12 Mb/s; 18 Mb/s
+                    Bit Rates:24 Mb/s; 36 Mb/s; 48 Mb/s; 54 Mb/s
+[2025-09-19 11:03:05] Exit code: 0
+[2025-09-19 11:03:05] 📊 STEP 11: Final status check
+[2025-09-19 11:03:05] === SETUP COMPLETE ===
+[2025-09-19 11:03:05] wlan0 (Kitesurfer): 10.228.15.232/24
+[2025-09-19 11:03:05] wlan1 (ValerieParty): 192.168.4.1/24
+[2025-09-19 11:03:05] hostapd: active
+[2025-09-19 11:03:05] dnsmasq: active
+[2025-09-19 18:34:42] Starting complete PixelParty network setup
+[2025-09-19 18:34:42] Target: wlan0=Kitesurfer, wlan1=ValerieParty with internet forwarding
+[2025-09-19 18:34:42] 🛑 STEP 1: Stopping all services
+[2025-09-19 18:34:42] Running: Stop hostapd
+[2025-09-19 18:34:42] Command: systemctl stop hostapd
+[2025-09-19 18:34:42] Exit code: 0
+[2025-09-19 18:34:42] Running: Stop dnsmasq
+[2025-09-19 18:34:42] Command: systemctl stop dnsmasq
+[2025-09-19 18:34:42] Exit code: 0
+[2025-09-19 18:34:42] Running: Kill any remaining hostapd processes
+[2025-09-19 18:34:42] Command: pkill -f hostapd
+[2025-09-19 18:34:42] Exit code: 1
+[2025-09-19 18:34:42] Running: Kill any remaining dnsmasq processes
+[2025-09-19 18:34:42] Command: pkill -f dnsmasq
+[2025-09-19 18:34:42] Exit code: 1
+[2025-09-19 18:34:42] 🧹 STEP 2: Cleaning up network interfaces
+[2025-09-19 18:34:42] Running: Flush wlan1 addresses
+[2025-09-19 18:34:42] Command: ip addr flush dev wlan1
+[2025-09-19 18:34:42] Exit code: 0
+[2025-09-19 18:34:42] Running: Bring wlan1 down
+[2025-09-19 18:34:42] Command: ip link set dev wlan1 down
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] Running: Bring wlan1 up
+[2025-09-19 18:34:43] Command: ip link set dev wlan1 up
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] 🔧 STEP 3: Setting up wlan1 interface
+[2025-09-19 18:34:43] Running: Add IP to wlan1
+[2025-09-19 18:34:43] Command: ip addr add 192.168.4.1/24 dev wlan1
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] Running: Ensure wlan1 is up
+[2025-09-19 18:34:43] Command: ip link set dev wlan1 up
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] 🔀 STEP 4: Enabling IP forwarding
+[2025-09-19 18:34:43] Running: Enable IP forwarding
+[2025-09-19 18:34:43] Command: sysctl -w net.ipv4.ip_forward=1
+net.ipv4.ip_forward = 1
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] 🛡️ STEP 5: Setting up iptables rules
+[2025-09-19 18:34:43] Running: Flush NAT table
+[2025-09-19 18:34:43] Command: iptables -t nat -F
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] Running: Flush FORWARD chain
+[2025-09-19 18:34:43] Command: iptables -F FORWARD
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] Detected primary internet interface: wlan0
+[2025-09-19 18:34:43] Running: Set up NAT masquerading to wlan0
+[2025-09-19 18:34:43] Command: iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] Running: Allow forward wlan1->wlan0
+[2025-09-19 18:34:43] Command: iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] Running: Allow return traffic from wlan0
+[2025-09-19 18:34:43] Command: iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] 📡 STEP 6: Configuring hostapd
+[2025-09-19 18:34:43] Running: Show hostapd config
+[2025-09-19 18:34:43] Command: cat /etc/hostapd/hostapd.conf
+interface=wlan1
+driver=nl80211
+ssid=ValerieParty
+hw_mode=g
+channel=1
+wmm_enabled=1
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+ieee80211n=1
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] 🌐 STEP 7: Configuring dnsmasq
+[2025-09-19 18:34:43] Running: Backup dnsmasq config
+[2025-09-19 18:34:43] Command: cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup.1758321283
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] Running: Remove old PixelParty config
+[2025-09-19 18:34:43] Command: sed -i '/# PixelParty Guest Network/,/^$/d' /etc/dnsmasq.conf
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] Running: Show dnsmasq config
+[2025-09-19 18:34:43] Command: tail -10 /etc/dnsmasq.conf
+
+
+
+
+
+
+
+# PixelParty Guest Network
+interface=wlan1
+dhcp-range=192.168.4.2,192.168.4.254,255.255.255.0,24h
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:43] 🚀 STEP 8: Starting services
+[2025-09-19 18:34:43] Running: Start dnsmasq
+[2025-09-19 18:34:43] Command: systemctl start dnsmasq
+[2025-09-19 18:34:43] Exit code: 0
+[2025-09-19 18:34:46] Running: Start hostapd
+[2025-09-19 18:34:46] Command: systemctl start hostapd
+[2025-09-19 18:34:47] Exit code: 0
+[2025-09-19 18:34:52] ✅ STEP 9: Verifying setup
+[2025-09-19 18:34:52] Running: Check dnsmasq status
+[2025-09-19 18:34:52] Command: systemctl status dnsmasq
+● dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server
+     Loaded: loaded (/lib/systemd/system/dnsmasq.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 18:34:43 EDT; 8s ago
+    Process: 1689 ExecStartPre=/usr/share/dnsmasq/systemd-helper checkconfig (code=exited, status=0/SUCCESS)
+    Process: 1694 ExecStart=/usr/share/dnsmasq/systemd-helper exec (code=exited, status=0/SUCCESS)
+    Process: 1700 ExecStartPost=/usr/share/dnsmasq/systemd-helper start-resolvconf (code=exited, status=0/SUCCESS)
+   Main PID: 1699 (dnsmasq)
+      Tasks: 1 (limit: 8750)
+        CPU: 47ms
+     CGroup: /system.slice/dnsmasq.service
+             └─1699 /usr/sbin/dnsmasq -x /run/dnsmasq/dnsmasq.pid -u dnsmasq -7 /etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new --local-service --trust-anchor=.,20326,8,2,E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D --trust-anchor=.,38696,8,2,683D2D0ACB8C9B712A1948B27F741219298D0A450D612C483AF444A4C0FB2B16
+
+Sep 19 18:34:43 raspberrypi systemd[1]: Starting dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server...
+Sep 19 18:34:43 raspberrypi dnsmasq[1699]: started, version 2.90 cachesize 150
+Sep 19 18:34:43 raspberrypi dnsmasq[1699]: compile time options: IPv6 GNU-getopt DBus no-UBus i18n IDN2 DHCP DHCPv6 no-Lua TFTP conntrack ipset nftset auth cryptohash DNSSEC loop-detect inotify dumpfile
+Sep 19 18:34:43 raspberrypi dnsmasq-dhcp[1699]: DHCP, IP range 192.168.4.2 -- 192.168.4.254, lease time 1d
+Sep 19 18:34:43 raspberrypi dnsmasq[1699]: reading /etc/resolv.conf
+Sep 19 18:34:43 raspberrypi dnsmasq[1699]: using nameserver 10.44.59.80#53
+Sep 19 18:34:43 raspberrypi dnsmasq[1699]: read /etc/hosts - 7 names
+Sep 19 18:34:43 raspberrypi systemd[1]: Started dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server.
+[2025-09-19 18:34:52] Exit code: 0
+[2025-09-19 18:34:52] Running: Check hostapd status
+[2025-09-19 18:34:52] Command: systemctl status hostapd
+● hostapd.service - Access point and authentication server for Wi-Fi and Ethernet
+     Loaded: loaded (/lib/systemd/system/hostapd.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-09-19 18:34:47 EDT; 5s ago
+       Docs: man:hostapd(8)
+    Process: 1719 ExecStart=/usr/sbin/hostapd -B -P /run/hostapd.pid $DAEMON_OPTS ${DAEMON_CONF} (code=exited, status=0/SUCCESS)
+   Main PID: 1720 (hostapd)
+      Tasks: 1 (limit: 8750)
+        CPU: 12ms
+     CGroup: /system.slice/hostapd.service
+             └─1720 /usr/sbin/hostapd -B -P /run/hostapd.pid /etc/hostapd/hostapd.conf
+
+Sep 19 18:34:46 raspberrypi systemd[1]: Starting hostapd.service - Access point and authentication server for Wi-Fi and Ethernet...
+Sep 19 18:34:47 raspberrypi hostapd[1719]: wlan1: interface state UNINITIALIZED->ENABLED
+Sep 19 18:34:47 raspberrypi hostapd[1719]: wlan1: AP-ENABLED
+Sep 19 18:34:47 raspberrypi systemd[1]: Started hostapd.service - Access point and authentication server for Wi-Fi and Ethernet.
+[2025-09-19 18:34:52] Exit code: 0
+[2025-09-19 18:34:52] Running: Check wireless interfaces
+[2025-09-19 18:34:52] Command: iwconfig
+lo        no wireless extensions.
+
+eth0      no wireless extensions.
+
+wlan0     IEEE 802.11bgn  ESSID:"Kitesurfer"  Nickname:"<WIFI@REALTEK>"
+          Mode:Managed  Frequency:2.442 GHz  Access Point: 0A:0B:63:E5:90:FF   
+          Bit Rate:144.4 Mb/s   Sensitivity:0/0  
+          Retry:off   RTS thr:off   Fragment thr:off
+          Encryption key:****-****-****-****-****-****-****-****   Security mode:open
+          Power Management:off
+          Link Quality=100/100  Signal level=50/100  Noise level=0/100
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:0  Invalid misc:0   Missed beacon:0
+
+wlan1     IEEE 802.11  Mode:Master  Tx-Power=31 dBm   
+          Retry short limit:7   RTS thr:off   Fragment thr:off
+          Power Management:on
+          
+[2025-09-19 18:34:52] Exit code: 0
+[2025-09-19 18:34:52] Running: Check IP addresses
+[2025-09-19 18:34:52] Command: ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: eth0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc mq state DOWN group default qlen 1000
+    link/ether e4:5f:01:10:68:9c brd ff:ff:ff:ff:ff:ff
+3: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 2312 qdisc mq state UP group default qlen 1000
+    link/ether e4:be:ed:f8:1f:42 brd ff:ff:ff:ff:ff:ff
+    inet 10.44.59.232/24 brd 10.44.59.255 scope global dynamic noprefixroute wlan0
+       valid_lft 3183sec preferred_lft 3183sec
+    inet6 fe80::211b:1ff5:b92b:1167/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+4: wlan1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether e4:5f:01:10:68:9e brd ff:ff:ff:ff:ff:ff
+    inet 192.168.4.1/24 scope global wlan1
+       valid_lft forever preferred_lft forever
+[2025-09-19 18:34:52] Exit code: 0
+[2025-09-19 18:34:52] Running: Check NAT rules
+[2025-09-19 18:34:52] Command: iptables -t nat -L POSTROUTING
+Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination         
+MASQUERADE  all  --  anywhere             anywhere            
+[2025-09-19 18:34:52] Exit code: 0
+[2025-09-19 18:34:52] Running: Check forward rules
+[2025-09-19 18:34:52] Command: iptables -L FORWARD
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+ACCEPT     all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
+[2025-09-19 18:34:52] Exit code: 0
+[2025-09-19 18:34:52] 🧪 STEP 10: Testing connectivity
+[2025-09-19 18:34:52] Running: Test local IP
+[2025-09-19 18:34:52] Command: ping -c 2 192.168.4.1
+PING 192.168.4.1 (192.168.4.1) 56(84) bytes of data.
+64 bytes from 192.168.4.1: icmp_seq=1 ttl=64 time=0.134 ms
+64 bytes from 192.168.4.1: icmp_seq=2 ttl=64 time=0.089 ms
+
+--- 192.168.4.1 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1021ms
+rtt min/avg/max/mdev = 0.089/0.111/0.134/0.022 ms
+[2025-09-19 18:34:53] Exit code: 0
+[2025-09-19 18:34:53] Running: Scan for ValerieParty
+[2025-09-19 18:34:53] Command: iwlist scan | grep -A3 -B3 ValerieParty || echo 'ValerieParty not found'
+lo        Interface doesn't support scanning.
+
+eth0      Interface doesn't support scanning.
+
+                    Quality=100/100  Signal level=50/100  
+                    Extra:fm=0003
+          Cell 02 - Address: E4:5F:01:10:68:9E
+                    ESSID:"ValerieParty"
+                    Protocol:IEEE 802.11bgn
+                    Mode:Master
+                    Frequency:2.412 GHz (Channel 1)
+[2025-09-19 18:35:01] Exit code: 0
+[2025-09-19 18:35:01] 📊 STEP 11: Final status check
+[2025-09-19 18:35:01] === SETUP COMPLETE ===
+[2025-09-19 18:35:01] wlan0 (Kitesurfer): 10.44.59.232/24
+[2025-09-19 18:35:01] wlan1 (ValerieParty): 192.168.4.1/24
+[2025-09-19 18:35:01] hostapd: active
+[2025-09-19 18:35:01] dnsmasq: active
+[2025-09-20 12:02:10] Starting complete PixelParty network setup
+[2025-09-20 12:02:10] Target: wlan0=Kitesurfer, wlan1=ValerieParty with internet forwarding
+[2025-09-20 12:02:10] 🛑 STEP 1: Stopping all services
+[2025-09-20 12:02:10] Running: Stop hostapd
+[2025-09-20 12:02:10] Command: systemctl stop hostapd
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] Running: Stop dnsmasq
+[2025-09-20 12:02:10] Command: systemctl stop dnsmasq
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] Running: Kill any remaining hostapd processes
+[2025-09-20 12:02:10] Command: pkill -f hostapd
+[2025-09-20 12:02:10] Exit code: 1
+[2025-09-20 12:02:10] Running: Kill any remaining dnsmasq processes
+[2025-09-20 12:02:10] Command: pkill -f dnsmasq
+[2025-09-20 12:02:10] Exit code: 1
+[2025-09-20 12:02:10] 🧹 STEP 2: Cleaning up network interfaces
+[2025-09-20 12:02:10] Running: Flush wlan1 addresses
+[2025-09-20 12:02:10] Command: ip addr flush dev wlan1
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] Running: Bring wlan1 down
+[2025-09-20 12:02:10] Command: ip link set dev wlan1 down
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] Running: Bring wlan1 up
+[2025-09-20 12:02:10] Command: ip link set dev wlan1 up
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] 🔧 STEP 3: Setting up wlan1 interface
+[2025-09-20 12:02:10] Running: Add IP to wlan1
+[2025-09-20 12:02:10] Command: ip addr add 192.168.4.1/24 dev wlan1
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] Running: Ensure wlan1 is up
+[2025-09-20 12:02:10] Command: ip link set dev wlan1 up
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] 🔀 STEP 4: Enabling IP forwarding
+[2025-09-20 12:02:10] Running: Enable IP forwarding
+[2025-09-20 12:02:10] Command: sysctl -w net.ipv4.ip_forward=1
+net.ipv4.ip_forward = 1
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] 🛡️ STEP 5: Setting up iptables rules
+[2025-09-20 12:02:10] Running: Flush NAT table
+[2025-09-20 12:02:10] Command: iptables -t nat -F
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] Running: Flush FORWARD chain
+[2025-09-20 12:02:10] Command: iptables -F FORWARD
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] Detected primary internet interface: wlan0
+[2025-09-20 12:02:10] Running: Set up NAT masquerading to wlan0
+[2025-09-20 12:02:10] Command: iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] Running: Allow forward wlan1->wlan0
+[2025-09-20 12:02:10] Command: iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] Running: Allow return traffic from wlan0
+[2025-09-20 12:02:10] Command: iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] 📡 STEP 6: Configuring hostapd
+[2025-09-20 12:02:10] Running: Show hostapd config
+[2025-09-20 12:02:10] Command: cat /etc/hostapd/hostapd.conf
+interface=wlan1
+driver=nl80211
+ssid=ValerieParty
+hw_mode=g
+channel=1
+wmm_enabled=1
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+ieee80211n=1
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] 🌐 STEP 7: Configuring dnsmasq
+[2025-09-20 12:02:10] Running: Backup dnsmasq config
+[2025-09-20 12:02:10] Command: cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup.1758384130
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] Running: Remove old PixelParty config
+[2025-09-20 12:02:10] Command: sed -i '/# PixelParty Guest Network/,/^$/d' /etc/dnsmasq.conf
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:10] Running: Show dnsmasq config
+[2025-09-20 12:02:10] Command: tail -10 /etc/dnsmasq.conf
+
+
+
+
+
+
+
+# PixelParty Guest Network
+interface=wlan1
+dhcp-range=192.168.4.2,192.168.4.254,255.255.255.0,24h
+[2025-09-20 12:02:10] Exit code: 0
+[2025-09-20 12:02:11] 🚀 STEP 8: Starting services
+[2025-09-20 12:02:11] Running: Start dnsmasq
+[2025-09-20 12:02:11] Command: systemctl start dnsmasq
+[2025-09-20 12:02:11] Exit code: 0
+[2025-09-20 12:02:14] Running: Start hostapd
+[2025-09-20 12:02:14] Command: systemctl start hostapd
+[2025-09-20 12:02:14] Exit code: 0
+[2025-09-20 12:02:19] ✅ STEP 9: Verifying setup
+[2025-09-20 12:02:19] Running: Check dnsmasq status
+[2025-09-20 12:02:19] Command: systemctl status dnsmasq
+● dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server
+     Loaded: loaded (/lib/systemd/system/dnsmasq.service; enabled; preset: enabled)
+     Active: active (running) since Sat 2025-09-20 12:02:11 EDT; 8s ago
+    Process: 1934 ExecStartPre=/usr/share/dnsmasq/systemd-helper checkconfig (code=exited, status=0/SUCCESS)
+    Process: 1939 ExecStart=/usr/share/dnsmasq/systemd-helper exec (code=exited, status=0/SUCCESS)
+    Process: 1945 ExecStartPost=/usr/share/dnsmasq/systemd-helper start-resolvconf (code=exited, status=0/SUCCESS)
+   Main PID: 1944 (dnsmasq)
+      Tasks: 1 (limit: 8750)
+        CPU: 47ms
+     CGroup: /system.slice/dnsmasq.service
+             └─1944 /usr/sbin/dnsmasq -x /run/dnsmasq/dnsmasq.pid -u dnsmasq -7 /etc/dnsmasq.d,.dpkg-dist,.dpkg-old,.dpkg-new --local-service --trust-anchor=.,20326,8,2,E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D --trust-anchor=.,38696,8,2,683D2D0ACB8C9B712A1948B27F741219298D0A450D612C483AF444A4C0FB2B16
+
+Sep 20 12:02:11 raspberrypi systemd[1]: Starting dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server...
+Sep 20 12:02:11 raspberrypi dnsmasq[1944]: started, version 2.90 cachesize 150
+Sep 20 12:02:11 raspberrypi dnsmasq[1944]: compile time options: IPv6 GNU-getopt DBus no-UBus i18n IDN2 DHCP DHCPv6 no-Lua TFTP conntrack ipset nftset auth cryptohash DNSSEC loop-detect inotify dumpfile
+Sep 20 12:02:11 raspberrypi dnsmasq-dhcp[1944]: DHCP, IP range 192.168.4.2 -- 192.168.4.254, lease time 1d
+Sep 20 12:02:11 raspberrypi dnsmasq[1944]: reading /etc/resolv.conf
+Sep 20 12:02:11 raspberrypi dnsmasq[1944]: using nameserver 10.44.59.80#53
+Sep 20 12:02:11 raspberrypi dnsmasq[1944]: read /etc/hosts - 7 names
+Sep 20 12:02:11 raspberrypi systemd[1]: Started dnsmasq.service - dnsmasq - A lightweight DHCP and caching DNS server.
+[2025-09-20 12:02:19] Exit code: 0
+[2025-09-20 12:02:19] Running: Check hostapd status
+[2025-09-20 12:02:19] Command: systemctl status hostapd
+● hostapd.service - Access point and authentication server for Wi-Fi and Ethernet
+     Loaded: loaded (/lib/systemd/system/hostapd.service; enabled; preset: enabled)
+     Active: active (running) since Sat 2025-09-20 12:02:14 EDT; 5s ago
+       Docs: man:hostapd(8)
+    Process: 1964 ExecStart=/usr/sbin/hostapd -B -P /run/hostapd.pid $DAEMON_OPTS ${DAEMON_CONF} (code=exited, status=0/SUCCESS)
+   Main PID: 1965 (hostapd)
+      Tasks: 1 (limit: 8750)
+        CPU: 15ms
+     CGroup: /system.slice/hostapd.service
+             └─1965 /usr/sbin/hostapd -B -P /run/hostapd.pid /etc/hostapd/hostapd.conf
+
+Sep 20 12:02:14 raspberrypi systemd[1]: Starting hostapd.service - Access point and authentication server for Wi-Fi and Ethernet...
+Sep 20 12:02:14 raspberrypi hostapd[1964]: wlan1: interface state UNINITIALIZED->ENABLED
+Sep 20 12:02:14 raspberrypi hostapd[1964]: wlan1: AP-ENABLED
+Sep 20 12:02:14 raspberrypi systemd[1]: Started hostapd.service - Access point and authentication server for Wi-Fi and Ethernet.
+[2025-09-20 12:02:19] Exit code: 0
+[2025-09-20 12:02:19] Running: Check wireless interfaces
+[2025-09-20 12:02:19] Command: iwconfig
+lo        no wireless extensions.
+
+eth0      no wireless extensions.
+
+wlan0     IEEE 802.11  ESSID:"Kitesurfer"  
+          Mode:Managed  Frequency:5.805 GHz  Access Point: 0A:F4:9C:E5:90:FF   
+          Bit Rate=24 Mb/s   Tx-Power=31 dBm   
+          Retry short limit:7   RTS thr:off   Fragment thr:off
+          Encryption key:off
+          Power Management:on
+          Link Quality=61/70  Signal level=-49 dBm  
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:1  Invalid misc:0   Missed beacon:0
+
+wlan1     IEEE 802.11bgn  ESSID:"ValerieParty"  Nickname:"<WIFI@REALTEK>"
+          Mode:Master  Frequency:2.412 GHz  Access Point: E4:BE:ED:F8:1F:42   
+          Bit Rate:144.4 Mb/s   Sensitivity:0/0  
+          Retry:off   RTS thr:off   Fragment thr:off
+          Encryption key:off
+          Power Management:off
+          Link Quality:0  Signal level:0  Noise level:0
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:0  Invalid misc:0   Missed beacon:0
+
+[2025-09-20 12:02:19] Exit code: 0
+[2025-09-20 12:02:19] Running: Check IP addresses
+[2025-09-20 12:02:19] Command: ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: eth0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc mq state DOWN group default qlen 1000
+    link/ether e4:5f:01:10:68:9c brd ff:ff:ff:ff:ff:ff
+3: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether e4:5f:01:10:68:9e brd ff:ff:ff:ff:ff:ff
+    inet 10.44.59.232/24 brd 10.44.59.255 scope global dynamic noprefixroute wlan0
+       valid_lft 3500sec preferred_lft 3500sec
+    inet6 fe80::211b:1ff5:b92b:1167/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+4: wlan1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 2312 qdisc mq state UP group default qlen 1000
+    link/ether e4:be:ed:f8:1f:42 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.4.1/24 scope global wlan1
+       valid_lft forever preferred_lft forever
+[2025-09-20 12:02:19] Exit code: 0
+[2025-09-20 12:02:19] Running: Check NAT rules
+[2025-09-20 12:02:19] Command: iptables -t nat -L POSTROUTING
+Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination         
+MASQUERADE  all  --  anywhere             anywhere            
+[2025-09-20 12:02:19] Exit code: 0
+[2025-09-20 12:02:19] Running: Check forward rules
+[2025-09-20 12:02:19] Command: iptables -L FORWARD
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+ACCEPT     all  --  anywhere             anywhere            
+ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
+[2025-09-20 12:02:19] Exit code: 0
+[2025-09-20 12:02:19] 🧪 STEP 10: Testing connectivity
+[2025-09-20 12:02:19] Running: Test local IP
+[2025-09-20 12:02:19] Command: ping -c 2 192.168.4.1
+PING 192.168.4.1 (192.168.4.1) 56(84) bytes of data.
+64 bytes from 192.168.4.1: icmp_seq=1 ttl=64 time=0.207 ms
+64 bytes from 192.168.4.1: icmp_seq=2 ttl=64 time=0.092 ms
+
+--- 192.168.4.1 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1015ms
+rtt min/avg/max/mdev = 0.092/0.149/0.207/0.057 ms
+[2025-09-20 12:02:20] Exit code: 0
+[2025-09-20 12:02:20] Running: Scan for ValerieParty
+[2025-09-20 12:02:20] Command: iwlist scan | grep -A3 -B3 ValerieParty || echo 'ValerieParty not found'
+lo        Interface doesn't support scanning.
+
+eth0      Interface doesn't support scanning.
+
+                    Frequency:2.412 GHz (Channel 1)
+                    Quality=70/70  Signal level=-39 dBm  
+                    Encryption key:off
+                    ESSID:"ValerieParty"
+                    Bit Rates:1 Mb/s; 2 Mb/s; 5.5 Mb/s; 11 Mb/s; 6 Mb/s
+                              9 Mb/s; 12 Mb/s; 18 Mb/s
+                    Bit Rates:24 Mb/s; 36 Mb/s; 48 Mb/s; 54 Mb/s
+[2025-09-20 12:02:27] Exit code: 0
+[2025-09-20 12:02:27] 📊 STEP 11: Final status check
+[2025-09-20 12:02:27] === SETUP COMPLETE ===
+[2025-09-20 12:02:27] wlan0 (Kitesurfer): 10.44.59.232/24
+[2025-09-20 12:02:27] wlan1 (ValerieParty): 192.168.4.1/24
+[2025-09-20 12:02:27] hostapd: active
+[2025-09-20 12:02:27] dnsmasq: active
