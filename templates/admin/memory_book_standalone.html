@@ -91,6 +91,7 @@
             object-fit: cover;
             border-radius: 2px;
             box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+            cursor: pointer;
         }
 
         .polaroid-caption {
@@ -365,7 +366,9 @@
 
                             <img src="photos/{{ memory.photo.filename }}"
                                  alt="Souvenir de {{ memory.photo.guest_name }}"
-                                 class="polaroid-photo">
+                                 class="polaroid-photo"
+                                 onclick="window.open('photos/{{ memory.photo.filename }}', '_blank')"
+                                 title="Cliquez pour voir en plein écran">
 
                             <div class="polaroid-caption">
                                 <div class="polaroid-date signature">{{ memory.photo.uploaded_at.strftime('%d %b %Y • %Hh%M') }}</div>
