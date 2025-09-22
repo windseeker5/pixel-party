@@ -1,1 +1,15 @@
 === FRESH DEBUG SESSION STARTED AT Sat 20 Sep 13:45:02 EDT 2025 ===
+[2025-09-22 14:49:47] ID:1 - 🚀 Thread started: 'Run Away to Mars' by 'TALK' from https://www.youtube.com/watch?v=jMPkCCxkEVI
+[2025-09-22 14:49:47] ID:1 - ✅ App context acquired
+[2025-09-22 14:49:47] ID:1 - 📊 Querying database for music request
+[2025-09-22 14:49:48] ID:1 - ✅ Found music request: Run Away to Mars
+[2025-09-22 14:49:48] ID:1 - ✅ Status updated to 'downloading'
+[2025-09-22 14:49:48] ID:1 - 🔧 Getting YouTube service
+[2025-09-22 14:49:48] ID:1 - ✅ YouTube service acquired
+[2025-09-22 14:49:48] ID:1 - ⬇️ Starting download from: https://www.youtube.com/watch?v=jMPkCCxkEVI
+[2025-09-22 14:49:59] ID:1 - 📁 Download returned filename: TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 14:49:59] ID:1 - 🔍 Checking for file: media/music/TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 14:49:59] ID:1 - ✅ Found file using exact filename: TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 14:49:59] ID:1 - ✅ Found file, updating database with: TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 14:49:59] ID:1 - ✅ Background download complete: TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 14:49:59] ID:1 - 🏁 Thread finished

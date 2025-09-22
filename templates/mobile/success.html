@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Memory Shared! - {{ config.PARTY_TITLE or 'Birthday Celebration' }}{% endblock %}
+{% block title %}Souvenir partagé ! - {{ config.PARTY_TITLE or 'Fête d\'anniversaire' }}{% endblock %}
 
 {% block content %}
     <div class="flex items-center justify-center">
@@ -13,13 +13,13 @@
                     </svg>
                 </div>
                 
-                <h2 class="card-title justify-center text-2xl mb-4 text-success">Memory Shared!</h2>
+                <h2 class="card-title justify-center text-2xl mb-4 text-success">Souvenir partagé !</h2>
                 
                 <p class="text-lg mb-6 flex items-center justify-center">
                     <svg class="w-6 h-6 mr-2 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    Your photo and birthday wish have been successfully shared!
+                    Votre photo et message d'anniversaire ont été partagés avec succès !
                 </p>
                 
                 {% if music_added %}
@@ -27,24 +27,20 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                     </svg>
-                    <span>Your song suggestion has also been added to the playlist!</span>
+                    <span>Votre suggestion musicale a été ajoutée à la playlist !</span>
                 </div>
                 {% endif %}
                 
-                <p class="opacity-70 mb-8">Your memory will appear on the big screen soon and will be part of the digital memory book.</p>
+                <p class="opacity-70 mb-8">Votre souvenir apparaîtra bientôt sur le grand écran et fera partie du livre de souvenirs numérique.</p>
                 
-                <div class="card-actions justify-center space-x-4">
-                    <a href="/mobile/main" class="btn btn-outline">
-                        Share Another Memory
-                    </a>
-                    <button onclick="window.close()" class="btn btn-primary">
-                        Done
-                    </button>
+                <!-- Footer -->
+                <div class="text-center mt-6 text-sm text-gray-400">
+                    Made with ❤️ for Valérie
                 </div>
                 
                 <!-- Auto-close timer -->
-                <div class="mt-6 text-sm opacity-50">
-                    Returning to form in <span id="countdown" class="font-bold text-primary">15</span> seconds
+                <div class="mt-4 text-sm opacity-50">
+                    Retour au formulaire dans <span id="countdown" class="font-bold text-primary">10</span> secondes
                 </div>
             </div>
         </div>
@@ -132,7 +128,7 @@
     createConfetti();
     
     // Auto-close countdown
-    let seconds = 15;
+    let seconds = 10;
     const countdown = document.getElementById('countdown');
     
     const timer = setInterval(() => {

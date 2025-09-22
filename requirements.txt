@@ -14,3 +14,4 @@ netifaces==0.11.0
 qrcode
 playwright==1.48.0
 moviepy==1.0.3
+aiofiles==24.1.0

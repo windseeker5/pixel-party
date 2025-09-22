@@ -294,9 +294,16 @@ def main_form():
     """Single screen with everything - name, photo, wish, optional music."""
     party_title = get_setting('party_title', 'Birthday Celebration')
     host_name = get_setting('host_name', 'Birthday Star')
+
+    # Get counts for sidebar stats
+    photo_count = Photo.query.count()
+    music_count = MusicQueue.query.count()
+
     return render_template('mobile/main_form.html',
                          party_title=party_title,
-                         host_name=host_name)
+                         host_name=host_name,
+                         photo_count=photo_count,
+                         music_count=music_count)
 
 
 @mobile_bp.route('/enter', methods=['POST'])
@@ -910,8 +917,8 @@ def search_music_ai():
                 return f'''
                 <div id="ai-suggestions-container">
                     <div class="text-center py-3">
-                        <div class="text-xs opacity-70 mb-2">AI couldn't generate {search_query} suggestions</div>
-                        <button onclick="location.reload()" class="btn btn-xs btn-outline">Try Again</button>
+                        <div class="text-xs opacity-70 mb-2">L'IA n'a pas pu générer de suggestions pour "{search_query}"</div>
+                        <button onclick="location.reload()" class="btn btn-xs btn-outline">Réessayer</button>
                     </div>
                 </div>
                 '''
@@ -1227,13 +1234,13 @@ def ollama_status():
             # Return HTML for HTMX
             if connected:
                 return '''
-                <div class="tooltip" data-tip="🤖 AI music suggestions available">
+                <div class="tooltip" data-tip="🤖 Suggestions musicales IA disponibles">
                     <div class="w-3 h-3 rounded-full bg-green-500"></div>
                 </div>
                 '''
             else:
                 return '''
-                <div class="tooltip" data-tip="❌ AI music suggestions unavailable">
+                <div class="tooltip" data-tip="❌ Suggestions musicales IA indisponibles">
                     <div class="w-3 h-3 rounded-full bg-gray-500"></div>
                 </div>
                 '''
@@ -1245,7 +1252,7 @@ def ollama_status():
     except Exception as e:
         if is_htmx_request():
             return '''
-            <div class="tooltip" data-tip="❌ AI connection error">
+            <div class="tooltip" data-tip="❌ Erreur de connexion IA">
                 <div class="w-3 h-3 rounded-full bg-red-500"></div>
             </div>
             '''
