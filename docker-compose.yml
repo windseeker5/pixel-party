@@ -15,6 +15,7 @@ services:
       - ./media:/app/media
       - ./data:/app/data
       - ./export:/app/export
+      - /mnt/pixelparty/Music:/mnt/pixelparty/Music:ro
     networks:
       - pixelparty-network
     extra_hosts:

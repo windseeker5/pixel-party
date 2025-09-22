@@ -230,6 +230,73 @@
         }
     }
 </style>
+
+<script>
+// Dynamic slideshow timing for videos
+let htmxTimerId = null;
+let defaultSlideshowDuration = 8; // seconds
+
+document.addEventListener('DOMContentLoaded', function() {
+    const photoDisplay = document.getElementById('photo-display');
+    if (photoDisplay) {
+        defaultSlideshowDuration = parseInt(photoDisplay.dataset.slideshowDuration) || 8;
+    }
+
+    // Listen for video duration messages from iframe/components
+    window.addEventListener('message', function(event) {
+        if (event.data.type === 'video_duration') {
+            const videoDuration = Math.max(event.data.duration, defaultSlideshowDuration);
+            resetHTMXTimer(videoDuration);
+        } else if (event.data.type === 'video_ended') {
+            // Video ended early, proceed to next immediately
+            triggerNextSlide();
+        }
+    });
+
+    // Monitor for new content to detect videos directly
+    document.addEventListener('htmx:afterSwap', function(event) {
+        if (event.target.id === 'photo-display') {
+            checkForVideo(event.target);
+        }
+    });
+});
+
+function checkForVideo(container) {
+    const video = container.querySelector('video');
+    if (video) {
+        video.addEventListener('loadedmetadata', function() {
+            const duration = Math.ceil(this.duration) || defaultSlideshowDuration;
+            const finalDuration = Math.max(duration, defaultSlideshowDuration);
+            resetHTMXTimer(finalDuration);
+        });
+    } else {
+        // It's an image, use default timing
+        resetHTMXTimer(defaultSlideshowDuration);
+    }
+}
+
+function resetHTMXTimer(duration) {
+    const photoDisplay = document.getElementById('photo-display');
+    if (!photoDisplay) return;
+
+    // Clear existing timer
+    if (htmxTimerId) {
+        clearTimeout(htmxTimerId);
+    }
+
+    // Set new timer
+    htmxTimerId = setTimeout(function() {
+        triggerNextSlide();
+    }, duration * 1000);
+}
+
+function triggerNextSlide() {
+    const photoDisplay = document.getElementById('photo-display');
+    if (photoDisplay) {
+        htmx.trigger(photoDisplay, 'htmx:trigger');
+    }
+}
+</script>
 {% endblock %}
 
 {% block content %}
@@ -247,11 +314,12 @@
         </div>
         
         <!-- Photo Display Area (HTMX will update this) -->
-        <div id="photo-display" 
-             hx-get="{{ url_for('api.current_photo') }}" 
+        <div id="photo-display"
+             hx-get="{{ url_for('api.current_photo') }}"
              hx-trigger="every {{ slideshow_duration }}s"
              hx-swap="innerHTML"
-             hx-indicator=".htmx-indicator">
+             hx-indicator=".htmx-indicator"
+             data-slideshow-duration="{{ slideshow_duration }}">
             <!-- Initial content -->
             <div class="no-photos-placeholder">
                 <div class="text-6xl mb-4">📸</div>

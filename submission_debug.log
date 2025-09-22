@@ -492,3 +492,19 @@ guest_name: 'Messenger group - 50 ANS À MA VALOUS'
 PASS: Guest name validation
 PASS: File exists - 552568734_23946172705056780_8240108965338850369_n.mp4
 PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Marie'
+PASS: Guest name validation
+PASS: File exists - 1000003031.jpg
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Phil'
+PASS: Guest name validation
+PASS: File exists - 1000003054.jpg
+PASS: File type allowed

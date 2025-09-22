@@ -8,13 +8,13 @@
         <!-- Video with Ken Burns effect -->
         <video src="/media/photos/{{ photo.filename }}"
                autoplay
-               loop
                playsinline
                preload="auto"
                volume="0.7"
                class="absolute inset-0 w-full h-full object-contain ken-burns-animation"
-               onloadeddata="console.log('Video loaded:', '{{ photo.filename }}'); this.currentTime = 0;"
-               onended="this.currentTime = 0; this.play();"
+               data-duration="{{ photo.duration or 0 }}"
+               onloadeddata="console.log('Video loaded:', '{{ photo.filename }}'); this.currentTime = 0; adjustVideoDisplay(this);"
+               onended="notifyVideoEnded(this);"
                onerror="console.error('Video error:', '{{ photo.filename }}', this.error);"
                oncanplay="console.log('Video can play:', '{{ photo.filename }}');">
             <source src="/media/photos/{{ photo.filename }}" type="video/{{ file_ext }}">
@@ -27,7 +27,8 @@
         <!-- Photo with Ken Burns effect -->
         <img src="/media/photos/{{ photo.filename }}"
              alt="Photo from {{ photo.guest_name }}"
-             class="absolute inset-0 w-full h-full object-cover ken-burns-animation">
+             class="absolute inset-0 w-full h-full object-contain ken-burns-animation"
+             onload="adjustImageDisplay(this)">
     {% endif %}
     
     <!-- SIMPLE TikTok-style text overlay - NO JAVASCRIPT -->
@@ -66,14 +67,27 @@
 </div>
 
 <style>
-/* Ken Burns effect for photos */
+/* Ken Burns effect for photos and videos */
 @keyframes kenBurnsSimple {
     0% { transform: scale(1.0) translate(0, 0); }
-    100% { transform: scale(1.1) translate(-1%, -1%); }
+    100% { transform: scale(1.05) translate(-0.5%, -0.5%); }
+}
+
+@keyframes kenBurnsVertical {
+    0% { transform: scale(1.0) translate(0, 0); }
+    100% { transform: scale(1.02) translate(0, -0.3%); }
 }
 
 .ken-burns-animation {
     animation: kenBurnsSimple 8s ease-out forwards;
+}
+
+.ken-burns-vertical {
+    animation: kenBurnsVertical 8s ease-out forwards;
+}
+
+.ken-burns-video {
+    animation: none;
 }
 
 /* TikTok overlay container - Base positioning */
@@ -526,5 +540,47 @@ document.addEventListener('htmx:afterSwap', function() {
     clearTimeout(htmxTimeout);
     htmxTimeout = setTimeout(startTypewriter, 100);
 });
+
+// Adjust image display based on aspect ratio
+function adjustImageDisplay(img) {
+    img.onload = function() {
+        const aspectRatio = this.naturalWidth / this.naturalHeight;
+        if (aspectRatio < 1) {
+            // Vertical image - use gentler Ken Burns effect
+            this.classList.remove('ken-burns-animation');
+            this.classList.add('ken-burns-vertical');
+        }
+    };
+}
+
+// Adjust video display and notify parent of duration
+function adjustVideoDisplay(video) {
+    video.addEventListener('loadedmetadata', function() {
+        const aspectRatio = this.videoWidth / this.videoHeight;
+        if (aspectRatio < 1) {
+            // Vertical video - no Ken Burns effect
+            this.classList.remove('ken-burns-animation');
+            this.classList.add('ken-burns-video');
+        }
+
+        // Notify parent window of video duration
+        const duration = this.duration || 0;
+        if (window.parent && duration > 0) {
+            window.parent.postMessage({
+                type: 'video_duration',
+                duration: Math.ceil(duration)
+            }, '*');
+        }
+    });
+}
+
+// Notify parent when video ends
+function notifyVideoEnded(video) {
+    if (window.parent) {
+        window.parent.postMessage({
+            type: 'video_ended'
+        }, '*');
+    }
+}
 </script>
 

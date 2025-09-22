@@ -549,6 +549,9 @@ def submit_memory():
                                 relative_path = file_path.replace('/mnt/media/MUSIC/', '')
                                 library_root = Path(current_app.config['MUSIC_LIBRARY_PATH'])
                                 source_path = library_root / relative_path
+                            elif file_path.startswith('/mnt/pixelparty/Music'):
+                                # Current mounted path - use as is
+                                source_path = Path(file_path)
                             elif file_path.startswith('/'):
                                 # Already absolute path
                                 source_path = Path(file_path)

@@ -151,7 +151,11 @@
                                     <td>
                                         <div class="avatar">
                                             <div class="mask mask-squircle w-10 h-10">
-                                                <img src="/media/photos/{{ photo.filename }}" alt="Thumbnail">
+                                                {% if photo.file_type == 'video' and photo.thumbnail %}
+                                                    <img src="data:image/jpeg;base64,{{ photo.thumbnail }}" alt="Video Thumbnail">
+                                                {% else %}
+                                                    <img src="/media/photos/{{ photo.filename }}" alt="Thumbnail">
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </td>

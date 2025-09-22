@@ -13,3 +13,31 @@
 [2025-09-22 14:49:59] ID:1 - ✅ Found file, updating database with: TALK_-_Run_Away_to_Mars.mp3
 [2025-09-22 14:49:59] ID:1 - ✅ Background download complete: TALK_-_Run_Away_to_Mars.mp3
 [2025-09-22 14:49:59] ID:1 - 🏁 Thread finished
+[2025-09-22 15:33:48] ID:1 - 🚀 Thread started: 'Les étoiles filantes' by 'LES COWBOYS FRINGANTS' from https://www.youtube.com/watch?v=KIe_3vhxmoA
+[2025-09-22 15:33:48] ID:1 - ✅ App context acquired
+[2025-09-22 15:33:48] ID:1 - 📊 Querying database for music request
+[2025-09-22 15:33:48] ID:1 - ✅ Found music request: Les étoiles filantes
+[2025-09-22 15:33:48] ID:1 - ✅ Status updated to 'downloading'
+[2025-09-22 15:33:48] ID:1 - 🔧 Getting YouTube service
+[2025-09-22 15:33:48] ID:1 - ✅ YouTube service acquired
+[2025-09-22 15:33:48] ID:1 - ⬇️ Starting download from: https://www.youtube.com/watch?v=KIe_3vhxmoA
+[2025-09-22 15:34:01] ID:1 - 📁 Download returned filename: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 15:34:01] ID:1 - 🔍 Checking for file: media/music/LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 15:34:01] ID:1 - ✅ Found file using exact filename: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 15:34:01] ID:1 - ✅ Found file, updating database with: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 15:34:01] ID:1 - ✅ Background download complete: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 15:34:01] ID:1 - 🏁 Thread finished
+[2025-09-22 15:36:03] ID:2 - 🚀 Thread started: 'Just Like Tom Thumb's Blues' by 'Bob Dylan' from https://www.youtube.com/watch?v=CcRNSHqiH7A
+[2025-09-22 15:36:03] ID:2 - ✅ App context acquired
+[2025-09-22 15:36:03] ID:2 - 📊 Querying database for music request
+[2025-09-22 15:36:03] ID:2 - ✅ Found music request: Just Like Tom Thumb's Blues
+[2025-09-22 15:36:03] ID:2 - ✅ Status updated to 'downloading'
+[2025-09-22 15:36:03] ID:2 - 🔧 Getting YouTube service
+[2025-09-22 15:36:03] ID:2 - ✅ YouTube service acquired
+[2025-09-22 15:36:03] ID:2 - ⬇️ Starting download from: https://www.youtube.com/watch?v=CcRNSHqiH7A
+[2025-09-22 15:36:15] ID:2 - 📁 Download returned filename: Bob_Dylan_-_Just_Like_Tom_Thumbs_Blues.mp3
+[2025-09-22 15:36:15] ID:2 - 🔍 Checking for file: media/music/Bob_Dylan_-_Just_Like_Tom_Thumbs_Blues.mp3
+[2025-09-22 15:36:15] ID:2 - ✅ Found file using exact filename: Bob_Dylan_-_Just_Like_Tom_Thumbs_Blues.mp3
+[2025-09-22 15:36:15] ID:2 - ✅ Found file, updating database with: Bob_Dylan_-_Just_Like_Tom_Thumbs_Blues.mp3
+[2025-09-22 15:36:15] ID:2 - ✅ Background download complete: Bob_Dylan_-_Just_Like_Tom_Thumbs_Blues.mp3
+[2025-09-22 15:36:15] ID:2 - 🏁 Thread finished
