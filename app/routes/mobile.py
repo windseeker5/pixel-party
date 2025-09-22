@@ -14,6 +14,28 @@ from app.services.auth import guest_required
 mobile_bp = Blueprint('mobile', __name__)
 
 
+def validate_utf8_text(text):
+    """Validate that text is properly UTF-8 encoded and safe for database storage."""
+    if not text:
+        return True, text
+
+    try:
+        # Ensure it's a string (not bytes)
+        if isinstance(text, bytes):
+            text = text.decode('utf-8')
+
+        # Validate that we can encode and decode without issues
+        text.encode('utf-8').decode('utf-8')
+
+        # Remove any null bytes or other problematic characters
+        cleaned_text = text.replace('\x00', '').strip()
+
+        return True, cleaned_text
+    except (UnicodeDecodeError, UnicodeEncodeError) as e:
+        current_app.logger.error(f"UTF-8 validation failed: {e}")
+        return False, text
+
+
 def download_youtube_async(video_url, title, artist, app, music_request_id):
     """Download YouTube audio in background thread."""
     import traceback
@@ -336,6 +358,14 @@ def submit_memory():
         flash('Please enter your name', 'error')
         return redirect(url_for('mobile.main_form'))
 
+    # Validate UTF-8 encoding for guest name (emoji support)
+    is_valid, guest_name = validate_utf8_text(guest_name)
+    if not is_valid:
+        with open('submission_debug.log', 'a', encoding='utf-8') as f:
+            f.write(f"FAIL: Invalid UTF-8 in guest name\n")
+        flash('Invalid characters in your name. Please use standard text and emojis only.', 'error')
+        return redirect(url_for('mobile.main_form'))
+
     with open('submission_debug.log', 'a') as f:
         f.write(f"PASS: Guest name validation\n")
 
@@ -410,6 +440,18 @@ def submit_memory():
             flash(error_msg, 'error')
             return redirect(url_for('mobile.upload'))
     
+    # Validate UTF-8 encoding for wish message (emoji support)
+    is_valid, wish_message = validate_utf8_text(wish_message)
+    if not is_valid:
+        error_msg = 'Invalid characters in your message. Please use standard text and emojis only.'
+        if is_htmx_request():
+            return render_template('mobile/upload.html',
+                                 guest_name=session['guest_name'],
+                                 error=error_msg)
+        else:
+            flash(error_msg, 'error')
+            return redirect(url_for('mobile.upload'))
+
     # Limit wish message to 140 characters (with proper emoji handling)
     # Note: We count actual characters, not bytes, and allow full emoji support
     # Since we're using db.Text, we can be more generous with the limit

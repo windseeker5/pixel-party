@@ -15,8 +15,24 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Tangerine:wght@400;700&family=Allura&display=swap" rel="stylesheet">
+
+    <!-- Emoji font support for consistent rendering across devices -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
     
     <style>
+        /* Emoji font support for consistent rendering across all devices */
+        body, html, .wish-text, .emoji-support, #submitter-wish, #song-title, #song-artist {
+            font-family: 'Inter', 'Segoe UI', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', 'EmojiOne Mozilla', 'Twemoji Mozilla', 'Segoe UI Symbol', sans-serif;
+        }
+
+        /* Specific emoji rendering styles */
+        .emoji-text, #submitter-wish {
+            font-feature-settings: "liga" 1, "kern" 1;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
         /* Remove all margins and padding for full screen */
         body, html {
             margin: 0;

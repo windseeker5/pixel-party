@@ -13,7 +13,7 @@ import aiofiles
 class FileHandler:
     """Handle file uploads and processing."""
 
-    UPLOAD_DIR = "static/uploads"
+    UPLOAD_DIR = "media/photos"
     MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
     MAX_VIDEO_DURATION = 120  # seconds (2 minutes)
     TARGET_WIDTH = 1920
@@ -81,10 +81,13 @@ class FileHandler:
             thumbnail_name = f"{video_name}_thumb.jpg"
             thumbnail_path = os.path.join(self.UPLOAD_DIR, thumbnail_name)
 
+            print(f"Generating thumbnail for {video_path} -> {thumbnail_path}")
+
             # Extract frame at 1 second (or 10% of duration, whichever is smaller)
             with VideoFileClip(video_path) as clip:
                 duration = clip.duration
                 timestamp = min(1.0, duration * 0.1)  # 1 second or 10% of video
+                print(f"Video duration: {duration}s, extracting frame at {timestamp}s")
 
                 # Save frame as thumbnail
                 frame = clip.get_frame(timestamp)
@@ -95,11 +98,14 @@ class FileHandler:
                 # Resize to reasonable thumbnail size
                 image.thumbnail((400, 300), Image.LANCZOS)
                 image.save(thumbnail_path, 'JPEG', quality=85)
+                print(f"Thumbnail saved successfully: {thumbnail_name}")
 
             return thumbnail_name
 
         except Exception as e:
             print(f"Error generating video thumbnail: {e}")
+            import traceback
+            traceback.print_exc()
             return None
     
     def is_image(self, filename: str) -> bool:

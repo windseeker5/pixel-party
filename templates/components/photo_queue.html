@@ -14,7 +14,8 @@
                     <!-- Video thumbnail with play icon -->
                     <img src="/media/photos/{{ photo.thumbnail }}"
                          alt="Video by {{ photo.guest_name }}"
-                         class="w-full h-full object-cover">
+                         class="w-full h-full object-cover"
+                         onerror="this.onerror=null; this.src='/media/photos/video_placeholder.svg';">
                     <!-- Small play icon overlay -->
                     <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
                         <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -22,9 +23,13 @@
                         </svg>
                     </div>
                 {% elif is_video %}
-                    <!-- Video icon if no thumbnail -->
-                    <div class="w-full h-full bg-gray-600 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <!-- Video placeholder if no thumbnail -->
+                    <img src="/media/photos/video_placeholder.svg"
+                         alt="Video by {{ photo.guest_name }}"
+                         class="w-full h-full object-cover">
+                    <!-- Small play icon overlay -->
+                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z"/>
                         </svg>
                     </div>
