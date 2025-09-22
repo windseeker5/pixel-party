@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Project specific
+*.db-journal
+*.log
+*.zip
+*.sh
+debug_*
+test_*
+*_debug.log
+*.md
+RASPBERRY_PI_SETUP.md
+nexttime.md
+PRD.md
+CLAUDE.md
+
+# Temporary files
+t
+submission_debug.log
+youtube_download_debug.log
+fix_fuckup.log
+SETUP_EVERYTHING.log
+patch2.log
+ken_notes.txt
+
+# Large media files (we'll mount these as volumes)
+media/
+export/
+
+# Database files (mounted as volume)
+*.db

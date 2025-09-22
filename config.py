@@ -20,7 +20,7 @@ class Config:
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50MB max file size
     UPLOAD_FOLDER = BASE_DIR / 'media' / 'photos'
     VIDEO_FOLDER = BASE_DIR / 'media' / 'videos'
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'mp4', 'mov', 'avi', 'mkv', 'webm'}
     
     # Music library settings
     MUSIC_LIBRARY_PATH = Path('/mnt/pixelparty/Music')  # Source library
@@ -28,7 +28,7 @@ class Config:
     SUPPORTED_AUDIO_FORMATS = {'.mp3', '.flac', '.m4a', '.ogg', '.wav', '.aac'}
     
     # Ollama settings
-    OLLAMA_BASE_URL = 'http://127.0.0.1:11434'
+    OLLAMA_BASE_URL = os.environ.get('OLLAMA_BASE_URL') or 'http://127.0.0.1:11434'
     PREFERRED_MODEL = 'deepseek-r1:8b'
     
     # Party settings

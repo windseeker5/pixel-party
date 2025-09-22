@@ -12,3 +12,5 @@ yt-dlp==2025.9.5
 rembg
 netifaces==0.11.0
 qrcode
+playwright==1.48.0
+moviepy==1.0.3

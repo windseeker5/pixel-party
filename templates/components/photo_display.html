@@ -1,9 +1,34 @@
-<!-- Photo Display with Ken Burns effect and text overlay -->
+<!-- Photo/Video Display with Ken Burns effect and text overlay -->
 <div class="relative w-full h-full overflow-hidden rounded-2xl bg-black">
-    <!-- Photo with Ken Burns effect -->
-    <img src="/media/photos/{{ photo.filename }}" 
-         alt="Photo from {{ photo.guest_name }}"
-         class="absolute inset-0 w-full h-full object-cover ken-burns-animation">
+    {% set file_ext = photo.filename.split('.')[-1].lower() %}
+    {% set video_extensions = ['mp4', 'mov', 'avi', 'mkv', 'webm'] %}
+    {% set is_video = file_ext in video_extensions or (photo.file_type and photo.file_type == 'video') %}
+
+    {% if is_video %}
+        <!-- Video with Ken Burns effect -->
+        <video src="/media/photos/{{ photo.filename }}"
+               autoplay
+               muted
+               loop
+               playsinline
+               preload="auto"
+               class="absolute inset-0 w-full h-full object-cover ken-burns-animation"
+               onloadeddata="console.log('Video loaded:', '{{ photo.filename }}'); this.currentTime = 0;"
+               onended="this.currentTime = 0; this.play();"
+               onerror="console.error('Video error:', '{{ photo.filename }}', this.error);"
+               oncanplay="console.log('Video can play:', '{{ photo.filename }}');">
+            <source src="/media/photos/{{ photo.filename }}" type="video/{{ file_ext }}">
+            <p class="text-white text-center p-4">
+                Video format not supported by your browser.<br>
+                File: {{ photo.filename }}
+            </p>
+        </video>
+    {% else %}
+        <!-- Photo with Ken Burns effect -->
+        <img src="/media/photos/{{ photo.filename }}"
+             alt="Photo from {{ photo.guest_name }}"
+             class="absolute inset-0 w-full h-full object-cover ken-burns-animation">
+    {% endif %}
     
     <!-- SIMPLE TikTok-style text overlay - NO JAVASCRIPT -->
     {% if photo.wish_message %}

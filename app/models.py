@@ -20,9 +20,9 @@ class Guest(db.Model):
 
 
 class Photo(db.Model):
-    """Photo submissions with wishes."""
+    """Photo/Video submissions with wishes."""
     __tablename__ = 'photos'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     guest_id = db.Column(db.Integer, db.ForeignKey('guests.id'), nullable=True)
     guest_name = db.Column(db.String(100), nullable=False)  # Stored for easy access
@@ -33,6 +33,9 @@ class Photo(db.Model):
     displayed_at = db.Column(db.DateTime, nullable=True)
     display_duration = db.Column(db.Integer, default=10)  # Seconds to show on screen
     file_size = db.Column(db.Integer, default=0)  # bytes
+    file_type = db.Column(db.String(10), default='image')  # 'image' or 'video'
+    duration = db.Column(db.Float, nullable=True)  # Video duration in seconds
+    thumbnail = db.Column(db.String(255), nullable=True)  # Thumbnail filename for videos
 
 
 class MusicQueue(db.Model):

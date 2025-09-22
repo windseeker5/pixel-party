@@ -415,34 +415,58 @@ def submit_memory():
         wish_message = wish_message[:140]
     
     try:
-        # Save file
-        filename = secure_filename(file.filename)
-        unique_filename = f"{uuid.uuid4()}_{filename}"
-        
-        # Ensure upload directory exists
-        upload_dir = current_app.config['UPLOAD_FOLDER']
-        os.makedirs(upload_dir, exist_ok=True)
-        
-        file_path = os.path.join(upload_dir, unique_filename)
-        file.save(file_path)
-        
-        # Get file size
-        file_size = os.path.getsize(file_path)
-        
-        # Resize image if it's too large (for better big screen performance)
-        if file.content_type and file.content_type.startswith('image/'):
-            resize_image(file_path)
-            # Update file size after resize
-            file_size = os.path.getsize(file_path)
-        
-        # Create photo record
+        # Use FileHandler for proper file processing and validation
+        from app.services.file_handler import file_handler
+        import asyncio
+
+        # Get file data
+        file_data = file.read()
+        original_filename = file.filename
+
+        # Save file using FileHandler (handles both images and videos)
+        def run_async_save():
+            return asyncio.run(file_handler.save_file(file_data, original_filename, guest.name))
+
+        success, message, unique_filename = run_async_save()
+
+        if not success:
+            error_msg = f'Upload failed: {message}'
+            if is_htmx_request():
+                return render_template('mobile/upload.html',
+                                     guest_name=session.get('guest_name', ''),
+                                     error=error_msg)
+            else:
+                flash(error_msg, 'error')
+                return redirect(url_for('mobile.main_form'))
+
+        # Get file info
+        file_info = file_handler.get_file_info(unique_filename)
+        file_size = file_info.get('file_size', 0)
+        file_type = file_info.get('file_type', 'image')
+
+        # Get video duration and thumbnail if it's a video
+        video_duration = None
+        thumbnail_filename = None
+        if file_type == 'video':
+            file_path = file_info.get('file_path')
+            if file_path:
+                _, _, duration = file_handler.validate_video_duration(file_path)
+                video_duration = duration
+                # Get thumbnail filename (generated during save_file)
+                video_name = os.path.splitext(unique_filename)[0]
+                thumbnail_filename = f"{video_name}_thumb.jpg"
+
+        # Create photo record with new fields
         photo = Photo(
             guest_id=guest.id,
             guest_name=guest.name,
             filename=unique_filename,
-            original_filename=filename,
+            original_filename=original_filename,
             wish_message=wish_message,
-            file_size=file_size
+            file_size=file_size,
+            file_type=file_type,
+            duration=video_duration,
+            thumbnail=thumbnail_filename
         )
         
         db.session.add(photo)

@@ -92,7 +92,9 @@ def photos():
                 'guest_name': photo.guest_name,
                 'wish_message': photo.wish_message,
                 'uploaded_at': photo.uploaded_at.isoformat(),
-                'url': f"/media/photos/{photo.filename}"
+                'url': f"/media/photos/{photo.filename}",
+                'file_type': getattr(photo, 'file_type', 'image'),
+                'duration': getattr(photo, 'duration', None)
             })
         return jsonify({'photos': photo_data})
     

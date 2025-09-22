@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # PixelParty Flask Application
+  pixelparty-app:
+    build: .
+    container_name: pixelparty-app
+    restart: unless-stopped
+    environment:
+      - FLASK_CONFIG=production
+      - SECRET_KEY=${SECRET_KEY:-birthday-party-secret-key-change-in-production}
+      - DATABASE_URL=sqlite:////app/data/birthday_party.db
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+    volumes:
+      - ./media:/app/media
+      - ./data:/app/data
+      - ./export:/app/export
+    networks:
+      - pixelparty-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: pixelparty-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./media:/app/media:ro
+      - ./static:/app/static:ro
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/certbot
+    networks:
+      - pixelparty-network
+    depends_on:
+      - pixelparty-app
+
+  # Let's Encrypt SSL Certificate Container
+  certbot:
+    image: certbot/certbot
+    container_name: pixelparty-certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/certbot
+    command: certonly --webroot --webroot-path=/var/www/certbot --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email -d ${DOMAIN}
+
+volumes:
+  certbot-etc:
+  certbot-var:
+  web-root:
+
+networks:
+  pixelparty-network:
+    driver: bridge
