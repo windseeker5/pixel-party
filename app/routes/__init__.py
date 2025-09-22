@@ -9,8 +9,8 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def index():
-    """Show big screen display."""
-    return redirect(url_for('big_screen.big_screen'))
+    """Redirect to login page."""
+    return redirect(url_for('auth.guest_login'))
 
 
 @main_bp.route('/media/music/<filename>')

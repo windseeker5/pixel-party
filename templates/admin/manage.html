@@ -390,6 +390,81 @@
                         </div>
                     </div>
 
+                    <!-- Password Settings -->
+                    <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
+                        <h3 class="text-lg font-semibold border-b border-yellow-300 pb-2 mb-4">🔐 Password Settings</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-medium">Guest Password</span>
+                                    <span class="label-text-alt text-gray-500">Password for guests to access mobile/big screen</span>
+                                </label>
+                                <input type="text" name="guest_password"
+                                       value="{{ settings.get('guest_password', 'party2025') }}"
+                                       class="input input-bordered input-warning"
+                                       placeholder="Enter guest password">
+                                <div class="label">
+                                    <span class="label-text-alt text-warning">⚠️ Used for mobile and big screen access</span>
+                                </div>
+                            </div>
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-medium">Admin Password</span>
+                                    <span class="label-text-alt text-gray-500">Password for admin panel access</span>
+                                </label>
+                                <input type="text" name="admin_password"
+                                       value="{{ settings.get('admin_password', 'admin2025') }}"
+                                       class="input input-bordered input-warning"
+                                       placeholder="Enter admin password">
+                                <div class="label">
+                                    <span class="label-text-alt text-warning">⚠️ Used for admin panel and settings access</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning mt-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                            <div>
+                                <h3 class="font-bold">Security Note</h3>
+                                <div class="text-sm">Passwords are stored as plain text. Keep them simple for party use. Changes take effect immediately.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Code URL Settings -->
+                    <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                        <h3 class="text-lg font-semibold border-b border-blue-300 pb-2 mb-4">🔗 QR Code URL Settings</h3>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-medium">External URL (Optional)</span>
+                                <span class="label-text-alt text-gray-500">Override auto-detected IP address</span>
+                            </label>
+                            <input type="url" name="external_url"
+                                   value="{{ settings.get('external_url', '') }}"
+                                   class="input input-bordered input-info"
+                                   placeholder="https://yourparty.example.com or http://192.168.1.100:5000">
+                            <div class="label">
+                                <span class="label-text-alt text-info">
+                                    💡 Leave empty to use auto-detected IP address (current: auto-detection)
+                                </span>
+                            </div>
+                        </div>
+                        <div class="alert alert-info mt-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <h3 class="font-bold">QR Code URL Logic</h3>
+                                <div class="text-sm">
+                                    <strong>Empty field:</strong> QR code uses auto-detected IP address (default)<br>
+                                    <strong>URL provided:</strong> QR code uses your custom URL<br>
+                                    <strong>Format:</strong> Include http:// or https:// and port if needed
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Submit Button -->
                     <div class="flex justify-end pt-6">
                         <button type="submit" class="btn btn-primary">

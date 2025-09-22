@@ -203,15 +203,32 @@ def stats():
 @api_bp.route('/network_info')
 def network_info():
     """Get network information for QR code generation."""
+    from app.models import get_setting
+
     port = request.environ.get('SERVER_PORT', 5000)
-    network_ip = get_network_ip()
-    mobile_url = f"http://{network_ip}:{port}/mobile"
-    
-    return jsonify({
-        'network_ip': network_ip,
-        'mobile_url': mobile_url,
-        'port': port
-    })
+
+    # Check for external URL setting first
+    external_url = get_setting('external_url', '').strip()
+
+    if external_url:
+        # Use external URL if configured
+        mobile_url = f"{external_url.rstrip('/')}/mobile"
+        return jsonify({
+            'network_ip': 'external',
+            'mobile_url': mobile_url,
+            'port': port,
+            'url_source': 'external_setting'
+        })
+    else:
+        # Use auto-detected IP (current behavior)
+        network_ip = get_network_ip()
+        mobile_url = f"http://{network_ip}:{port}/mobile"
+        return jsonify({
+            'network_ip': network_ip,
+            'mobile_url': mobile_url,
+            'port': port,
+            'url_source': 'auto_detected'
+        })
 
 
 @api_bp.route('/reset_test_data', methods=['POST'])

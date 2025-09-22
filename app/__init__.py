@@ -26,11 +26,13 @@ def create_app(config_name='default'):
     from app.routes.big_screen import big_screen_bp
     from app.routes.api import api_bp
     from app.routes.admin import admin_bp
-    
+    from app.routes.auth import auth_bp
+
     app.register_blueprint(mobile_bp, url_prefix='/mobile')
     app.register_blueprint(big_screen_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(auth_bp)
     
     # Main route
     from app.routes import main_bp

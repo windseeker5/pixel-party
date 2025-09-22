@@ -5,17 +5,20 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, jsonify, request, current_app
 from app.models import Photo, MusicQueue, MusicLibrary, get_setting, update_setting
 from utils.music_library import music_search
+from app.services.auth import guest_required
 
 big_screen_bp = Blueprint('big_screen', __name__)
 
 
 @big_screen_bp.route('/')
+@guest_required
 def big_screen():
     """Main big screen display interface."""
     return render_template('big_screen/display.html')
 
 
 @big_screen_bp.route('/slideshow')
+@guest_required
 def slideshow():
     """Full screen slideshow with TikTok-style text animations."""
     party_title = get_setting('party_title', 'Birthday Celebration')

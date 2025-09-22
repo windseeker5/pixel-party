@@ -12,9 +12,14 @@ class Config:
     # Basic Flask settings
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'birthday-party-secret-key-change-in-production'
     
-    # Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///birthday_party.db'
+    # Database with explicit UTF-8 encoding for emoji support
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///birthday_party.db?charset=utf8'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'connect_args': {'check_same_thread': False},
+        'pool_pre_ping': True,
+        'echo': False
+    }
     
     # File upload settings
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50MB max file size

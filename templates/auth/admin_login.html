@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-100 flex items-center justify-center p-4">
+    <div class="card w-full max-w-md bg-base-100 shadow-2xl">
+        <div class="card-body">
+            <!-- Admin Header -->
+            <div class="text-center mb-6">
+                <div class="text-6xl mb-4">🔐</div>
+                <h1 class="text-3xl font-bold text-secondary">Admin Access</h1>
+                <p class="text-base-content/70 mt-2">Enter admin password to manage the party</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-4">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'error' if category == 'error' else 'info' }} mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                    {% if category == 'error' %}
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    {% else %}
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    {% endif %}
+                                </svg>
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Login Form -->
+            <form method="POST" action="{{ url_for('auth.admin_login') }}">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text text-lg">Admin Password</span>
+                    </label>
+                    <input type="password"
+                           name="password"
+                           placeholder="Enter admin password..."
+                           class="input input-bordered input-lg w-full text-center text-xl"
+                           required
+                           autofocus>
+                </div>
+
+                <div class="form-control mt-8">
+                    <button type="submit" class="btn btn-secondary btn-lg w-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                        Access Admin Panel
+                    </button>
+                </div>
+            </form>
+
+            <!-- Back to Party Link -->
+            <div class="divider"></div>
+            <div class="text-center">
+                <a href="{{ url_for('auth.guest_login') }}" class="link link-primary text-sm">
+                    ← Back to Party Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-focus password field when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.querySelector('input[name="password"]');
+    if (passwordInput) {
+        passwordInput.focus();
+    }
+});
+
+// Add entrance animation
+document.querySelector('.card').style.animation = 'fadeInDown 0.6s ease-out';
+</script>
+
+<style>
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Admin button hover effect */
+.btn-secondary:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s ease;
+}
+
+/* Subtle admin styling differences */
+.card {
+    border: 2px solid rgba(99, 102, 241, 0.1);
+}
+</style>
+{% endblock %}

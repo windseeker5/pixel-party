@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 from app import db
 from app.models import Guest, Photo, MusicQueue, get_setting
+from app.services.auth import guest_required
 
 mobile_bp = Blueprint('mobile', __name__)
 
@@ -266,6 +267,7 @@ def resize_image(file_path, max_width=1920, max_height=1080):
 
 
 @mobile_bp.route('/main')
+@guest_required
 def main_form():
     """Single screen with everything - name, photo, wish, optional music."""
     party_title = get_setting('party_title', 'Birthday Celebration')
@@ -315,6 +317,7 @@ def upload():
 
 
 @mobile_bp.route('/submit_memory', methods=['POST'])
+@guest_required
 def submit_memory():
     """Handle photo upload and wish submission - session-free form-based submission."""
     guest_name = request.form.get('guest_name', '').strip()
@@ -620,6 +623,7 @@ def music():
 
 
 @mobile_bp.route('/search_music', methods=['POST'])
+@guest_required
 def search_music():
     """HTMX endpoint for music search with progressive loading (local/YouTube first, AI later)."""
     # No authentication required - this is a party app!
@@ -1221,6 +1225,7 @@ def status():
     })
 
 @mobile_bp.route("/success")
+@guest_required
 def success():
     """Success page after submission."""
     # Get guest info from URL parameters (session-free)

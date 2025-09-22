@@ -110,6 +110,9 @@ def init_default_settings():
         ('welcome_screen_interval_value', '5'),
         ('welcome_screen_duration', '8'),
         ('enable_ai_suggestions', 'true'),
+        ('guest_password', 'party2025'),
+        ('admin_password', 'admin2025'),
+        ('external_url', ''),
     ]
     
     for key, value in default_settings:

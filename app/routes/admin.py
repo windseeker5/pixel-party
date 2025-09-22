@@ -8,11 +8,13 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from app import db
 from app.models import Photo, MusicQueue, Guest, Settings, update_setting, MusicLibrary
 from utils.music_library import music_search
+from app.services.auth import admin_required
 
 admin_bp = Blueprint('admin', __name__)
 
 
 @admin_bp.route('/')
+@admin_required
 def dashboard():
     """Admin dashboard."""
     stats = {
@@ -40,6 +42,7 @@ indexing_status = {
 
 
 @admin_bp.route('/music')
+@admin_required
 def music_dashboard():
     """Music library management dashboard."""
     # Get library statistics
@@ -219,6 +222,7 @@ def memory_book():
 
 
 @admin_bp.route('/manage')
+@admin_required
 def manage():
     """Admin management page to view and delete entries."""
     # Get all photos with guest info
@@ -242,7 +246,8 @@ def update_settings():
         'party_title', 'host_name', 'slideshow_duration',
         'max_submissions_per_guest', 'auto_play_music',
         'welcome_screen_interval_type', 'welcome_screen_interval_value',
-        'welcome_screen_duration', 'enable_ai_suggestions'
+        'welcome_screen_duration', 'enable_ai_suggestions',
+        'guest_password', 'admin_password', 'external_url'
     ]
 
     for key in settings_to_update:
