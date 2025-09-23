@@ -292,9 +292,9 @@
                 </div>
 
                 <!-- Photo Content (populated via HTMX) -->
-                <div id="photo-content" class="hidden h-full" 
-                     hx-get="/api/current_photo" 
-                     hx-trigger="every 8s"
+                <div id="photo-content" class="hidden h-full"
+                     hx-get="/api/current_photo"
+                     hx-trigger="load"
                      hx-swap="innerHTML">
                     <!-- Photos will be loaded here -->
                 </div>
@@ -698,11 +698,9 @@
                             // Show mini QR code in music player
                             document.getElementById('mini-qr-container').classList.remove('hidden');
                             
-                            // Start the HTMX polling if not already started
+                            // Trigger the first photo load immediately
                             const photoContent = document.getElementById('photo-content');
-                            if (!photoContent.hasAttribute('hx-trigger')) {
-                                htmx.process(photoContent);
-                            }
+                            triggerNextPhoto();
                         }
                     }
                 })
@@ -711,6 +709,57 @@
         
         // Check for photos every 5 seconds
         setInterval(checkForPhotos, 5000);
+
+        // Photo slideshow timer variables
+        let photoTimer = null;
+        let defaultPhotoDuration = 8; // seconds
+
+        // Listen for HTMX content updates to check for videos
+        document.addEventListener('htmx:afterSwap', function(event) {
+            if (event.target.id === 'photo-content') {
+                checkPhotoContent(event.target);
+            }
+        });
+
+        function checkPhotoContent(container) {
+            // Look for video element
+            const video = container.querySelector('video');
+            if (video) {
+                // Get duration from data attribute first (more reliable)
+                const dataDuration = parseFloat(video.getAttribute('data-duration'));
+                if (dataDuration && dataDuration > 0) {
+                    setPhotoTimer(Math.ceil(dataDuration));
+                } else {
+                    // Fallback to video duration when metadata loads
+                    video.addEventListener('loadedmetadata', function() {
+                        const duration = Math.ceil(this.duration) || defaultPhotoDuration;
+                        setPhotoTimer(duration);
+                    });
+                }
+            } else {
+                // It's an image, use default timing
+                setPhotoTimer(defaultPhotoDuration);
+            }
+        }
+
+        function setPhotoTimer(duration) {
+            // Clear existing timer
+            if (photoTimer) {
+                clearTimeout(photoTimer);
+            }
+
+            // Set new timer to trigger next photo
+            photoTimer = setTimeout(function() {
+                triggerNextPhoto();
+            }, duration * 1000);
+        }
+
+        function triggerNextPhoto() {
+            const photoContent = document.getElementById('photo-content');
+            if (photoContent) {
+                htmx.trigger(photoContent, 'htmx:trigger');
+            }
+        }
 
         // Compact Music Player Functions
         function setupAudioPlayer() {

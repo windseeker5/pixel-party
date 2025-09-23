@@ -580,3 +580,11 @@ guest_name: 'qwsswq'
 PASS: Guest name validation
 PASS: File exists - 550776854_24796851993272051_1928165336822853573_n.mp4
 PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'wdss'
+PASS: Guest name validation
+PASS: File exists - 550079870_24288142117535381_207967598490872311_n.mp4
+PASS: File type allowed
