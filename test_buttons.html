@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Song Selection</title>
+</head>
+<body>
+    <div id="music-search-container">
+        <p>Search field here</p>
+    </div>
+
+    <button type="button"
+            class="select-song-btn"
+            data-title="Test Song"
+            data-artist="Test Artist"
+            data-source="local"
+            data-file-path="/path/to/song"
+            data-url="">
+        + Select Test Song
+    </button>
+
+    <div id="selected-song" class="hidden">
+        <p>Selected: <span id="selected-song-text"></span></p>
+        <button onclick="clearSelectedSong()">Remove</button>
+    </div>
+
+    <input type="hidden" id="selected-song-input">
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.addEventListener('click', function(e) {
+                if (e.target.matches('.select-song-btn') || e.target.closest('.select-song-btn')) {
+                    e.preventDefault();
+                    const button = e.target.matches('.select-song-btn') ? e.target : e.target.closest('.select-song-btn');
+
+                    const title = button.dataset.title;
+                    const artist = button.dataset.artist;
+                    const source = button.dataset.source;
+                    const filePath = button.dataset.filePath;
+                    const url = button.dataset.url;
+
+                    console.log('Button clicked:', { title, artist, source, filePath, url });
+                    selectSong(title, artist, source, filePath, url);
+                }
+            });
+        });
+
+        function selectSong(title, artist, source, file_path, url) {
+            console.log('selectSong called:', { title, artist, source, file_path, url });
+
+            const selectedSongDiv = document.getElementById('selected-song');
+            const selectedSongText = document.getElementById('selected-song-text');
+            const selectedSongInput = document.getElementById('selected-song-input');
+            const searchContainer = document.getElementById('music-search-container');
+
+            selectedSongText.textContent = `${title} - ${artist}`;
+            selectedSongInput.value = JSON.stringify({
+                title,
+                artist,
+                source,
+                file_path: file_path || '',
+                url: url || ''
+            });
+
+            selectedSongDiv.classList.remove('hidden');
+            searchContainer.classList.add('hidden');
+        }
+
+        function clearSelectedSong() {
+            const selectedSongDiv = document.getElementById('selected-song');
+            const selectedSongInput = document.getElementById('selected-song-input');
+            const searchContainer = document.getElementById('music-search-container');
+
+            selectedSongDiv.classList.add('hidden');
+            selectedSongInput.value = '';
+            searchContainer.classList.remove('hidden');
+        }
+    </script>
+
+    <style>
+        .hidden { display: none; }
+        button { padding: 10px; margin: 5px; }
+    </style>
+</body>
+</html>

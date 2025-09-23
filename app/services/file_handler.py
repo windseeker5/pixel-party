@@ -14,16 +14,18 @@ class FileHandler:
     """Handle file uploads and processing."""
 
     UPLOAD_DIR = "media/photos"
+    THUMBNAIL_DIR = "media/thumbnails"
     MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
     MAX_VIDEO_DURATION = 120  # seconds (2 minutes)
     TARGET_WIDTH = 1920
     TARGET_HEIGHT = 1080
     ALLOWED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'}
     ALLOWED_VIDEO_EXTENSIONS = {'.mp4', '.mov', '.avi', '.mkv', '.webm'}
-    
+
     def __init__(self):
         """Initialize FileHandler."""
         os.makedirs(self.UPLOAD_DIR, exist_ok=True)
+        os.makedirs(self.THUMBNAIL_DIR, exist_ok=True)
     
     def generate_filename(self, original_filename: str, guest_name: str) -> str:
         """Generate a unique filename for uploaded files."""
@@ -79,7 +81,7 @@ class FileHandler:
             # Generate thumbnail filename
             video_name = os.path.splitext(os.path.basename(video_path))[0]
             thumbnail_name = f"{video_name}_thumb.jpg"
-            thumbnail_path = os.path.join(self.UPLOAD_DIR, thumbnail_name)
+            thumbnail_path = os.path.join(self.THUMBNAIL_DIR, thumbnail_name)
 
             print(f"Generating thumbnail for {video_path} -> {thumbnail_path}")
 

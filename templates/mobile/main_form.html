@@ -237,6 +237,14 @@
                           required></textarea>
             </div>
             
+            <!-- Selected song display - shows when song is selected (OUTSIDE form-control) -->
+            <div id="selected-song" class="hidden mb-3">
+                <div class="alert bg-yellow-400 text-black">
+                    <span id="selected-song-text">Selected song will appear here</span>
+                    <button type="button" onclick="clearSelectedSong()" class="btn btn-sm btn-error">Supprimer</button>
+                </div>
+            </div>
+
             <!-- Optional Music Suggestion -->
             <div class="form-control">
                 <label class="label">
@@ -251,45 +259,35 @@
                     </span>
                 </label>
 
-                <input type="text"
-                       placeholder="Rechercher par ambiance, titre ou artiste..."
-                       class="input input-bordered input-lg input-secondary w-full border-orange-500 focus:border-orange-500 text-lg"
-                       hx-post="/mobile/search_music"
-                       hx-trigger="input delay:500ms"
-                       hx-target="#music-results"
-                       hx-include="this"
-                       hx-indicator="#search-spinner"
-                       hx-swap="innerHTML"
-                       hx-sync="this:replace"
-                       name="query"
-                       autocomplete="off">
+                <!-- Music search container - hidden when song is selected -->
+                <div id="music-search-container">
+                    <input type="text"
+                           placeholder="Rechercher par ambiance, titre ou artiste..."
+                           class="input input-bordered input-lg input-secondary w-full border-orange-500 focus:border-orange-500 text-lg"
+                           hx-post="/mobile/search_music"
+                           hx-trigger="input delay:500ms"
+                           hx-target="#music-results"
+                           hx-include="this"
+                           hx-indicator="#search-spinner"
+                           hx-swap="innerHTML"
+                           hx-sync="this:replace"
+                           name="query"
+                           autocomplete="off">
 
-                <!-- Search loading indicator with progressive states -->
-                <div id="search-spinner" class="htmx-indicator text-center py-2">
-                    <span class="loading loading-spinner loading-sm"></span>
-                    <span class="text-sm opacity-70 ml-2">
-                        <span id="search-stage">Recherche dans la bibliothèque et YouTube...</span>
-                    </span>
+                    <!-- Search loading indicator with progressive states -->
+                    <div id="search-spinner" class="htmx-indicator text-center py-2">
+                        <span class="loading loading-spinner loading-sm"></span>
+                        <span class="text-sm opacity-70 ml-2">
+                            <span id="search-stage">Recherche dans la bibliothèque et YouTube...</span>
+                        </span>
+                    </div>
+
+                    <!-- Search results -->
+                    <div id="music-results" class="space-y-1 max-h-96 overflow-y-auto"></div>
                 </div>
-
-                <!-- Search results -->
-                <div id="music-results" class="space-y-1 max-h-96 overflow-y-auto"></div>
 
                 <!-- Hidden input for selected song -->
                 <input type="hidden" name="selected_song" id="selected-song-input">
-                
-                <!-- Selected song display (outside collapsible) -->
-                <div id="selected-song" class="hidden mt-3">
-                    <div class="alert bg-yellow-400 text-black border-yellow-500">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                        </svg>
-                        <span id="selected-song-text"></span>
-                        <button type="button"
-                                onclick="document.getElementById('selected-song').classList.add('hidden'); document.getElementById('selected-song-input').value='';"
-                                class="badge badge-error text-white">Supprimer</button>
-                    </div>
-                </div>
             </div>
             
             <!-- Submit Button -->
@@ -309,119 +307,82 @@
 </div>
 
 <script>
-    // Fix for empty selected-song div issue - AGGRESSIVE approach to ensure it always works
-    function fixEmptySelectedSongDiv() {
-        const selectedSongDiv = document.getElementById('selected-song');
-        if (selectedSongDiv && selectedSongDiv.innerHTML.trim() === '') {
-            console.log('🔧 Fixing empty selected-song div...');
-            selectedSongDiv.innerHTML = `
-                <div class="alert bg-yellow-400 text-black border-yellow-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                    </svg>
-                    <span id="selected-song-text"></span>
-                    <button type="button"
-                            onclick="document.getElementById('selected-song').classList.add('hidden'); document.getElementById('selected-song-input').value='';"
-                            class="badge badge-error text-white">Supprimer</button>
-                </div>
-            `;
-            return true;
-        }
-        return false;
-    }
-
-    // AGGRESSIVE FIX: Run immediately and on multiple events
-    fixEmptySelectedSongDiv();
-    setTimeout(fixEmptySelectedSongDiv, 50);
-    setTimeout(fixEmptySelectedSongDiv, 200);
-    setTimeout(fixEmptySelectedSongDiv, 500);
-    
-    // Run on DOM ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', fixEmptySelectedSongDiv);
-    }
-    
-    // Run when user starts using music section
-    document.addEventListener('change', function(e) {
-        if (e.target && e.target.type === 'checkbox') {
-            setTimeout(fixEmptySelectedSongDiv, 10);
-        }
-    });
-    
-    // Run before any search happens
-    document.addEventListener('input', function(e) {
-        if (e.target && e.target.name === 'query') {
-            fixEmptySelectedSongDiv();
-        }
-    });
-
     // Event delegation for dynamically added Select buttons
     document.addEventListener('DOMContentLoaded', function() {
         document.body.addEventListener('click', function(e) {
             if (e.target.matches('.select-song-btn') || e.target.closest('.select-song-btn')) {
                 e.preventDefault();
                 const button = e.target.matches('.select-song-btn') ? e.target : e.target.closest('.select-song-btn');
-                
+
                 const title = button.dataset.title;
                 const artist = button.dataset.artist;
                 const source = button.dataset.source;
                 const filePath = button.dataset.filePath;
                 const url = button.dataset.url;
-                
+
                 console.log('Button clicked:', { title, artist, source, filePath, url });
                 selectSong(title, artist, source, filePath, url);
             }
         });
     });
-    
-    // Function to select song from HTMX search results - DEFENSIVE VERSION
+
+    // Function to select song from HTMX search results - ULTRA DEFENSIVE VERSION
     function selectSong(title, artist, source, file_path, url) {
         const selectedSongDiv = document.getElementById('selected-song');
         let selectedSongText = document.getElementById('selected-song-text');
         const selectedSongInput = document.getElementById('selected-song-input');
         const searchInput = document.querySelector('input[name="query"]');
-        
-        // DEFENSIVE: Check if elements exist, create if missing
-        if (!selectedSongDiv) {
-            console.error('selected-song div not found');
-            return;
-        }
-        
-        if (!selectedSongInput) {
-            console.error('selected-song-input not found');
-            return;
-        }
-        
-        // DEFENSIVE: If selectedSongText doesn't exist, ensure the div has proper content
-        if (!selectedSongText) {
-            console.log('🔧 selected-song-text not found, rebuilding div content...');
+        const searchContainer = document.getElementById('music-search-container');
+
+        // ULTRA DEFENSIVE: If the div is empty, rebuild the EXACT original content
+        if (selectedSongDiv && (!selectedSongText || selectedSongDiv.innerHTML.trim() === '')) {
+            console.log('🔧 Rebuilding selected-song div content...');
             selectedSongDiv.innerHTML = `
                 <div class="alert bg-yellow-400 text-black border-yellow-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                     </svg>
-                    <span id="selected-song-text"></span>
-                    <button type="button"
-                            onclick="document.getElementById('selected-song').classList.add('hidden'); document.getElementById('selected-song-input').value='';"
-                            class="badge badge-error text-white">Supprimer</button>
+                    <span id="selected-song-text">Selected song will appear here</span>
+                    <button type="button" onclick="clearSelectedSong()" class="badge badge-error text-white">Supprimer</button>
                 </div>
             `;
             selectedSongText = document.getElementById('selected-song-text');
         }
-        
+
+        // DEFENSIVE: Check if elements exist
+        if (!selectedSongDiv) {
+            console.error('selected-song div not found');
+            return;
+        }
+
+        if (!selectedSongInput) {
+            console.error('selected-song-input not found');
+            return;
+        }
+
+        if (!selectedSongText) {
+            console.error('selected-song-text not found even after rebuild');
+            return;
+        }
+
         // Update selected song display
         selectedSongText.textContent = `${title} - ${artist}`;
-        selectedSongInput.value = JSON.stringify({ 
-            title, 
-            artist, 
-            source, 
-            file_path: file_path || '', 
-            url: url || '' 
+        selectedSongInput.value = JSON.stringify({
+            title,
+            artist,
+            source,
+            file_path: file_path || '',
+            url: url || ''
         });
-        
+
         // Show selected song
         selectedSongDiv.classList.remove('hidden');
-        
+
+        // Hide search container - this is what you wanted!
+        if (searchContainer) {
+            searchContainer.classList.add('hidden');
+        }
+
         // Clear search input and results
         if (searchInput) {
             searchInput.value = '';
@@ -430,8 +391,23 @@
         if (resultsDiv) {
             resultsDiv.innerHTML = '';
         }
-        
-        console.log('Song selected:', { title, artist, source, file_path, url });
+
+        console.log('Song selected successfully:', { title, artist, source, file_path, url });
+    }
+
+    function clearSelectedSong() {
+        const selectedSongDiv = document.getElementById('selected-song');
+        const selectedSongInput = document.getElementById('selected-song-input');
+        const searchContainer = document.getElementById('music-search-container');
+
+        // Hide selected song
+        selectedSongDiv.classList.add('hidden');
+        selectedSongInput.value = '';
+
+        // Show search container again
+        if (searchContainer) {
+            searchContainer.classList.remove('hidden');
+        }
     }
     
     // Character counter for wish message with proper emoji support

@@ -1,0 +1,42 @@
+<!-- Music selection area - shows either search field OR selected song -->
+{% if selected_song %}
+    <!-- Selected song display -->
+    <div class="alert bg-yellow-400 text-black border-yellow-500">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+        </svg>
+        <span>{{ selected_song.title }} - {{ selected_song.artist }}</span>
+        <button type="button"
+                hx-post="/mobile/clear_song"
+                hx-target="#music-selection-area"
+                class="badge badge-error text-white">Supprimer</button>
+    </div>
+
+    <!-- Hidden input for form submission -->
+    <input type="hidden" name="selected_song" value="{{ selected_song_json }}">
+{% else %}
+    <!-- Search field and results -->
+    <input type="text"
+           placeholder="Rechercher par ambiance, titre ou artiste..."
+           class="input input-bordered input-lg input-secondary w-full border-orange-500 focus:border-orange-500 text-lg"
+           hx-post="/mobile/search_music"
+           hx-trigger="input delay:500ms"
+           hx-target="#music-results"
+           hx-include="this"
+           hx-indicator="#search-spinner"
+           hx-swap="innerHTML"
+           hx-sync="this:replace"
+           name="query"
+           autocomplete="off">
+
+    <!-- Search loading indicator -->
+    <div id="search-spinner" class="htmx-indicator text-center py-2">
+        <span class="loading loading-spinner loading-sm"></span>
+        <span class="text-sm opacity-70 ml-2">
+            <span id="search-stage">Recherche dans la bibliothèque et YouTube...</span>
+        </span>
+    </div>
+
+    <!-- Search results -->
+    <div id="music-results" class="space-y-1 max-h-96 overflow-y-auto"></div>
+{% endif %}

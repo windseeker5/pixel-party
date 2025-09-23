@@ -297,6 +297,23 @@
             font-style: italic;
         }
 
+        /* Video play button overlay */
+        .video-thumbnail::after {
+            content: '▶';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+        }
+
+        .polaroid-frame {
+            position: relative;
+        }
+
         /* Paper tape effect for some photos */
         .paper-tape {
             position: absolute;
@@ -373,11 +390,20 @@
                             <div class="paper-tape"></div>
                             {% endif %}
 
+                            {% if memory.photo.file_type == 'video' and memory.photo.thumbnail %}
+                            <img src="/media/thumbnails/{{ memory.photo.thumbnail }}"
+                                 alt="Souvenir de {{ memory.photo.guest_name }}"
+                                 class="polaroid-photo video-thumbnail"
+                                 onclick="window.open('/media/photos/{{ memory.photo.filename }}', '_blank')"
+                                 title="Cliquez pour voir la vidéo"
+                                 data-video="true">
+                            {% else %}
                             <img src="/media/photos/{{ memory.photo.filename }}"
                                  alt="Souvenir de {{ memory.photo.guest_name }}"
                                  class="polaroid-photo"
                                  onclick="window.open('/media/photos/{{ memory.photo.filename }}', '_blank')"
                                  title="Cliquez pour voir en plein écran">
+                            {% endif %}
 
                             <div class="polaroid-caption">
                                 <div class="polaroid-date signature">{{ memory.photo.uploaded_at.strftime('%d %b %Y • %Hh%M') }}</div>

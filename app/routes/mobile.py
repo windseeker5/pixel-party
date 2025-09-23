@@ -1291,4 +1291,41 @@ def success():
     return render_template("mobile/success.html",
                          guest_name=guest_name,
                          music_added=music_added)
+@mobile_bp.route('/select_song', methods=['POST'])
+def select_song():
+    """HTMX endpoint to select a song and hide search field."""
+    title = request.form.get('title', '').strip()
+    artist = request.form.get('artist', '').strip()
+    source = request.form.get('source', '').strip()
+    file_path = request.form.get('file_path', '').strip()
+    url = request.form.get('url', '').strip()
+
+    if not title or not artist:
+        # Return search field if invalid selection
+        return render_template('partials/music_selection.html', selected_song=None)
+
+    # Create selected song object
+    selected_song = {
+        'title': title,
+        'artist': artist,
+        'source': source,
+        'file_path': file_path,
+        'url': url
+    }
+
+    # Create JSON for hidden form field
+    import json
+    selected_song_json = json.dumps(selected_song)
+
+    return render_template('partials/music_selection.html',
+                         selected_song=selected_song,
+                         selected_song_json=selected_song_json)
+
+
+@mobile_bp.route('/clear_song', methods=['POST'])
+def clear_song():
+    """HTMX endpoint to clear selected song and show search field again."""
+    return render_template('partials/music_selection.html', selected_song=None)
+
+
 # Force reload

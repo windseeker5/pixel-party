@@ -41,3 +41,73 @@
 [2025-09-22 15:36:15] ID:2 - ✅ Found file, updating database with: Bob_Dylan_-_Just_Like_Tom_Thumbs_Blues.mp3
 [2025-09-22 15:36:15] ID:2 - ✅ Background download complete: Bob_Dylan_-_Just_Like_Tom_Thumbs_Blues.mp3
 [2025-09-22 15:36:15] ID:2 - 🏁 Thread finished
+[2025-09-22 16:25:24] ID:2 - 🚀 Thread started: 'Run Away to Mars' by 'TALK' from https://www.youtube.com/watch?v=jMPkCCxkEVI
+[2025-09-22 16:25:24] ID:2 - ✅ App context acquired
+[2025-09-22 16:25:24] ID:2 - 📊 Querying database for music request
+[2025-09-22 16:25:24] ID:2 - ✅ Found music request: Run Away to Mars
+[2025-09-22 16:25:24] ID:2 - ✅ Status updated to 'downloading'
+[2025-09-22 16:25:24] ID:2 - 🔧 Getting YouTube service
+[2025-09-22 16:25:24] ID:2 - ✅ YouTube service acquired
+[2025-09-22 16:25:24] ID:2 - ⬇️ Starting download from: https://www.youtube.com/watch?v=jMPkCCxkEVI
+[2025-09-22 16:25:37] ID:2 - 📁 Download returned filename: TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 16:25:37] ID:2 - 🔍 Checking for file: media/music/TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 16:25:37] ID:2 - ✅ Found file using exact filename: TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 16:25:37] ID:2 - ✅ Found file, updating database with: TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 16:25:37] ID:2 - ✅ Background download complete: TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 16:25:37] ID:2 - 🏁 Thread finished
+[2025-09-22 16:27:01] ID:3 - 🚀 Thread started: 'LE DOIGT DANS L'CUL' by 'LAURENT GERRA' from https://www.youtube.com/watch?v=HfkdqZtoHLA
+[2025-09-22 16:27:01] ID:3 - ✅ App context acquired
+[2025-09-22 16:27:01] ID:3 - 📊 Querying database for music request
+[2025-09-22 16:27:01] ID:3 - ✅ Found music request: LE DOIGT DANS L'CUL
+[2025-09-22 16:27:01] ID:3 - ✅ Status updated to 'downloading'
+[2025-09-22 16:27:01] ID:3 - 🔧 Getting YouTube service
+[2025-09-22 16:27:01] ID:3 - ✅ YouTube service acquired
+[2025-09-22 16:27:01] ID:3 - ⬇️ Starting download from: https://www.youtube.com/watch?v=HfkdqZtoHLA
+[2025-09-22 16:27:12] ID:3 - 📁 Download returned filename: LAURENT_GERRA_-_LE_DOIGT_DANS_LCUL.mp3
+[2025-09-22 16:27:12] ID:3 - 🔍 Checking for file: media/music/LAURENT_GERRA_-_LE_DOIGT_DANS_LCUL.mp3
+[2025-09-22 16:27:12] ID:3 - ✅ Found file using exact filename: LAURENT_GERRA_-_LE_DOIGT_DANS_LCUL.mp3
+[2025-09-22 16:27:12] ID:3 - ✅ Found file, updating database with: LAURENT_GERRA_-_LE_DOIGT_DANS_LCUL.mp3
+[2025-09-22 16:27:12] ID:3 - ✅ Background download complete: LAURENT_GERRA_-_LE_DOIGT_DANS_LCUL.mp3
+[2025-09-22 16:27:12] ID:3 - 🏁 Thread finished
+[2025-09-22 16:54:43] ID:1 - 🚀 Thread started: 'Run Away to Mars' by 'TALK' from https://www.youtube.com/watch?v=jMPkCCxkEVI
+[2025-09-22 16:54:43] ID:1 - ✅ App context acquired
+[2025-09-22 16:54:43] ID:1 - 📊 Querying database for music request
+[2025-09-22 16:54:43] ID:1 - ✅ Found music request: Run Away to Mars
+[2025-09-22 16:54:43] ID:1 - ✅ Status updated to 'downloading'
+[2025-09-22 16:54:43] ID:1 - 🔧 Getting YouTube service
+[2025-09-22 16:54:43] ID:1 - ✅ YouTube service acquired
+[2025-09-22 16:54:43] ID:1 - ⬇️ Starting download from: https://www.youtube.com/watch?v=jMPkCCxkEVI
+[2025-09-22 16:54:55] ID:1 - 📁 Download returned filename: TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 16:54:55] ID:1 - 🔍 Checking for file: media/music/TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 16:54:55] ID:1 - ✅ Found file using exact filename: TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 16:54:55] ID:1 - ✅ Found file, updating database with: TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 16:54:55] ID:1 - ✅ Background download complete: TALK_-_Run_Away_to_Mars.mp3
+[2025-09-22 16:54:55] ID:1 - 🏁 Thread finished
+[2025-09-22 16:55:33] ID:2 - 🚀 Thread started: 'Les étoiles filantes' by 'LES COWBOYS FRINGANTS' from https://www.youtube.com/watch?v=KIe_3vhxmoA
+[2025-09-22 16:55:33] ID:2 - ✅ App context acquired
+[2025-09-22 16:55:33] ID:2 - 📊 Querying database for music request
+[2025-09-22 16:55:33] ID:2 - ✅ Found music request: Les étoiles filantes
+[2025-09-22 16:55:33] ID:2 - ✅ Status updated to 'downloading'
+[2025-09-22 16:55:33] ID:2 - 🔧 Getting YouTube service
+[2025-09-22 16:55:33] ID:2 - ✅ YouTube service acquired
+[2025-09-22 16:55:33] ID:2 - ⬇️ Starting download from: https://www.youtube.com/watch?v=KIe_3vhxmoA
+[2025-09-22 16:55:47] ID:2 - 📁 Download returned filename: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 16:55:47] ID:2 - 🔍 Checking for file: media/music/LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 16:55:47] ID:2 - ✅ Found file using exact filename: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 16:55:47] ID:2 - ✅ Found file, updating database with: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 16:55:47] ID:2 - ✅ Background download complete: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 16:55:47] ID:2 - 🏁 Thread finished
+[2025-09-22 18:03:32] ID:1 - 🚀 Thread started: 'Les étoiles filantes' by 'LES COWBOYS FRINGANTS' from https://www.youtube.com/watch?v=KIe_3vhxmoA
+[2025-09-22 18:03:32] ID:1 - ✅ App context acquired
+[2025-09-22 18:03:32] ID:1 - 📊 Querying database for music request
+[2025-09-22 18:03:32] ID:1 - ✅ Found music request: Les étoiles filantes
+[2025-09-22 18:03:32] ID:1 - ✅ Status updated to 'downloading'
+[2025-09-22 18:03:32] ID:1 - 🔧 Getting YouTube service
+[2025-09-22 18:03:32] ID:1 - ✅ YouTube service acquired
+[2025-09-22 18:03:32] ID:1 - ⬇️ Starting download from: https://www.youtube.com/watch?v=KIe_3vhxmoA
+[2025-09-22 18:03:45] ID:1 - 📁 Download returned filename: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 18:03:45] ID:1 - 🔍 Checking for file: media/music/LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 18:03:45] ID:1 - ✅ Found file using exact filename: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 18:03:45] ID:1 - ✅ Found file, updating database with: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 18:03:45] ID:1 - ✅ Background download complete: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-22 18:03:45] ID:1 - 🏁 Thread finished

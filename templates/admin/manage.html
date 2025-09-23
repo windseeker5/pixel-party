@@ -152,7 +152,9 @@
                                         <div class="avatar">
                                             <div class="mask mask-squircle w-10 h-10">
                                                 {% if photo.file_type == 'video' and photo.thumbnail %}
-                                                    <img src="data:image/jpeg;base64,{{ photo.thumbnail }}" alt="Video Thumbnail">
+                                                    <img src="/media/thumbnails/{{ photo.thumbnail }}" alt="Video Thumbnail">
+                                                {% elif photo.file_type == 'video' %}
+                                                    <div class="bg-gray-300 w-full h-full flex items-center justify-center text-xs">📹</div>
                                                 {% else %}
                                                     <img src="/media/photos/{{ photo.filename }}" alt="Thumbnail">
                                                 {% endif %}

@@ -5,13 +5,13 @@
     {% set is_video = file_ext in video_extensions or (photo.file_type and photo.file_type == 'video') %}
 
     {% if is_video %}
-        <!-- Video with Ken Burns effect -->
+        <!-- Video with NO Ken Burns effect to prevent 8-second cutoff -->
         <video src="/media/photos/{{ photo.filename }}"
                autoplay
+               muted
                playsinline
                preload="auto"
-               volume="0.7"
-               class="absolute inset-0 w-full h-full object-contain ken-burns-animation"
+               class="absolute inset-0 w-full h-full object-contain ken-burns-video"
                data-duration="{{ photo.duration or 0 }}"
                onloadeddata="console.log('Video loaded:', '{{ photo.filename }}'); this.currentTime = 0; adjustVideoDisplay(this);"
                onended="notifyVideoEnded(this);"
@@ -33,7 +33,7 @@
     
     <!-- SIMPLE TikTok-style text overlay - NO JAVASCRIPT -->
     {% if photo.wish_message %}
-    <div class="tiktok-overlay tiktok-position-{{ (photo.id % 5) + 1 }}">
+    <div class="tiktok-overlay tiktok-position-{{ (photo.id % 6) + 1 }}">
         <!-- Main wish text with random animation style and dynamic sizing -->
         {% if (photo.id % 4) + 1 == 1 %}
             <!-- Style 1: Typewriter effect with JavaScript -->
@@ -106,33 +106,56 @@
     padding: 0 5%;
 }
 
-/* Position 1: Top area */
+/* Position 1: Top-left corner - safe from center subjects */
 .tiktok-position-1 {
     justify-content: flex-start;
-    padding-top: 20%;
+    align-items: flex-start;
+    padding-top: 8%;
+    padding-left: 5%;
+    text-align: left;
 }
 
-/* Position 2: Upper-middle area */
+/* Position 2: Top-right corner - safe from center subjects */
 .tiktok-position-2 {
     justify-content: flex-start;
-    padding-top: 35%;
+    align-items: flex-end;
+    padding-top: 8%;
+    padding-right: 5%;
+    text-align: right;
 }
 
-/* Position 3: Center (original) */
+/* Position 3: Bottom-left corner - safe from center subjects */
 .tiktok-position-3 {
-    justify-content: center;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding-bottom: 8%;
+    padding-left: 5%;
+    text-align: left;
 }
 
-/* Position 4: Lower-middle area */
+/* Position 4: Bottom-right corner - safe from center subjects */
 .tiktok-position-4 {
     justify-content: flex-end;
-    padding-bottom: 35%;
+    align-items: flex-end;
+    padding-bottom: 8%;
+    padding-right: 5%;
+    text-align: right;
 }
 
-/* Position 5: Bottom area */
+/* Position 5: Very top center - above most subjects */
 .tiktok-position-5 {
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 5%;
+    text-align: center;
+}
+
+/* Position 6: Very bottom center - below most subjects */
+.tiktok-position-6 {
     justify-content: flex-end;
-    padding-bottom: 20%;
+    align-items: center;
+    padding-bottom: 5%;
+    text-align: center;
 }
 
 /* Base TikTok text style with dynamic sizing and emoji support */
@@ -150,25 +173,25 @@
     font-family: system-ui, -apple-system, 'Segoe UI', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
 }
 
-/* Enhanced dynamic font sizing based on text length */
+/* Enhanced dynamic font sizing based on text length - Reduced by 30% */
 .tiktok-wish.text-extra-large {
-    font-size: clamp(3.5rem, 8vw, 6rem); /* 1-30 chars */
+    font-size: clamp(2.5rem, 6vw, 4rem); /* 1-30 chars */
 }
 
 .tiktok-wish.text-large {
-    font-size: clamp(3rem, 7vw, 5rem); /* 31-60 chars */
+    font-size: clamp(2.2rem, 5vw, 3.5rem); /* 31-60 chars */
 }
 
 .tiktok-wish.text-medium {
-    font-size: clamp(2.5rem, 6vw, 4rem); /* 61-100 chars */
+    font-size: clamp(1.8rem, 4.5vw, 3rem); /* 61-100 chars */
 }
 
 .tiktok-wish.text-small {
-    font-size: clamp(2rem, 5vw, 3.5rem); /* 101-140 chars */
+    font-size: clamp(1.5rem, 4vw, 2.5rem); /* 101-140 chars */
 }
 
 .tiktok-name {
-    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-size: clamp(1.2rem, 3vw, 2rem);
     font-weight: 700;
     text-shadow: 2px 2px 0px rgba(0,0,0,1);
     margin-top: 1rem;

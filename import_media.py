@@ -155,14 +155,16 @@ class MediaImporter:
             file_type = "image" if self.file_handler.is_image(file_path.name) else "video"
             file_size = len(file_data)
 
-            # For videos, get duration and thumbnail
+            # For videos, get duration and thumbnail filename
             duration = None
             thumbnail = None
             if file_type == "video":
                 video_path = os.path.join(self.file_handler.UPLOAD_DIR, saved_filename)
                 try:
                     _, _, duration = self.file_handler.validate_video_duration(video_path)
-                    thumbnail = self.file_handler.generate_video_thumbnail(video_path)
+                    # Get thumbnail filename (generated during save_file)
+                    video_name = os.path.splitext(saved_filename)[0]
+                    thumbnail = f"{video_name}_thumb.jpg"
                 except:
                     duration = None
                     thumbnail = None

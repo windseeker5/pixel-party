@@ -12,7 +12,7 @@
                 {% set is_video = (photo.file_type and photo.file_type == 'video') or photo.filename.split('.')[-1].lower() in ['mp4', 'mov', 'avi', 'mkv', 'webm'] %}
                 {% if is_video and photo.thumbnail %}
                     <!-- Video thumbnail with play icon -->
-                    <img src="/media/photos/{{ photo.thumbnail }}"
+                    <img src="/media/thumbnails/{{ photo.thumbnail }}"
                          alt="Video by {{ photo.guest_name }}"
                          class="w-full h-full object-cover"
                          onerror="this.onerror=null; this.src='/media/photos/video_placeholder.svg';">

@@ -44,6 +44,41 @@ def serve_music_file(filename):
         abort(500)
 
 
+@main_bp.route('/media/thumbnails/<filename>')
+def serve_thumbnail_file(filename):
+    """Serve thumbnail files from the thumbnails folder."""
+    try:
+        thumbnail_folder = Path(current_app.config['UPLOAD_FOLDER']).parent / 'thumbnails'
+        file_path = thumbnail_folder / filename
+
+        if not file_path.exists():
+            current_app.logger.error(f"Thumbnail file not found: {file_path}")
+            abort(404)
+
+        # Set proper MIME type for thumbnails (always images)
+        mimetype, _ = mimetypes.guess_type(str(file_path))
+        if mimetype is None:
+            ext = file_path.suffix.lower()
+            if ext in ['.jpg', '.jpeg']:
+                mimetype = 'image/jpeg'
+            elif ext in ['.png']:
+                mimetype = 'image/png'
+            else:
+                mimetype = 'image/jpeg'  # Default for thumbnails
+
+        return send_file(
+            file_path,
+            mimetype=mimetype,
+            as_attachment=False
+        )
+
+    except Exception as e:
+        if hasattr(e, 'code'):
+            raise e
+        current_app.logger.error(f"Error serving thumbnail file {filename}: {e}")
+        abort(500)
+
+
 @main_bp.route('/media/photos/<filename>')
 def serve_media_file(filename):
     """Serve photo and video files from the uploads folder."""

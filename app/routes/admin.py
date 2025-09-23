@@ -322,6 +322,7 @@ def export_standalone():
     export_dir = 'export'
     os.makedirs(export_dir, exist_ok=True)
     os.makedirs(f'{export_dir}/photos', exist_ok=True)
+    os.makedirs(f'{export_dir}/thumbnails', exist_ok=True)
     os.makedirs(f'{export_dir}/music', exist_ok=True)
     
     # Prepare memories data and copy files
@@ -332,6 +333,13 @@ def export_standalone():
         photo_dest = f'{export_dir}/photos/{photo.filename}'
         if os.path.exists(photo_src):
             shutil.copy2(photo_src, photo_dest)
+
+        # Copy video thumbnail if it exists
+        if photo.file_type == 'video' and photo.thumbnail:
+            thumb_src = f'media/thumbnails/{photo.thumbnail}'
+            thumb_dest = f'{export_dir}/thumbnails/{photo.thumbnail}'
+            if os.path.exists(thumb_src):
+                shutil.copy2(thumb_src, thumb_dest)
         
         # Get associated music
         music = None

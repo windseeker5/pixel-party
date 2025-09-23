@@ -240,12 +240,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const photoDisplay = document.getElementById('photo-display');
     if (photoDisplay) {
         defaultSlideshowDuration = parseInt(photoDisplay.dataset.slideshowDuration) || 8;
+        // Start the slideshow immediately to load first photo
+        triggerNextSlide();
     }
 
     // Listen for video duration messages from iframe/components
     window.addEventListener('message', function(event) {
         if (event.data.type === 'video_duration') {
-            const videoDuration = Math.max(event.data.duration, defaultSlideshowDuration);
+            // Use actual video duration, don't force minimum
+            const videoDuration = event.data.duration || defaultSlideshowDuration;
             resetHTMXTimer(videoDuration);
         } else if (event.data.type === 'video_ended') {
             // Video ended early, proceed to next immediately
@@ -264,11 +267,17 @@ document.addEventListener('DOMContentLoaded', function() {
 function checkForVideo(container) {
     const video = container.querySelector('video');
     if (video) {
-        video.addEventListener('loadedmetadata', function() {
-            const duration = Math.ceil(this.duration) || defaultSlideshowDuration;
-            const finalDuration = Math.max(duration, defaultSlideshowDuration);
-            resetHTMXTimer(finalDuration);
-        });
+        // Get duration from data attribute first (more reliable)
+        const dataDuration = parseFloat(video.getAttribute('data-duration'));
+        if (dataDuration && dataDuration > 0) {
+            resetHTMXTimer(Math.ceil(dataDuration));
+        } else {
+            // Fallback to metadata if data-duration not available
+            video.addEventListener('loadedmetadata', function() {
+                const duration = Math.ceil(this.duration) || defaultSlideshowDuration;
+                resetHTMXTimer(duration);
+            });
+        }
     } else {
         // It's an image, use default timing
         resetHTMXTimer(defaultSlideshowDuration);
@@ -316,7 +325,7 @@ function triggerNextSlide() {
         <!-- Photo Display Area (HTMX will update this) -->
         <div id="photo-display"
              hx-get="{{ url_for('api.current_photo') }}"
-             hx-trigger="every {{ slideshow_duration }}s"
+             hx-trigger="htmx:trigger"
              hx-swap="innerHTML"
              hx-indicator=".htmx-indicator"
              data-slideshow-duration="{{ slideshow_duration }}">
