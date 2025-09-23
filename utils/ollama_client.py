@@ -3,15 +3,16 @@
 import aiohttp
 import asyncio
 import json
+import os
 from typing import List, Dict, Any
 import logging
 # Remove Flask dependency to make it testable outside Flask context
 
 class OllamaClient:
     """Simple Ollama client for music suggestions."""
-    
+
     def __init__(self):
-        self.base_url = "http://127.0.0.1:11434"
+        self.base_url = os.getenv('OLLAMA_BASE_URL', 'http://127.0.0.1:11434')
         self.model = "llama3.2:1b"
         self.session = None
         self.logger = logging.getLogger(__name__)
