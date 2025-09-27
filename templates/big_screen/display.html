@@ -293,8 +293,8 @@
 
                 <!-- Photo Content (populated via HTMX) -->
                 <div id="photo-content" class="hidden h-full"
-                     hx-get="/api/current_photo"
-                     hx-trigger="load"
+                     hx-get="{{ url_for('api.current_photo') }}"
+                     hx-trigger="nextPhoto"
                      hx-swap="innerHTML">
                     <!-- Photos will be loaded here -->
                 </div>
@@ -508,6 +508,35 @@
         let audioPlayer = null;
         let hasPhotos = false;
 
+        // Global functions for photo_display.html compatibility
+        window.adjustImageDisplay = function(img) {
+            // This function is called from photo_display.html
+            // Just prevent the error - the function in photo_display.html will handle the logic
+            console.log('adjustImageDisplay called for', img);
+        };
+
+        window.adjustVideoDisplay = function(video) {
+            // This function is called from photo_display.html
+            // Provide basic video handling
+            if (video && typeof video.addEventListener === 'function') {
+                video.addEventListener('loadedmetadata', function() {
+                    const duration = this.duration || {{ slideshow_duration }}; // default from database setting
+                    if (window.parent && duration > 0) {
+                        window.parent.postMessage({
+                            type: 'video_duration',
+                            duration: Math.ceil(duration)
+                        }, '*');
+                    }
+                });
+            }
+        };
+
+        // Global nextSong function for audio player
+        window.nextSong = function() {
+            // This will be implemented by the music player functionality
+            console.log('Next song triggered');
+        };
+
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize audio player
             audioPlayer = document.getElementById('audio-player');
@@ -712,7 +741,7 @@
 
         // Photo slideshow timer variables
         let photoTimer = null;
-        let defaultPhotoDuration = 8; // seconds
+        let defaultPhotoDuration = {{ slideshow_duration }}; // seconds from database setting
 
         // Listen for HTMX content updates to check for videos
         document.addEventListener('htmx:afterSwap', function(event) {
@@ -757,7 +786,7 @@
         function triggerNextPhoto() {
             const photoContent = document.getElementById('photo-content');
             if (photoContent) {
-                htmx.trigger(photoContent, 'htmx:trigger');
+                htmx.trigger(photoContent, 'nextPhoto');
             }
         }
 

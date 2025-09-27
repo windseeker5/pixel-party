@@ -14,7 +14,8 @@ big_screen_bp = Blueprint('big_screen', __name__)
 @guest_required
 def big_screen():
     """Main big screen display interface."""
-    return render_template('big_screen/display.html')
+    slideshow_duration = int(get_setting('slideshow_duration', 8))
+    return render_template('big_screen/display.html', slideshow_duration=slideshow_duration)
 
 
 @big_screen_bp.route('/slideshow')

@@ -236,6 +236,31 @@
 let htmxTimerId = null;
 let defaultSlideshowDuration = 8; // seconds
 
+// Global functions for photo_display.html compatibility
+window.adjustImageDisplay = function(img) {
+    // This function is called from photo_display.html
+    // Prevent errors by providing a safe implementation
+    if (img && img.onload && typeof img.onload === 'function') {
+        img.onload();
+    }
+};
+
+window.adjustVideoDisplay = function(video) {
+    // This function is called from photo_display.html
+    // Provide basic video handling
+    if (video && typeof video.addEventListener === 'function') {
+        video.addEventListener('loadedmetadata', function() {
+            const duration = this.duration || defaultSlideshowDuration;
+            if (window.parent && duration > 0) {
+                window.parent.postMessage({
+                    type: 'video_duration',
+                    duration: Math.ceil(duration)
+                }, '*');
+            }
+        });
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     const photoDisplay = document.getElementById('photo-display');
     if (photoDisplay) {
@@ -302,7 +327,7 @@ function resetHTMXTimer(duration) {
 function triggerNextSlide() {
     const photoDisplay = document.getElementById('photo-display');
     if (photoDisplay) {
-        htmx.trigger(photoDisplay, 'htmx:trigger');
+        htmx.trigger(photoDisplay, 'nextSlide');
     }
 }
 </script>
@@ -325,7 +350,7 @@ function triggerNextSlide() {
         <!-- Photo Display Area (HTMX will update this) -->
         <div id="photo-display"
              hx-get="{{ url_for('api.current_photo') }}"
-             hx-trigger="htmx:trigger"
+             hx-trigger="nextSlide"
              hx-swap="innerHTML"
              hx-indicator=".htmx-indicator"
              data-slideshow-duration="{{ slideshow_duration }}">

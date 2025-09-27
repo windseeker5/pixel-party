@@ -33,16 +33,8 @@
 
 ### PROMPT 1: Start Fresh with Context
 ```
-I have a Flask birthday party app with these requirements:
-- 2 pages: mobile form (upload photo + wish) and big screen display
-- Stack: Flask + HTMX + CSS animations (no complex JavaScript)
-- Effects needed: Ken Burns on photos, TikTok-style text overlays
-- One-time use for 2-day party
+claude
 
-Here's my PRD: [paste PRD]
-Current status: Starting fresh
-
-Build ONLY the mobile form first. Make it work completely before moving to display.
 ```
 
 ### PROMPT 2: Test Before Moving On
@@ -118,7 +110,7 @@ PROMPT: Build a dead-simple Flask app:
 4. Test each step before continuing
 
 No frameworks, no complexity. Just Flask + HTML + CSS.
-```
+``` 
 
 ## Your Effects Are 100% Possible with CSS
 
