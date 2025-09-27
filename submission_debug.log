@@ -588,3 +588,263 @@ guest_name: 'wdss'
 PASS: Guest name validation
 PASS: File exists - 550079870_24288142117535381_207967598490872311_n.mp4
 PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: ['photo']
+guest_name: 'Ken'
+PASS: Guest name validation
+PASS: File exists - kenBO2024.png
+PASS: File type allowed
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+DEBUG: Starting submit_memory, edit_id=1, is_edit_mode=True
+DEBUG: About to query photo with edit_id=1
+DEBUG: Photo found: 1
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+EDIT MODE: Getting guest for edit_id=1
+EDIT MODE: Guest found/created: Marie-France (ID: 1)
+DEBUG: Starting submit_memory, edit_id=1, is_edit_mode=True
+DEBUG: About to query photo with edit_id=1
+DEBUG: Photo found: 1
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+EDIT MODE: Getting guest for edit_id=1
+EDIT MODE: Guest found/created: Marie-France (ID: 1)
+DEBUG: Starting submit_memory, edit_id=1, is_edit_mode=True
+DEBUG: About to query photo with edit_id=1
+DEBUG: Photo found: 1
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+EDIT MODE: Getting guest for edit_id=1
+EDIT MODE: Guest found/created: Marie-France (ID: 1)
+DEBUG: Starting submit_memory, edit_id=1, is_edit_mode=True
+DEBUG: About to query photo with edit_id=1
+DEBUG: Photo found: 1
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+EDIT MODE: Getting guest for edit_id=1
+EDIT MODE: Guest found/created: Marie-France (ID: 1)
+DEBUG: Starting submit_memory, edit_id=1, is_edit_mode=True
+DEBUG: About to query photo with edit_id=1
+DEBUG: Photo found: 1
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+EDIT MODE: Getting guest for edit_id=1
+EDIT MODE: Guest found/created: Marie-France (ID: 1)
+DEBUG: Starting submit_memory, edit_id=1, is_edit_mode=True
+DEBUG: About to query photo with edit_id=1
+DEBUG: Photo found: 1
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+EDIT MODE: Getting guest for edit_id=1
+EDIT MODE: Guest found/created: Marie-France (ID: 1)
+DEBUG: Starting submit_memory, edit_id=1, is_edit_mode=True
+DEBUG: About to query photo with edit_id=1
+DEBUG: Photo found: 1
+DEBUG: Starting submit_memory, edit_id=1, is_edit_mode=True
+DEBUG: About to query photo with edit_id=1
+DEBUG: Photo found: 1
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'selected_song']
+Files keys: []
+guest_name: 'Test User'
+PASS: Guest name validation
+EDIT MODE: Getting guest for edit_id=1
+EDIT MODE: Guest found/created: Marie-France (ID: 1)
+DEBUG: Starting submit_memory, edit_id=1, is_edit_mode=True
+DEBUG: About to query photo with edit_id=1
+DEBUG: Photo found: 1
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'selected_song']
+Files keys: []
+guest_name: 'Test User'
+PASS: Guest name validation
+EDIT MODE: Getting guest for edit_id=1
+EDIT MODE: Guest found/created: Marie-France (ID: 1)
+EDIT MODE: No new file uploaded, keeping existing
+MUSIC: Starting music handling, selected_song='{"title":"Les étoiles filantes","artist":"LES COWBOYS FRINGANTS","source":"youtube"}'
+MUSIC: Has selected song, parsing JSON
+MUSIC: JSON parsed successfully: {'title': 'Les étoiles filantes', 'artist': 'LES COWBOYS FRINGANTS', 'source': 'youtube'}
+MUSIC: Checking source type: youtube
+MUSIC: Processing YouTube source
+MUSIC: YouTube data - URL: False, Title: 'Les étoiles filantes', Artist: 'LES COWBOYS FRINGANTS'
+MUSIC: Creating music request if valid data, title='Les étoiles filantes'
+MUSIC: Valid title found, creating music request
+MUSIC: Status set to 'pending'
+MUSIC: Creating MusicQueue object with guest_id=1
+MUSIC: MusicQueue object created, adding to session
+MUSIC: Added to session, flushing to get ID
+MUSIC: Flush complete, music_request.id=7
+POST MUSIC: Updating guest submission count, is_edit_mode=True
+POST MUSIC: About to commit database changes
+POST MUSIC: Database commit successful
+DEBUG: Starting submit_memory, edit_id=1, is_edit_mode=True
+DEBUG: About to query photo with edit_id=1
+DEBUG: Photo found: 1
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['edit_id', 'guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Marie-France'
+PASS: Guest name validation
+EDIT MODE: Getting guest for edit_id=1
+EDIT MODE: Guest found/created: Marie-France (ID: 1)
+EDIT MODE: No new file uploaded, keeping existing

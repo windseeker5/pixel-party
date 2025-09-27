@@ -9,6 +9,7 @@ from app import db
 from app.models import Photo, MusicQueue, Guest, Settings, update_setting, MusicLibrary
 from utils.music_library import music_search
 from app.services.auth import admin_required
+from app.services.file_handler import file_handler
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -200,22 +201,23 @@ def memory_book():
     # For each photo, find the associated music from the same guest at similar time
     memories = []
     for photo in photos:
-        # Get music request from same guest around the same time (within 10 minutes)
+        # Get music request from same guest (any time - support for edit mode)
         music = None
         if photo.guest_id:
-            music_query = MusicQueue.query.filter_by(guest_id=photo.guest_id)
-            # Get music within 10 minutes of photo upload
-            time_window = 600  # 10 minutes in seconds
-            start_time = photo.uploaded_at - datetime.timedelta(seconds=time_window)
-            end_time = photo.uploaded_at + datetime.timedelta(seconds=time_window)
-            music = music_query.filter(
-                MusicQueue.submitted_at >= start_time,
-                MusicQueue.submitted_at <= end_time
-            ).first()
-        
+            # Get the most recent music from this guest that's ready/completed
+            music = MusicQueue.query.filter_by(guest_id=photo.guest_id)\
+                .filter(MusicQueue.status.in_(['ready', 'completed']))\
+                .order_by(MusicQueue.submitted_at.desc())\
+                .first()
+
+        # Get creation date from photo metadata
+        photo_path = f'media/photos/{photo.filename}'
+        creation_date = file_handler.get_media_creation_date(photo_path)
+
         memories.append({
             'photo': photo,
-            'music': music
+            'music': music,
+            'creation_date': creation_date or photo.uploaded_at
         })
     
     return render_template('admin/memory_book.html', memories=memories)
@@ -308,6 +310,96 @@ def delete_music(music_id):
     return redirect(url_for('admin.manage'))
 
 
+@admin_bp.route('/music/retry/<int:music_id>', methods=['POST'])
+@admin_required
+def retry_music_download(music_id):
+    """Retry downloading a failed YouTube song."""
+    import threading
+    from flask import current_app
+
+    music = MusicQueue.query.get_or_404(music_id)
+
+    if music.source != 'youtube':
+        flash(f'Can only retry YouTube downloads. This is a {music.source} song.', 'error')
+        return redirect(url_for('admin.manage'))
+
+    if music.status != 'error':
+        flash(f'Song is not in error state (current status: {music.status})', 'warning')
+        return redirect(url_for('admin.manage'))
+
+    try:
+        # Reset status to pending and clear filename
+        music.status = 'pending'
+        music.filename = None
+        db.session.commit()
+
+        # Log the retry attempt
+        current_app.logger.info(f"🔄 RETRY: Starting retry for music ID {music_id}: '{music.song_title}' by '{music.artist}'")
+        print(f"🔄 RETRY: Starting retry for music ID {music_id}: '{music.song_title}' by '{music.artist}'")
+
+        flash(f'Retry initiated for "{music.song_title}" by {music.artist}. Check status in a few moments.', 'info')
+
+        # Create search query and start retry in background
+        search_query = f"{music.artist} {music.song_title}"
+
+        # Import and start the retry function immediately
+        from app.services.youtube_service import get_youtube_service
+
+        print(f"🔍 RETRY: Searching YouTube for: {search_query}")
+        current_app.logger.info(f"🔍 RETRY: Searching YouTube for: {search_query}")
+
+        # Do the search immediately to see if it works
+        try:
+            youtube_service = get_youtube_service()
+            results = youtube_service.search_youtube(search_query, max_results=1)
+
+            if results:
+                video_url = results[0]['url']
+                title = results[0]['title']
+                artist = results[0]['artist']
+
+                print(f"✅ RETRY: Found video: {video_url}")
+                current_app.logger.info(f"✅ RETRY: Found video: {video_url}")
+
+                # Now start the download thread
+                from app.routes.mobile import download_youtube_async
+
+                print(f"🚀 RETRY: Starting download thread for ID {music_id}")
+                current_app.logger.info(f"🚀 RETRY: Starting download thread for ID {music_id}")
+
+                # Start download in background thread
+                retry_thread = threading.Thread(
+                    target=download_youtube_async,
+                    args=(video_url, title, artist, current_app._get_current_object(), music_id),
+                    name=f"YouTubeRetry-{music_id}"
+                )
+                retry_thread.daemon = True
+                retry_thread.start()
+
+                print(f"✅ RETRY: Thread started successfully for ID {music_id}")
+                current_app.logger.info(f"✅ RETRY: Thread started successfully for ID {music_id}")
+
+            else:
+                print(f"❌ RETRY: No YouTube results found for: {search_query}")
+                current_app.logger.error(f"❌ RETRY: No YouTube results found for: {search_query}")
+                music.status = 'error'
+                db.session.commit()
+                flash(f'No YouTube results found for "{music.song_title}" by {music.artist}', 'error')
+
+        except Exception as search_error:
+            print(f"❌ RETRY: Search failed: {search_error}")
+            current_app.logger.error(f"❌ RETRY: Search failed: {search_error}")
+            music.status = 'error'
+            db.session.commit()
+            flash(f'Search failed: {str(search_error)}', 'error')
+
+    except Exception as e:
+        flash(f'Error starting retry: {str(e)}', 'error')
+        current_app.logger.error(f"Error in retry_music_download: {e}")
+
+    return redirect(url_for('admin.manage'))
+
+
 @admin_bp.route('/export/standalone')
 def export_standalone():
     """Export standalone HTML memory book for USB."""
@@ -341,28 +433,36 @@ def export_standalone():
             if os.path.exists(thumb_src):
                 shutil.copy2(thumb_src, thumb_dest)
         
-        # Get associated music
+        # Get associated music (any time - support for edit mode)
         music = None
         if photo.guest_id:
-            music_query = MusicQueue.query.filter_by(guest_id=photo.guest_id)
-            time_window = 600  # 10 minutes
-            start_time = photo.uploaded_at - datetime.timedelta(seconds=time_window)
-            end_time = photo.uploaded_at + datetime.timedelta(seconds=time_window)
-            music = music_query.filter(
-                MusicQueue.submitted_at >= start_time,
-                MusicQueue.submitted_at <= end_time
-            ).first()
-            
-            # Copy music file if exists
+            # Get the most recent music from this guest that's ready/completed
+            music = MusicQueue.query.filter_by(guest_id=photo.guest_id)\
+                .filter(MusicQueue.status.in_(['ready', 'completed']))\
+                .order_by(MusicQueue.submitted_at.desc())\
+                .first()
+
+            # Copy music file if exists, but include music info even if file is missing
+            music_available = False
             if music and music.filename:
                 music_src = f'media/music/{music.filename}'
                 music_dest = f'{export_dir}/music/{music.filename}'
                 if os.path.exists(music_src):
                     shutil.copy2(music_src, music_dest)
-        
+                    music_available = True
+
+            # Add music availability info for template
+            if music:
+                music.file_available = music_available
+
+        # Get creation date from photo metadata
+        photo_path = f'media/photos/{photo.filename}'
+        creation_date = file_handler.get_media_creation_date(photo_path)
+
         memories.append({
             'photo': photo,
-            'music': music
+            'music': music,  # Include music even if file is missing
+            'creation_date': creation_date or photo.uploaded_at
         })
     
     # Generate standalone HTML

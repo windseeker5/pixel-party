@@ -247,6 +247,48 @@ class FileHandler:
         """Generate hash for file deduplication."""
         return hashlib.md5(file_data).hexdigest()
 
+    def get_media_creation_date(self, filepath: str) -> Optional[datetime]:
+        """Extract creation date from photo/video metadata.
+
+        Args:
+            filepath: Path to the media file
+
+        Returns:
+            datetime object of when media was created, or None if not found
+        """
+        try:
+            if not os.path.exists(filepath):
+                return None
+
+            # For images, try EXIF data
+            if self.is_image(filepath):
+                try:
+                    with Image.open(filepath) as img:
+                        exif = img.getexif()
+
+                        # Try DateTimeOriginal first (when photo was taken)
+                        if 36867 in exif:  # EXIF DateTimeOriginal tag
+                            return datetime.strptime(exif[36867], '%Y:%m:%d %H:%M:%S')
+
+                        # Try DateTime tag as fallback
+                        elif 306 in exif:  # EXIF DateTime tag
+                            return datetime.strptime(exif[306], '%Y:%m:%d %H:%M:%S')
+
+                except Exception as e:
+                    print(f"Error reading EXIF from {filepath}: {e}")
+
+            # For videos, could add ffprobe metadata extraction here if needed
+            # For now, fall back to file modification time
+
+        except Exception as e:
+            print(f"Error getting creation date from {filepath}: {e}")
+
+        # Fallback to file modification time
+        try:
+            return datetime.fromtimestamp(os.path.getmtime(filepath))
+        except:
+            return None
+
 
 # Create global instance
 file_handler = FileHandler()

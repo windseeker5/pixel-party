@@ -409,7 +409,7 @@
                             {% endif %}
 
                             <div class="polaroid-caption">
-                                <div class="polaroid-date signature">{{ memory.photo.uploaded_at.strftime('%d %b %Y • %Hh%M') }}</div>
+                                <div class="polaroid-date signature">{{ (memory.creation_date or memory.photo.uploaded_at).strftime('%d %b %Y • %Hh%M') }}</div>
                             </div>
                         </div>
                     </div>
@@ -428,20 +428,47 @@
 
                     <!-- Column 3: Vintage Vinyl Music Player -->
                     <div class="flex flex-col items-center">
-                        {% if memory.music and memory.music.filename %}
-                        <div class="vinyl-player" onclick="playMusic('music/{{ memory.music.filename }}', this)">
-                            <div class="vinyl-lines"></div>
-                            <div class="vinyl-center">
-                                <svg class="w-6 h-6 fill-black" viewBox="0 0 24 24">
-                                    <path d="M8 5v14l11-7z"/>
-                                </svg>
+                        {% if memory.music %}
+                            {% if memory.music.filename and memory.music.file_available %}
+                            <!-- Playable music -->
+                            <div class="vinyl-player" onclick="playMusic('music/{{ memory.music.filename }}', this)">
+                                <div class="vinyl-lines"></div>
+                                <div class="vinyl-center">
+                                    <svg class="w-6 h-6 fill-black" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                </div>
                             </div>
-                        </div>
-                        <div class="song-info">
-                            <div class="song-title">{{ memory.music.song_title or 'Chanson Inconnue' }}</div>
-                            <div class="song-artist">{{ memory.music.artist or 'Artiste Inconnu' }}</div>
-                        </div>
+                            <div class="song-info">
+                                <div class="song-title">{{ memory.music.song_title or 'Chanson Inconnue' }}</div>
+                                <div class="song-artist">{{ memory.music.artist or 'Artiste Inconnu' }}</div>
+                            </div>
+                            {% else %}
+                            <!-- Music requested but file missing -->
+                            <div class="text-center">
+                                <div class="vinyl-player opacity-50 cursor-not-allowed" title="Fichier audio non disponible">
+                                    <div class="vinyl-lines"></div>
+                                    <div class="vinyl-center">
+                                        <svg class="w-6 h-6 fill-red-500" viewBox="0 0 24 24">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="song-info">
+                                    <div class="song-title text-gray-600">{{ memory.music.song_title or 'Chanson Inconnue' }}</div>
+                                    <div class="song-artist text-gray-500">{{ memory.music.artist or 'Artiste Inconnu' }}</div>
+                                    <div class="text-xs text-red-500 mt-1">
+                                        {% if memory.music.status == 'error' %}
+                                        Téléchargement échoué
+                                        {% else %}
+                                        Fichier non disponible
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                         {% else %}
+                        <!-- No music suggested -->
                         <div class="text-gray-400 italic text-center">
                             <svg class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>

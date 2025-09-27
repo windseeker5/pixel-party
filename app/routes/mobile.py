@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 from app import db
 from app.models import Guest, Photo, MusicQueue, get_setting
-from app.services.auth import guest_required
+from app.services.auth import guest_required, is_admin_authenticated, is_guest_authenticated
 
 mobile_bp = Blueprint('mobile', __name__)
 
@@ -289,9 +289,27 @@ def resize_image(file_path, max_width=1920, max_height=1080):
 
 
 @mobile_bp.route('/main')
-@guest_required
 def main_form():
-    """Single screen with everything - name, photo, wish, optional music."""
+    """Single screen with everything - name, photo, wish, optional music. Supports edit mode for admin."""
+    edit_id = request.args.get('edit_id')
+    photo = None
+
+    # Handle edit mode
+    if edit_id:
+        # Only allow if admin is authenticated
+        if not is_admin_authenticated():
+            flash('Admin access required to edit entries', 'error')
+            return redirect(url_for('auth.admin_login'))
+
+        photo = Photo.query.get_or_404(int(edit_id))
+    else:
+        # For regular mode, require guest authentication
+        from app.services.auth import guest_required
+        if not is_guest_authenticated():
+            session['login_redirect'] = request.url
+            flash('Please enter the party password to continue! 🎉', 'info')
+            return redirect(url_for('auth.guest_login'))
+
     party_title = get_setting('party_title', 'Birthday Celebration')
     host_name = get_setting('host_name', 'Birthday Star')
 
@@ -303,7 +321,9 @@ def main_form():
                          party_title=party_title,
                          host_name=host_name,
                          photo_count=photo_count,
-                         music_count=music_count)
+                         music_count=music_count,
+                         photo=photo,
+                         edit_mode=bool(edit_id))
 
 
 @mobile_bp.route('/enter', methods=['POST'])
@@ -337,18 +357,70 @@ def enter():
 
 @mobile_bp.route('/upload')
 def upload():
-    """Photo upload with wish form."""
+    """Photo upload with wish form - supports edit mode for admin."""
+    edit_id = request.args.get('edit_id')
+    photo = None
+
+    # Handle edit mode
+    if edit_id:
+        # Only allow if admin is authenticated
+        if not is_admin_authenticated():
+            flash('Admin access required to edit entries', 'error')
+            return redirect(url_for('auth.admin_login'))
+
+        photo = Photo.query.get_or_404(int(edit_id))
+
+        return render_template('mobile/upload.html',
+                             guest_name=photo.guest_name,
+                             photo=photo,
+                             edit_mode=True)
+
+    # Regular upload mode
     if 'guest_name' not in session:
         return redirect(url_for('mobile.welcome'))
-    
-    return render_template('mobile/upload.html', 
-                         guest_name=session['guest_name'])
+
+    return render_template('mobile/upload.html',
+                         guest_name=session['guest_name'],
+                         edit_mode=False)
 
 
 @mobile_bp.route('/submit_memory', methods=['POST'])
-@guest_required
 def submit_memory():
-    """Handle photo upload and wish submission - session-free form-based submission."""
+    """Handle photo upload and wish submission - supports editing existing entries."""
+    try:
+        # Check if this is an edit operation
+        edit_id = request.form.get('edit_id')
+        is_edit_mode = bool(edit_id)
+        existing_photo = None
+
+        with open('submission_debug.log', 'a') as f:
+            f.write(f"DEBUG: Starting submit_memory, edit_id={edit_id}, is_edit_mode={is_edit_mode}\n")
+
+        if is_edit_mode:
+            # Get the existing photo once at the beginning
+            with open('submission_debug.log', 'a') as f:
+                f.write(f"DEBUG: About to query photo with edit_id={edit_id}\n")
+            existing_photo = Photo.query.get_or_404(int(edit_id))
+            with open('submission_debug.log', 'a') as f:
+                f.write(f"DEBUG: Photo found: {existing_photo.id}\n")
+    except Exception as e:
+        with open('submission_debug.log', 'a') as f:
+            f.write(f"ERROR in submit_memory start: {str(e)}\n")
+        raise
+
+    # Check authentication based on mode
+    if is_edit_mode:
+        # For edit mode, require admin authentication
+        if not is_admin_authenticated():
+            flash('Admin access required to edit entries', 'error')
+            return redirect(url_for('auth.admin_login'))
+    else:
+        # For regular mode, require guest authentication
+        if not is_guest_authenticated():
+            session['login_redirect'] = request.url
+            flash('Please enter the party password to continue! 🎉', 'info')
+            return redirect(url_for('auth.guest_login'))
+
     guest_name = request.form.get('guest_name', '').strip()
 
     # Log the submission attempt
@@ -376,14 +448,30 @@ def submit_memory():
     with open('submission_debug.log', 'a') as f:
         f.write(f"PASS: Guest name validation\n")
 
-    # Always create or get guest based on form name (no session dependencies)
-    session_id = str(uuid.uuid4())
-    guest = Guest.query.filter_by(name=guest_name).first()
-
-    if not guest:
-        guest = Guest(name=guest_name, session_id=session_id)
-        db.session.add(guest)
-        db.session.commit()
+    # Handle guest differently for edit vs new submissions
+    if is_edit_mode:
+        with open('submission_debug.log', 'a') as f:
+            f.write(f"EDIT MODE: Getting guest for edit_id={edit_id}\n")
+        # For edit mode, get the guest from the existing photo
+        guest = existing_photo.guest or Guest.query.filter_by(name=guest_name).first()
+        if not guest:
+            with open('submission_debug.log', 'a') as f:
+                f.write(f"EDIT MODE: Creating fallback guest\n")
+            # Fallback: create guest if somehow missing
+            session_id = str(uuid.uuid4())
+            guest = Guest(name=guest_name, session_id=session_id)
+            db.session.add(guest)
+            db.session.commit()
+        with open('submission_debug.log', 'a') as f:
+            f.write(f"EDIT MODE: Guest found/created: {guest.name} (ID: {guest.id})\n")
+    else:
+        # For new submissions, create or get guest based on form name
+        session_id = str(uuid.uuid4())
+        guest = Guest.query.filter_by(name=guest_name).first()
+        if not guest:
+            guest = Guest(name=guest_name, session_id=session_id)
+            db.session.add(guest)
+            db.session.commit()
     
     # Get form data
     wish_message = request.form.get('wish_message', '').strip()
@@ -406,36 +494,47 @@ def submit_memory():
             print(f"   ❌ JSON parse error: {e}")
             print(f"   Raw selected_song: {repr(selected_song)}")
     
+    # File validation - required for new uploads, optional for edits
     if not file or file.filename == '':
-        with open('submission_debug.log', 'a') as f:
-            f.write(f"FAIL: File validation - file={file}, filename={file.filename if file else 'None'}\n")
-        error_msg = 'Please select a photo or video to share! 📸'
-        if is_htmx_request():
-            return render_template('mobile/upload.html', 
-                                 guest_name=session['guest_name'],
-                                 error=error_msg)
+        if not is_edit_mode:
+            # For new uploads, file is required
+            with open('submission_debug.log', 'a') as f:
+                f.write(f"FAIL: File validation - file={file}, filename={file.filename if file else 'None'}\n")
+            error_msg = 'Please select a photo or video to share! 📸'
+            if is_htmx_request():
+                return render_template('mobile/upload.html',
+                                     guest_name=session['guest_name'],
+                                     error=error_msg)
+            else:
+                flash(error_msg, 'error')
+                return redirect(url_for('mobile.upload'))
         else:
-            flash(error_msg, 'error')
-            return redirect(url_for('mobile.upload'))
+            # For edits, no new file means keep existing file - skip file processing
+            file = None
     
-    with open('submission_debug.log', 'a') as f:
-        f.write(f"PASS: File exists - {file.filename}\n")
-    
-    if not allowed_file(file.filename):
+    # Only check file if it's not None (for edit mode without new file)
+    if file:
         with open('submission_debug.log', 'a') as f:
-            f.write(f"FAIL: File type not allowed - {file.filename}\n")
-        supported_formats = ', '.join(current_app.config['ALLOWED_EXTENSIONS'])
-        error_msg = f'File type not supported. Please use: {supported_formats}'
-        if is_htmx_request():
-            return render_template('mobile/upload.html', 
-                                 guest_name=session['guest_name'],
-                                 error=error_msg)
-        else:
-            flash(error_msg, 'error')
-            return redirect(url_for('mobile.upload'))
-    
-    with open('submission_debug.log', 'a') as f:
-        f.write(f"PASS: File type allowed\n")
+            f.write(f"PASS: File exists - {file.filename}\n")
+
+        if not allowed_file(file.filename):
+            with open('submission_debug.log', 'a') as f:
+                f.write(f"FAIL: File type not allowed - {file.filename}\n")
+            supported_formats = ', '.join(current_app.config['ALLOWED_EXTENSIONS'])
+            error_msg = f'File type not supported. Please use: {supported_formats}'
+            if is_htmx_request():
+                return render_template('mobile/upload.html',
+                                     guest_name=session['guest_name'],
+                                     error=error_msg)
+            else:
+                flash(error_msg, 'error')
+                return redirect(url_for('mobile.upload'))
+
+        with open('submission_debug.log', 'a') as f:
+            f.write(f"PASS: File type allowed\n")
+    else:
+        with open('submission_debug.log', 'a') as f:
+            f.write(f"EDIT MODE: No new file uploaded, keeping existing\n")
     
     if not wish_message:
         error_msg = 'Please write a birthday wish to go with your photo! 💝'
@@ -465,63 +564,96 @@ def submit_memory():
     if len(wish_message) > 140:
         # Truncate at character boundary, not byte boundary
         wish_message = wish_message[:140]
-    
+
     try:
-        # Use FileHandler for proper file processing and validation
-        from app.services.file_handler import file_handler
-        import asyncio
-
-        # Get file data
-        file_data = file.read()
-        original_filename = file.filename
-
-        # Save file using FileHandler (handles both images and videos)
-        def run_async_save():
-            return asyncio.run(file_handler.save_file(file_data, original_filename, guest.name))
-
-        success, message, unique_filename = run_async_save()
-
-        if not success:
-            error_msg = f'Upload failed: {message}'
-            if is_htmx_request():
-                return render_template('mobile/upload.html',
-                                     guest_name=session.get('guest_name', ''),
-                                     error=error_msg)
-            else:
-                flash(error_msg, 'error')
-                return redirect(url_for('mobile.main_form'))
-
-        # Get file info
-        file_info = file_handler.get_file_info(unique_filename)
-        file_size = file_info.get('file_size', 0)
-        file_type = file_info.get('file_type', 'image')
-
-        # Get video duration and thumbnail if it's a video
+        # File processing - only if a new file is provided
+        unique_filename = None
+        original_filename = None
+        file_size = 0
+        file_type = 'image'
         video_duration = None
         thumbnail_filename = None
-        if file_type == 'video':
-            file_path = file_info.get('file_path')
-            if file_path:
-                _, _, duration = file_handler.validate_video_duration(file_path)
-                video_duration = duration
-                # Get thumbnail filename (generated during save_file)
-                video_name = os.path.splitext(unique_filename)[0]
-                thumbnail_filename = f"{video_name}_thumb.jpg"
 
-        # Create photo record with new fields
-        photo = Photo(
-            guest_id=guest.id,
-            guest_name=guest.name,
-            filename=unique_filename,
-            original_filename=original_filename,
-            wish_message=wish_message,
-            file_size=file_size,
-            file_type=file_type,
-            duration=video_duration,
-            thumbnail=thumbnail_filename
-        )
-        
-        db.session.add(photo)
+        if file:  # Only process file if one was uploaded
+            try:
+                # Use FileHandler for proper file processing and validation
+                from app.services.file_handler import file_handler
+                import asyncio
+
+                # Get file data
+                file_data = file.read()
+                original_filename = file.filename
+
+                # Save file using FileHandler (handles both images and videos)
+                def run_async_save():
+                    return asyncio.run(file_handler.save_file(file_data, original_filename, guest.name))
+
+                success, message, unique_filename = run_async_save()
+
+                if not success:
+                    error_msg = f'Upload failed: {message}'
+                    if is_htmx_request():
+                        return render_template('mobile/upload.html',
+                                             guest_name=session.get('guest_name', ''),
+                                             error=error_msg)
+                    else:
+                        flash(error_msg, 'error')
+                        return redirect(url_for('mobile.main_form'))
+
+                # Get file info
+                file_info = file_handler.get_file_info(unique_filename)
+                file_size = file_info.get('file_size', 0)
+                file_type = file_info.get('file_type', 'image')
+
+                # Get video duration and thumbnail if it's a video
+                if file_type == 'video':
+                    file_path = file_info.get('file_path')
+                    if file_path:
+                        _, _, duration = file_handler.validate_video_duration(file_path)
+                        video_duration = duration
+                        # Get thumbnail filename (generated during save_file)
+                        video_name = os.path.splitext(unique_filename)[0]
+                        thumbnail_filename = f"{video_name}_thumb.jpg"
+
+            except Exception as e:
+                current_app.logger.error(f"Error processing file: {e}")
+                error_msg = f'File processing failed: {str(e)}'
+                if is_htmx_request():
+                    return render_template('mobile/upload.html',
+                                         guest_name=session.get('guest_name', ''),
+                                         error=error_msg)
+                else:
+                    flash(error_msg, 'error')
+                    return redirect(url_for('mobile.upload'))
+
+        # Create or update photo record
+        if is_edit_mode:
+            # Update existing photo (reuse the one we already fetched)
+            photo = existing_photo
+            photo.guest_name = guest.name
+            photo.wish_message = wish_message
+            # Update file info only if new file was uploaded
+            if unique_filename:
+                photo.filename = unique_filename
+                photo.original_filename = original_filename
+                photo.file_size = file_size
+                photo.file_type = file_type
+                photo.duration = video_duration
+                photo.thumbnail = thumbnail_filename
+        else:
+            # Create new photo record
+            photo = Photo(
+                guest_id=guest.id,
+                guest_name=guest.name,
+                filename=unique_filename,
+                original_filename=original_filename,
+                wish_message=wish_message,
+                file_size=file_size,
+                file_type=file_type,
+                duration=video_duration,
+                thumbnail=thumbnail_filename
+            )
+            db.session.add(photo)
         
         # Handle selected song if provided
         if selected_song:
@@ -532,6 +664,7 @@ def submit_memory():
                 # Copy music file from library to project music folder
                 copied_filename = None
                 youtube_download_needed = False
+
                 if song_data.get('source') == 'local':
                     try:
                         import shutil
@@ -610,17 +743,49 @@ def submit_memory():
                         status = 'ready' if copied_filename else 'error'
                     else:
                         status = 'pending'  # YouTube will be set to downloading then ready/error
-                    
-                    music_request = MusicQueue(
-                        guest_id=guest.id,
-                        song_title=song_data.get('title', ''),
-                        artist=song_data.get('artist', ''),
-                        album=song_data.get('album', ''),
-                        filename=copied_filename,  # Store copied filename (may be None)
-                        source=song_data.get('source', 'request'),
-                        status=status
-                    )
-                    db.session.add(music_request)
+
+                    # In edit mode, check if there's already a music request for this guest
+                    # to avoid duplicates
+                    if is_edit_mode:
+                        existing_music = MusicQueue.query.filter_by(
+                            guest_id=guest.id,
+                            song_title=song_data.get('title', ''),
+                            artist=song_data.get('artist', '')
+                        ).first()
+
+                        if existing_music:
+                            # Update existing entry
+                            music_request = existing_music
+                            music_request.album = song_data.get('album', '')
+                            music_request.filename = copied_filename
+                            music_request.source = song_data.get('source', 'request')
+                            music_request.status = status
+                            # Don't add to session since it's already there
+                        else:
+                            # Create new entry
+                            music_request = MusicQueue(
+                                guest_id=guest.id,
+                                song_title=song_data.get('title', ''),
+                                artist=song_data.get('artist', ''),
+                                album=song_data.get('album', ''),
+                                filename=copied_filename,
+                                source=song_data.get('source', 'request'),
+                                status=status
+                            )
+                            db.session.add(music_request)
+                    else:
+                        # Create new entry for non-edit mode
+                        music_request = MusicQueue(
+                            guest_id=guest.id,
+                            song_title=song_data.get('title', ''),
+                            artist=song_data.get('artist', ''),
+                            album=song_data.get('album', ''),
+                            filename=copied_filename,
+                            source=song_data.get('source', 'request'),
+                            status=status
+                        )
+                        db.session.add(music_request)
+
                     db.session.flush()  # Get the ID without committing
                     
                     # Start YouTube download if needed (after we have the ID)
@@ -642,14 +807,31 @@ def submit_memory():
                             
             except Exception as e:
                 current_app.logger.error(f"Error adding selected song: {e}")
-        
-        # Update guest submission count
-        guest.total_submissions += 1
-        
+
+        # Update guest submission count (only for new submissions, not edits)
+        if not is_edit_mode:
+            guest.total_submissions += 1
+
         db.session.commit()
         
-        # Handle HTMX requests differently than regular form submissions
-        if is_htmx_request():
+        # Handle success differently for edit vs. new submissions
+        if is_edit_mode:
+            # For edit mode with HTMX, return success page but with admin redirect
+            if is_htmx_request():
+                # Return HTMX response that triggers redirect to admin page
+                return f'''
+                <script>
+                    window.location.href = "{url_for('admin.manage')}";
+                </script>
+                <div class="alert alert-success">
+                    <span>Memory updated successfully! 🎉</span>
+                </div>
+                '''
+            else:
+                # Fallback for non-HTMX edit mode
+                flash('Memory updated successfully! 🎉', 'success')
+                return redirect(url_for('admin.manage'))
+        elif is_htmx_request():
             # For HTMX, return the success page content directly
             return render_template("mobile/success.html",
                                  guest_name=guest.name,

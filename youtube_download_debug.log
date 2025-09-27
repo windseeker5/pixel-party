@@ -111,3 +111,38 @@
 [2025-09-22 18:03:45] ID:1 - ✅ Found file, updating database with: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
 [2025-09-22 18:03:45] ID:1 - ✅ Background download complete: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
 [2025-09-22 18:03:45] ID:1 - 🏁 Thread finished
+[2025-09-27 11:41:22] ID:1 - 🚀 Thread started: 'Patrick Sébastien - Olé Osé' by 'La Quéquette à Raoul' from https://www.youtube.com/watch?v=M7hcaXstdMM
+[2025-09-27 11:41:22] ID:1 - ✅ App context acquired
+[2025-09-27 11:41:22] ID:1 - 📊 Querying database for music request
+[2025-09-27 11:41:22] ID:1 - ✅ Found music request: Patrick Sébastien - Olé Osé
+[2025-09-27 11:41:22] ID:1 - ✅ Status updated to 'downloading'
+[2025-09-27 11:41:22] ID:1 - 🔧 Getting YouTube service
+[2025-09-27 11:41:22] ID:1 - ✅ YouTube service acquired
+[2025-09-27 11:41:22] ID:1 - ⬇️ Starting download from: https://www.youtube.com/watch?v=M7hcaXstdMM
+[2025-09-27 11:41:26] ID:1 - 📁 Download returned filename: None
+[2025-09-27 11:41:26] ID:1 - 🔍 Searching for downloaded file matching: 'Patrick Sébastien - Olé Osé' by 'La Quéquette à Raoul'
+[2025-09-27 11:41:26] ID:1 - 🔍 Search patterns: ['La_Quéquette_à_Raoul_-_Patrick_Sébastien_-_Olé_Osé', 'La Quéquette à Raoul_-_Patrick Sébastien - Olé Osé', 'LaQuéquetteàRaoul_-_PatrickSébastien-OléOsé', 'La_Quéquette_à_Raoul_Patrick_Sébastien_-_Olé_Osé', 'La Quéquette à Raoul_Patrick Sébastien - Olé Osé', 'LaQuéquetteàRaoul_PatrickSébastien-OléOsé', 'Patrick_Sébastien_-_Olé_Osé', 'Patrick Sébastien - Olé Osé', 'PatrickSébastien-OléOsé']
+[2025-09-27 11:41:26] ID:1 - 🔍 Trying fuzzy matching for: 'Patrick Sébastien - Olé Osé'
+[2025-09-27 11:41:26] ID:1 - ❌ Downloaded file not found for 'Patrick Sébastien - Olé Osé' by 'La Quéquette à Raoul'
+[2025-09-27 11:41:26] ID:1 - ❌ Download error: Downloaded file not found for 'Patrick Sébastien - Olé Osé' by 'La Quéquette à Raoul'
+[2025-09-27 11:41:26] ID:1 - ❌ Full traceback: Traceback (most recent call last):
+  File "/home/kdresdell/Documents/DEV/PixelParty/app/routes/mobile.py", line 212, in download_youtube_async
+    raise FileNotFoundError(error_msg)
+FileNotFoundError: Downloaded file not found for 'Patrick Sébastien - Olé Osé' by 'La Quéquette à Raoul'
+
+[2025-09-27 11:41:26] ID:1 - ✅ Marked as error in database
+[2025-09-27 11:41:26] ID:1 - 🏁 Thread finished
+[2025-09-27 13:39:28] ID:8 - 🚀 Thread started: 'Les étoiles filantes' by 'LES COWBOYS FRINGANTS' from https://www.youtube.com/watch?v=KIe_3vhxmoA
+[2025-09-27 13:39:28] ID:8 - ✅ App context acquired
+[2025-09-27 13:39:28] ID:8 - 📊 Querying database for music request
+[2025-09-27 13:39:28] ID:8 - ✅ Found music request: Les étoiles filantes
+[2025-09-27 13:39:28] ID:8 - ✅ Status updated to 'downloading'
+[2025-09-27 13:39:28] ID:8 - 🔧 Getting YouTube service
+[2025-09-27 13:39:28] ID:8 - ✅ YouTube service acquired
+[2025-09-27 13:39:28] ID:8 - ⬇️ Starting download from: https://www.youtube.com/watch?v=KIe_3vhxmoA
+[2025-09-27 13:39:40] ID:8 - 📁 Download returned filename: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-27 13:39:40] ID:8 - 🔍 Checking for file: media/music/LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-27 13:39:40] ID:8 - ✅ Found file using exact filename: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-27 13:39:40] ID:8 - ✅ Found file, updating database with: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-27 13:39:40] ID:8 - ✅ Background download complete: LES_COWBOYS_FRINGANTS_-_Les_étoiles_filantes.mp3
+[2025-09-27 13:39:40] ID:8 - 🏁 Thread finished

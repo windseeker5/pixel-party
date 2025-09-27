@@ -128,7 +128,12 @@
               hx-indicator="#submit-spinner"
               accept-charset="UTF-8"
               class="space-y-4 emoji-support">
-            
+
+            {% if edit_mode and photo %}
+            <!-- Hidden field for edit mode -->
+            <input type="hidden" name="edit_id" value="{{ photo.id }}">
+            {% endif %}
+
             <!-- Name -->
             <div class="form-control">
                 <label class="label">
@@ -139,7 +144,8 @@
                         Votre nom
                     </span>
                 </label>
-                <input type="text" name="guest_name" value=""
+                <input type="text" name="guest_name"
+                       value="{% if edit_mode and photo %}{{ photo.guest_name }}{% endif %}"
                        placeholder="Entrez votre nom..."
                        class="input input-bordered input-lg focus:input-primary text-lg" required>
             </div>
@@ -152,14 +158,38 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                        Ajouter photo ou vidéo
+                        {% if edit_mode %}
+                            Photo actuelle (tapez pour remplacer)
+                        {% else %}
+                            Ajouter photo ou vidéo
+                        {% endif %}
                     </span>
                 </label>
+
+                {% if edit_mode and photo %}
+                <!-- Current Photo Preview in Edit Mode -->
+                <div class="mb-4 p-3 bg-base-200 rounded-lg">
+                    <div class="text-sm text-base-content mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-1 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Photo actuelle:
+                    </div>
+                    {% if photo.file_type == 'video' and photo.thumbnail %}
+                        <img src="/media/thumbnails/{{ photo.thumbnail }}" alt="Miniature vidéo actuelle" class="max-w-xs rounded-lg shadow-md">
+                        <div class="text-xs text-base-content opacity-70 mt-1">📹 Vidéo</div>
+                    {% elif photo.file_type == 'video' %}
+                        <div class="bg-base-300 max-w-xs h-32 flex items-center justify-center text-xs rounded-lg shadow-md">📹 Vidéo</div>
+                    {% else %}
+                        <img src="/media/photos/{{ photo.filename }}" alt="Photo actuelle" class="max-w-xs rounded-lg shadow-md">
+                    {% endif %}
+                </div>
+                {% endif %}
                 
                 <!-- Hidden file input -->
-                <input type="file" name="photo" accept="image/*,video/*" 
-                       id="photo-input" class="hidden" 
-                       onchange="handleFileSelect(this)" required>
+                <input type="file" name="photo" accept="image/*,video/*"
+                       id="photo-input" class="hidden"
+                       onchange="handleFileSelect(this)" {% if not edit_mode %}required{% endif %}>
                 
                 <!-- Drop Zone -->
                 <div id="photo-dropzone" 
@@ -234,7 +264,7 @@
                           placeholder="Joyeux anniversaire {{ host_name }}! Tu te souviens de cette fois où... 🎉❤️😊"
                           maxlength="100"
                           oninput="updateCharCounter(this, 'char-counter', 100)"
-                          required></textarea>
+                          required>{% if edit_mode and photo %}{{ photo.wish_message }}{% endif %}</textarea>
             </div>
             
             <!-- Selected song display - shows when song is selected (OUTSIDE form-control) -->
@@ -294,7 +324,13 @@
             <div class="card-actions justify-end">
                 <button type="submit" class="btn btn-success btn-lg w-full text-xl" id="submit-btn">
                     <span class="loading loading-spinner loading-sm hidden" id="submit-spinner"></span>
-                    <span id="submit-text">Soumettre un souvenir</span>
+                    <span id="submit-text">
+                        {% if edit_mode %}
+                            Mettre à jour le souvenir
+                        {% else %}
+                            Soumettre un souvenir
+                        {% endif %}
+                    </span>
                 </button>
             </div>
         </form>

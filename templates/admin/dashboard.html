@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - PixelParty</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- daisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.24/dist/full.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p class="text-gray-600 mt-2">Party management overview</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6">
+                    {% for category, message in messages %}
+                        <div class="alert {{ 'alert-success' if category == 'success' else 'alert-error' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="stat bg-white rounded-lg shadow">
+                <div class="stat-title">Total Photos</div>
+                <div class="stat-value text-primary">{{ stats.total_photos }}</div>
+            </div>
+            <div class="stat bg-white rounded-lg shadow">
+                <div class="stat-title">Total Guests</div>
+                <div class="stat-value text-secondary">{{ stats.total_guests }}</div>
+            </div>
+            <div class="stat bg-white rounded-lg shadow">
+                <div class="stat-title">Music Requests</div>
+                <div class="stat-value text-accent">{{ stats.music_requests }}</div>
+            </div>
+            <div class="stat bg-white rounded-lg shadow">
+                <div class="stat-title">Pending Photos</div>
+                <div class="stat-value text-warning">{{ stats.pending_photos }}</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <a href="/admin/manage" class="btn btn-primary btn-lg">
+                📋 Manage Entries
+            </a>
+            <a href="/admin/music" class="btn btn-secondary btn-lg">
+                🎵 Music Library
+            </a>
+            <a href="/admin/export" class="btn btn-accent btn-lg">
+                📖 Memory Book
+            </a>
+        </div>
+
+        <!-- Recent Photos -->
+        {% if recent_photos %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4">Recent Photos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for photo in recent_photos %}
+                <div class="card bg-base-100 shadow compact">
+                    <div class="card-body">
+                        <div class="font-bold">{{ photo.guest_name }}</div>
+                        <div class="text-sm opacity-70">{{ photo.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                        <div class="text-sm">{{ photo.wish_message[:50] }}{% if photo.wish_message|length > 50 %}...{% endif %}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Navigation -->
+        <div class="mt-8 text-center">
+            <a href="/" class="btn btn-ghost">← Back to Display</a>
+        </div>
+    </div>
+</body>
+</html>

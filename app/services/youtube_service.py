@@ -9,8 +9,23 @@ import yt_dlp
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, TIT2, TPE1, TALB, TPE2, TDRC, TCON
 import re
+import traceback
+import sys
 
+# Enhanced logging configuration for debugging
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# Create console handler if not exists
+if not logger.handlers:
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    )
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    logger.propagate = False
 
 
 class YouTubeAudioService:
@@ -56,16 +71,17 @@ class YouTubeAudioService:
     def search_youtube(self, query: str, max_results: int = 5) -> List[Dict]:
         """
         Search YouTube for music videos and return metadata.
-        
+
         Args:
             query: Search query string
             max_results: Maximum number of results to return
-            
+
         Returns:
             List of dictionaries with video metadata
         """
+        logger.info(f"🎵 Starting YouTube search: query='{query}', max_results={max_results}")
         search_results = []
-        
+
         try:
             # Use proper ytsearch syntax for yt-dlp with "music video" for better results
             search_query = f"ytsearch{max_results * 3}:{query} music video"
@@ -148,62 +164,123 @@ class YouTubeAudioService:
                         continue
         
         except Exception as e:
-            logger.error(f"YouTube search error for query '{query}': {e}")
-            import traceback
-            logger.error(traceback.format_exc())
+            logger.error(f"❌ YouTube search FAILED for query '{query}': {type(e).__name__}: {e}")
+            logger.error(f"📍 Full traceback:\n{traceback.format_exc()}")
+
+            # Additional debugging info
+            logger.error(f"🔍 Debug info:")
+            logger.error(f"   - Query: {repr(query)}")
+            logger.error(f"   - Max results: {max_results}")
+            logger.error(f"   - yt-dlp version: {yt_dlp.version.__version__ if hasattr(yt_dlp, 'version') else 'unknown'}")
+            logger.error(f"   - Output directory: {self.output_dir}")
+            logger.error(f"   - Current working directory: {os.getcwd()}")
+
             return []
         
         logger.info(f"YouTube search for '{query}' returned {len(search_results)} results")
         return search_results
     
-    def download_audio(self, video_url: str, title: str, artist: str) -> Optional[str]:
+    def download_audio(self, video_url: str, title: str, artist: str, max_retries: int = 2) -> Optional[str]:
         """
         Download audio from YouTube video and tag it.
-        
+
         Args:
             video_url: YouTube video URL
             title: Song title for tagging
             artist: Artist name for tagging
-            
+            max_retries: Number of retry attempts (default: 2)
+
         Returns:
             Filename of downloaded file, or None if failed
         """
-        try:
-            # Create safe filename
-            safe_filename = self._create_safe_filename(title, artist)
+        logger.info(f"⬇️ Starting YouTube download: url='{video_url}', title='{title}', artist='{artist}'")
+
+        for attempt in range(max_retries + 1):
+            if attempt > 0:
+                logger.info(f"🔄 Retry attempt {attempt}/{max_retries} for: {title}")
+                import time
+                time.sleep(2)  # Wait 2 seconds between retries
+
+            try:
+                # Create safe filename
+                safe_filename = self._create_safe_filename(title, artist)
             
-            # Update output template with safe filename
-            download_opts = self.ydl_opts.copy()
-            download_opts['outtmpl'] = str(self.output_dir / f"{safe_filename}.%(ext)s")
-            
-            # Download the audio
-            with yt_dlp.YoutubeDL(download_opts) as ydl:
-                logger.info(f"Downloading audio from: {video_url}")
-                ydl.download([video_url])
-            
-            # Find the downloaded file (yt-dlp might change the extension)
-            expected_file = self.output_dir / f"{safe_filename}.mp3"
-            if expected_file.exists():
-                downloaded_file = expected_file
-            else:
-                # Look for files with the same base name but different extensions
-                pattern = f"{safe_filename}.*"
-                matches = list(self.output_dir.glob(pattern))
-                if matches:
-                    downloaded_file = matches[0]
+                # Update output template with safe filename
+                download_opts = self.ydl_opts.copy()
+                download_opts['outtmpl'] = str(self.output_dir / f"{safe_filename}.%(ext)s")
+
+                # Download the audio
+                with yt_dlp.YoutubeDL(download_opts) as ydl:
+                    logger.info(f"Downloading audio from: {video_url}")
+                    ydl.download([video_url])
+
+                # Find the downloaded file (yt-dlp might change the extension)
+                expected_file = self.output_dir / f"{safe_filename}.mp3"
+                if expected_file.exists():
+                    downloaded_file = expected_file
                 else:
-                    logger.error(f"Downloaded file not found: {expected_file}")
+                    # Look for files with the same base name but different extensions
+                    pattern = f"{safe_filename}.*"
+                    matches = list(self.output_dir.glob(pattern))
+                    if matches:
+                        downloaded_file = matches[0]
+                    else:
+                        logger.error(f"Downloaded file not found: {expected_file}")
+                        if attempt < max_retries:
+                            logger.info(f"🔄 Will retry download (attempt {attempt + 1}/{max_retries})")
+                            continue  # Try again
+                        else:
+                            return None
+
+                # Tag the MP3 file with metadata
+                self._tag_mp3_file(downloaded_file, title, artist)
+
+                if attempt > 0:
+                    logger.info(f"✅ Download succeeded on retry attempt {attempt}")
+                logger.info(f"Successfully downloaded and tagged: {downloaded_file.name}")
+                return downloaded_file.name
+
+            except Exception as e:
+                error_type = type(e).__name__
+                error_msg = str(e)
+
+                logger.error(f"❌ YouTube download FAILED (attempt {attempt + 1}/{max_retries + 1}) for {video_url}: {error_type}: {error_msg}")
+
+                # Enhanced error classification
+                if "HTTP Error 403" in error_msg or "403" in error_msg:
+                    logger.error("🚫 Specific issue: HTTP 403 Forbidden - Video may be restricted or need authentication")
+                elif "HTTP Error 404" in error_msg or "404" in error_msg:
+                    logger.error("🚫 Specific issue: HTTP 404 Not Found - Video may have been deleted or URL is invalid")
+                elif "private" in error_msg.lower():
+                    logger.error("🚫 Specific issue: Video is private")
+                elif "not available" in error_msg.lower():
+                    logger.error("🚫 Specific issue: Video not available in this region or deleted")
+                elif "age" in error_msg.lower() and "restricted" in error_msg.lower():
+                    logger.error("🚫 Specific issue: Age-restricted content")
+                elif "ffmpeg" in error_msg.lower():
+                    logger.error("🚫 Specific issue: Audio processing failed - FFmpeg error")
+                elif "network" in error_msg.lower() or "connection" in error_msg.lower():
+                    logger.error("🚫 Specific issue: Network connectivity problem")
+
+                # If this is the last attempt, log full details
+                if attempt >= max_retries:
+                    logger.error(f"📍 Full traceback:\n{traceback.format_exc()}")
+                    logger.error(f"🔍 Download debug info:")
+                    logger.error(f"   - Video URL: {repr(video_url)}")
+                    logger.error(f"   - Title: {repr(title)}")
+                    logger.error(f"   - Artist: {repr(artist)}")
+                    logger.error(f"   - Output directory: {self.output_dir}")
+                    logger.error(f"   - Output directory exists: {self.output_dir.exists()}")
+                    logger.error(f"   - Output directory writable: {os.access(self.output_dir, os.W_OK)}")
+                    logger.error(f"   - Safe filename: {repr(self._create_safe_filename(title, artist))}")
                     return None
-            
-            # Tag the MP3 file with metadata
-            self._tag_mp3_file(downloaded_file, title, artist)
-            
-            logger.info(f"Successfully downloaded and tagged: {downloaded_file.name}")
-            return downloaded_file.name
-            
-        except Exception as e:
-            logger.error(f"Error downloading audio from {video_url}: {e}")
-            return None
+                else:
+                    logger.info(f"🔄 Will retry download (attempt {attempt + 2}/{max_retries + 1})")
+                    continue  # Try again
+
+        # If we get here, all retries failed
+        logger.error(f"❌ All download attempts failed for: {title} by {artist}")
+        return None
     
     def _parse_title(self, title: str) -> tuple[str, str]:
         """

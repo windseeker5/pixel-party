@@ -406,7 +406,7 @@
                             {% endif %}
 
                             <div class="polaroid-caption">
-                                <div class="polaroid-date signature">{{ memory.photo.uploaded_at.strftime('%d %b %Y • %Hh%M') }}</div>
+                                <div class="polaroid-date signature">{{ (memory.creation_date or memory.photo.uploaded_at).strftime('%d %b %Y • %Hh%M') }}</div>
                             </div>
                         </div>
                     </div>
