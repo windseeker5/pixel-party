@@ -155,16 +155,9 @@
             right: 20px;
         }
 
-        /* Enhanced Wish Styling */
+        /* Wish Container (no card styling) */
         .wish-card {
-            background: linear-gradient(145deg, #fff8f0 0%, #fef7ed 100%);
-            border-radius: 15px;
-            padding: 35px;
             margin: 20px 0;
-            box-shadow:
-                0 8px 20px rgba(255,165,0,0.1),
-                0 4px 8px rgba(0,0,0,0.05);
-            border: 1px solid rgba(255,215,0,0.2);
             position: relative;
             max-width: 400px;
         }
@@ -176,8 +169,6 @@
             margin-bottom: 15px;
             overflow-wrap: break-word;
             word-wrap: break-word;
-            max-height: 150px;
-            overflow: hidden;
             position: relative;
         }
 
@@ -194,17 +185,7 @@
             font-size: 20px; /* Long messages (71-100 chars) - slightly smaller */
         }
 
-        /* Fade effect for very long texts */
-        .wish-text.long-text::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 30px;
-            background: linear-gradient(transparent, #fef7ed);
-            pointer-events: none;
-        }
+        /* No fade effect - show full text */
 
         .wish-attribution {
             text-align: right;

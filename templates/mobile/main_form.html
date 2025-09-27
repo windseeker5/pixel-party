@@ -127,7 +127,9 @@
               hx-swap="outerHTML"
               hx-indicator="#submit-spinner"
               accept-charset="UTF-8"
-              class="space-y-4 emoji-support">
+              class="space-y-4 emoji-support"
+              novalidate
+              onsubmit="return validatePhotoRequired(event)">
 
             {% if edit_mode and photo %}
             <!-- Hidden field for edit mode -->
@@ -188,8 +190,16 @@
                 
                 <!-- Hidden file input -->
                 <input type="file" name="photo" accept="image/*,video/*"
-                       id="photo-input" class="hidden"
-                       onchange="handleFileSelect(this)" {% if not edit_mode %}required{% endif %}>
+                       id="photo-input" style="display: none;"
+                       onchange="handleFileSelect(this)">
+
+                <!-- Photo validation error message -->
+                <div id="photo-error" class="text-error text-sm mt-2 hidden">
+                    <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    Vous devez joindre une photo ou vidéo
+                </div>
                 
                 <!-- Drop Zone -->
                 <div id="photo-dropzone" 
@@ -360,7 +370,108 @@
                 selectSong(title, artist, source, filePath, url);
             }
         });
+
     });
+
+    // Validation function for photo requirement
+    function validatePhotoRequired(event) {
+        const photoInput = document.getElementById('photo-input');
+        const photoError = document.getElementById('photo-error');
+        const form = event.target;
+
+        // Check if photo is required (always required for new submissions)
+        const editMode = document.querySelector('input[name="edit_id"]');
+
+        // For new submissions, photo is mandatory
+        if (!editMode && !photoInput.files.length) {
+            // Prevent all form submission
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            // Disable HTMX attributes temporarily to prevent HTMX from handling this
+            form.removeAttribute('hx-post');
+            form.removeAttribute('hx-encoding');
+            form.removeAttribute('hx-target');
+            form.removeAttribute('hx-swap');
+            form.removeAttribute('hx-indicator');
+
+            // Create and show flash message at top of page
+            const existingFlash = document.querySelector('.validation-flash');
+            if (existingFlash) {
+                existingFlash.remove();
+            }
+
+            const flashMessage = document.createElement('div');
+            flashMessage.className = 'validation-flash alert alert-error mx-4 mb-4 shadow-lg';
+            flashMessage.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="font-medium">Vous devez joindre une photo ou vidéo pour soumettre un souvenir!</span>
+                </div>
+            `;
+
+            // Insert flash message at the top of main content
+            const mainContent = document.querySelector('main');
+            mainContent.insertBefore(flashMessage, mainContent.firstChild);
+
+            // Show local error message too
+            photoError.classList.remove('hidden');
+
+            // Scroll to top to show flash message
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Add red border to dropzone but keep it clickable
+            const dropzone = document.getElementById('photo-dropzone');
+            dropzone.style.borderColor = '#ef4444';
+            dropzone.style.borderWidth = '2px';
+
+            // Ensure dropzone remains clickable after validation
+            dropzone.style.pointerEvents = 'auto';
+            dropzone.onclick = function() {
+                document.getElementById('photo-input').click();
+            };
+
+            // Auto-hide flash message after 5 seconds
+            setTimeout(() => {
+                if (flashMessage.parentNode) {
+                    flashMessage.remove();
+                }
+            }, 5000);
+
+            // Re-enable HTMX attributes after a delay to allow future submissions
+            setTimeout(() => {
+                form.setAttribute('hx-post', '/mobile/submit_memory');
+                form.setAttribute('hx-encoding', 'multipart/form-data');
+                form.setAttribute('hx-target', 'body');
+                form.setAttribute('hx-swap', 'outerHTML');
+                form.setAttribute('hx-indicator', '#submit-spinner');
+            }, 100);
+
+            // Return false to prevent form submission
+            return false;
+        } else {
+            // Hide error message if validation passes
+            photoError.classList.add('hidden');
+            const dropzone = document.getElementById('photo-dropzone');
+            if (dropzone) {
+                dropzone.style.borderColor = '';
+                dropzone.style.borderWidth = '';
+            }
+
+            // Ensure HTMX attributes are enabled for valid submissions
+            form.setAttribute('hx-post', '/mobile/submit_memory');
+            form.setAttribute('hx-encoding', 'multipart/form-data');
+            form.setAttribute('hx-target', 'body');
+            form.setAttribute('hx-swap', 'outerHTML');
+            form.setAttribute('hx-indicator', '#submit-spinner');
+
+            // Return true to allow form submission
+            return true;
+        }
+    }
 
     // Function to select song from HTMX search results - ULTRA DEFENSIVE VERSION
     function selectSong(title, artist, source, file_path, url) {
@@ -496,6 +607,22 @@
         if (file) {
             if (validateFile(file)) {
                 showPreview(file);
+
+                // Clear validation messages when a file is selected
+                const photoError = document.getElementById('photo-error');
+                const flashMessage = document.querySelector('.validation-flash');
+                const dropzone = document.getElementById('photo-dropzone');
+
+                if (photoError) {
+                    photoError.classList.add('hidden');
+                }
+                if (flashMessage) {
+                    flashMessage.remove();
+                }
+                if (dropzone) {
+                    dropzone.style.borderColor = '';
+                    dropzone.style.borderWidth = '';
+                }
             } else {
                 // Reset file input if invalid
                 input.value = '';

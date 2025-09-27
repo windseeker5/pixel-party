@@ -26,8 +26,8 @@ class Photo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     guest_id = db.Column(db.Integer, db.ForeignKey('guests.id'), nullable=True)
     guest_name = db.Column(db.String(100), nullable=False)  # Stored for easy access
-    filename = db.Column(db.String(255), nullable=False)
-    original_filename = db.Column(db.String(255), nullable=False)
+    filename = db.Column(db.String(255), nullable=True)
+    original_filename = db.Column(db.String(255), nullable=True)
     wish_message = db.Column(db.Text, nullable=False)  # Birthday wish/note with full emoji support
     uploaded_at = db.Column(db.DateTime, default=datetime.datetime.now)
     displayed_at = db.Column(db.DateTime, nullable=True)

@@ -3,7 +3,7 @@
 import os
 import uuid
 import threading
-from datetime import datetime
+import datetime
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, session, jsonify
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -494,23 +494,12 @@ def submit_memory():
             print(f"   ❌ JSON parse error: {e}")
             print(f"   Raw selected_song: {repr(selected_song)}")
     
-    # File validation - required for new uploads, optional for edits
+    # File validation - optional for both new uploads and edits
     if not file or file.filename == '':
-        if not is_edit_mode:
-            # For new uploads, file is required
-            with open('submission_debug.log', 'a') as f:
-                f.write(f"FAIL: File validation - file={file}, filename={file.filename if file else 'None'}\n")
-            error_msg = 'Please select a photo or video to share! 📸'
-            if is_htmx_request():
-                return render_template('mobile/upload.html',
-                                     guest_name=session['guest_name'],
-                                     error=error_msg)
-            else:
-                flash(error_msg, 'error')
-                return redirect(url_for('mobile.upload'))
-        else:
-            # For edits, no new file means keep existing file - skip file processing
-            file = None
+        # No file uploaded - this is now allowed for both new and edit modes
+        file = None
+        with open('submission_debug.log', 'a') as f:
+            f.write(f"INFO: No file uploaded - proceeding with wish-only submission\n")
     
     # Only check file if it's not None (for edit mode without new file)
     if file:
@@ -566,11 +555,11 @@ def submit_memory():
         wish_message = wish_message[:140]
 
     try:
-        # File processing - only if a new file is provided
+        # Initialize file variables with defaults for wish-only submissions
         unique_filename = None
         original_filename = None
         file_size = 0
-        file_type = 'image'
+        file_type = 'wish'  # Default to 'wish' for no-file submissions
         video_duration = None
         thumbnail_filename = None
 
@@ -626,7 +615,7 @@ def submit_memory():
                     flash(error_msg, 'error')
                     return redirect(url_for('mobile.upload'))
 
-        # Create or update photo record
+        # Create or update photo record (now supports wish-only submissions)
         if is_edit_mode:
             # Update existing photo (reuse the one we already fetched)
             photo = existing_photo
@@ -641,15 +630,15 @@ def submit_memory():
                 photo.duration = video_duration
                 photo.thumbnail = thumbnail_filename
         else:
-            # Create new photo record
+            # Create new photo record (filename can be None for wish-only submissions)
             photo = Photo(
                 guest_id=guest.id,
                 guest_name=guest.name,
-                filename=unique_filename,
-                original_filename=original_filename,
+                filename=unique_filename,  # Can be None
+                original_filename=original_filename,  # Can be None
                 wish_message=wish_message,
                 file_size=file_size,
-                file_type=file_type,
+                file_type=file_type or 'wish',  # Set type to 'wish' if no file
                 duration=video_duration,
                 thumbnail=thumbnail_filename
             )
@@ -812,7 +801,57 @@ def submit_memory():
         if not is_edit_mode:
             guest.total_submissions += 1
 
-        db.session.commit()
+        # DEBUG: Log before commit
+        with open('submission_debug.log', 'a') as f:
+            f.write(f"DEBUG: About to commit to database\n")
+            f.write(f"Photo ID: {photo.id if hasattr(photo, 'id') else 'NEW'}\n")
+            f.write(f"Guest name: {photo.guest_name}\n")
+            f.write(f"Wish: {photo.wish_message}\n")
+            f.write(f"Filename: {photo.filename}\n")
+            f.write(f"File type: {photo.file_type}\n")
+
+        try:
+            db.session.commit()
+            with open('submission_debug.log', 'a') as f:
+                f.write(f"SUCCESS: Database commit successful, Photo ID: {photo.id}\n")
+        except Exception as commit_error:
+            with open('submission_debug.log', 'a') as f:
+                f.write(f"ERROR: Database commit failed: {commit_error}\n")
+            db.session.rollback()
+
+            # WORKAROUND: Use raw SQL insert since ORM is failing
+            try:
+                from sqlalchemy import text
+                with open('submission_debug.log', 'a') as f:
+                    f.write(f"WORKAROUND: Trying raw SQL insert...\n")
+
+                sql = text('''INSERT INTO photos
+                    (guest_id, guest_name, filename, original_filename, wish_message,
+                     uploaded_at, display_duration, file_size, file_type)
+                    VALUES (:guest_id, :guest_name, :filename, :original_filename, :wish_message,
+                            :uploaded_at, :display_duration, :file_size, :file_type)''')
+
+                result = db.session.execute(sql, {
+                    'guest_id': guest.id,
+                    'guest_name': guest.name,
+                    'filename': None,
+                    'original_filename': None,
+                    'wish_message': wish_message,
+                    'uploaded_at': datetime.datetime.now(),
+                    'display_duration': 10,
+                    'file_size': 0,
+                    'file_type': 'wish'
+                })
+                db.session.commit()
+
+                with open('submission_debug.log', 'a') as f:
+                    f.write(f"SUCCESS: Raw SQL insert worked!\n")
+
+            except Exception as sql_error:
+                with open('submission_debug.log', 'a') as f:
+                    f.write(f"ERROR: Raw SQL also failed: {sql_error}\n")
+                db.session.rollback()
+                raise commit_error
         
         # Handle success differently for edit vs. new submissions
         if is_edit_mode:

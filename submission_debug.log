@@ -848,3 +848,223 @@ PASS: Guest name validation
 EDIT MODE: Getting guest for edit_id=1
 EDIT MODE: Guest found/created: Marie-France (ID: 1)
 EDIT MODE: No new file uploaded, keeping existing
+DEBUG: Starting submit_memory, edit_id=None, is_edit_mode=False
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Test User'
+PASS: Guest name validation
+INFO: No file uploaded - proceeding with wish-only submission
+EDIT MODE: No new file uploaded, keeping existing
+DEBUG: Starting submit_memory, edit_id=None, is_edit_mode=False
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Final Test User'
+PASS: Guest name validation
+INFO: No file uploaded - proceeding with wish-only submission
+EDIT MODE: No new file uploaded, keeping existing
+DEBUG: Starting submit_memory, edit_id=None, is_edit_mode=False
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Working Test User'
+PASS: Guest name validation
+INFO: No file uploaded - proceeding with wish-only submission
+EDIT MODE: No new file uploaded, keeping existing
+DEBUG: Starting submit_memory, edit_id=None, is_edit_mode=False
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Debug Test'
+PASS: Guest name validation
+INFO: No file uploaded - proceeding with wish-only submission
+EDIT MODE: No new file uploaded, keeping existing
+DEBUG: About to commit to database
+Photo ID: None
+Guest name: Debug Test
+Wish: Debug wish to find the error
+Filename: None
+File type: wish
+DEBUG: Starting submit_memory, edit_id=None, is_edit_mode=False
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Error Finder'
+PASS: Guest name validation
+INFO: No file uploaded - proceeding with wish-only submission
+EDIT MODE: No new file uploaded, keeping existing
+DEBUG: About to commit to database
+Photo ID: None
+Guest name: Error Finder
+Wish: Finding the exact commit error
+Filename: None
+File type: wish
+ERROR: Database commit failed: (sqlite3.IntegrityError) NOT NULL constraint failed: photos.filename
+[SQL: INSERT INTO photos (guest_id, guest_name, filename, original_filename, wish_message, uploaded_at, displayed_at, display_duration, file_size, file_type, duration, thumbnail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: (21, 'Error Finder', None, None, 'Finding the exact commit error', '2025-09-27 14:17:32.247555', None, 10, 0, 'wish', None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+DEBUG: Starting submit_memory, edit_id=None, is_edit_mode=False
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Final Fix Test'
+PASS: Guest name validation
+INFO: No file uploaded - proceeding with wish-only submission
+EDIT MODE: No new file uploaded, keeping existing
+DEBUG: About to commit to database
+Photo ID: None
+Guest name: Final Fix Test
+Wish: This should work now since manual inserts work!
+Filename: None
+File type: wish
+ERROR: Database commit failed: (sqlite3.IntegrityError) NOT NULL constraint failed: photos.filename
+[SQL: INSERT INTO photos (guest_id, guest_name, filename, original_filename, wish_message, uploaded_at, displayed_at, display_duration, file_size, file_type, duration, thumbnail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: (22, 'Final Fix Test', None, None, 'This should work now since manual inserts work!', '2025-09-27 14:18:51.090583', None, 10, 0, 'wish', None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+DEBUG: Starting submit_memory, edit_id=None, is_edit_mode=False
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Workaround Test'
+PASS: Guest name validation
+INFO: No file uploaded - proceeding with wish-only submission
+EDIT MODE: No new file uploaded, keeping existing
+DEBUG: About to commit to database
+Photo ID: None
+Guest name: Workaround Test
+Wish: Testing the raw SQL workaround for wish-only submission
+Filename: None
+File type: wish
+ERROR: Database commit failed: (sqlite3.IntegrityError) NOT NULL constraint failed: photos.filename
+[SQL: INSERT INTO photos (guest_id, guest_name, filename, original_filename, wish_message, uploaded_at, displayed_at, display_duration, file_size, file_type, duration, thumbnail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: (23, 'Workaround Test', None, None, 'Testing the raw SQL workaround for wish-only submission', '2025-09-27 14:19:45.165243', None, 10, 0, 'wish', None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+WORKAROUND: Trying raw SQL insert...
+ERROR: Raw SQL also failed: (sqlite3.IntegrityError) NOT NULL constraint failed: photos.filename
+[SQL: INSERT INTO photos
+                    (guest_id, guest_name, filename, original_filename, wish_message,
+                     uploaded_at, display_duration, file_size, file_type)
+                    VALUES (?, ?, ?, ?, ?,
+                            ?, ?, ?, ?)]
+[parameters: (23, 'Workaround Test', None, None, 'Testing the raw SQL workaround for wish-only submission', datetime.datetime(2025, 9, 27, 14, 19, 45, 166888), 10, 0, 'wish')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+DEBUG: Starting submit_memory, edit_id=None, is_edit_mode=False
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Fresh Database Test'
+PASS: Guest name validation
+INFO: No file uploaded - proceeding with wish-only submission
+EDIT MODE: No new file uploaded, keeping existing
+DEBUG: About to commit to database
+Photo ID: None
+Guest name: Fresh Database Test
+Wish: Testing with fresh database - wish only!
+Filename: None
+File type: wish
+ERROR: Database commit failed: (sqlite3.IntegrityError) NOT NULL constraint failed: photos.filename
+[SQL: INSERT INTO photos (guest_id, guest_name, filename, original_filename, wish_message, uploaded_at, displayed_at, display_duration, file_size, file_type, duration, thumbnail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: (24, 'Fresh Database Test', None, None, 'Testing with fresh database - wish only!', '2025-09-27 14:22:01.904696', None, 10, 0, 'wish', None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+WORKAROUND: Trying raw SQL insert...
+ERROR: Raw SQL also failed: (sqlite3.IntegrityError) NOT NULL constraint failed: photos.filename
+[SQL: INSERT INTO photos
+                    (guest_id, guest_name, filename, original_filename, wish_message,
+                     uploaded_at, display_duration, file_size, file_type)
+                    VALUES (?, ?, ?, ?, ?,
+                            ?, ?, ?, ?)]
+[parameters: (24, 'Fresh Database Test', None, None, 'Testing with fresh database - wish only!', datetime.datetime(2025, 9, 27, 14, 22, 1, 905764), 10, 0, 'wish')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+DEBUG: Starting submit_memory, edit_id=None, is_edit_mode=False
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Test User'
+PASS: Guest name validation
+INFO: No file uploaded - proceeding with wish-only submission
+EDIT MODE: No new file uploaded, keeping existing
+DEBUG: About to commit to database
+Photo ID: None
+Guest name: Test User
+Wish: Testing validation without photo
+Filename: None
+File type: wish
+ERROR: Database commit failed: (sqlite3.IntegrityError) NOT NULL constraint failed: photos.filename
+[SQL: INSERT INTO photos (guest_id, guest_name, filename, original_filename, wish_message, uploaded_at, displayed_at, display_duration, file_size, file_type, duration, thumbnail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: (17, 'Test User', None, None, 'Testing validation without photo', '2025-09-27 14:24:56.420919', None, 10, 0, 'wish', None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+WORKAROUND: Trying raw SQL insert...
+ERROR: Raw SQL also failed: (sqlite3.IntegrityError) NOT NULL constraint failed: photos.filename
+[SQL: INSERT INTO photos
+                    (guest_id, guest_name, filename, original_filename, wish_message,
+                     uploaded_at, display_duration, file_size, file_type)
+                    VALUES (?, ?, ?, ?, ?,
+                            ?, ?, ?, ?)]
+[parameters: (17, 'Test User', None, None, 'Testing validation without photo', datetime.datetime(2025, 9, 27, 14, 24, 56, 423337), 10, 0, 'wish')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+DEBUG: Starting submit_memory, edit_id=None, is_edit_mode=False
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Final Test'
+PASS: Guest name validation
+INFO: No file uploaded - proceeding with wish-only submission
+EDIT MODE: No new file uploaded, keeping existing
+DEBUG: About to commit to database
+Photo ID: None
+Guest name: Final Test
+Wish: Testing that photo upload works after validation
+Filename: None
+File type: wish
+ERROR: Database commit failed: (sqlite3.IntegrityError) NOT NULL constraint failed: photos.filename
+[SQL: INSERT INTO photos (guest_id, guest_name, filename, original_filename, wish_message, uploaded_at, displayed_at, display_duration, file_size, file_type, duration, thumbnail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: (25, 'Final Test', None, None, 'Testing that photo upload works after validation', '2025-09-27 14:31:15.980157', None, 10, 0, 'wish', None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+WORKAROUND: Trying raw SQL insert...
+ERROR: Raw SQL also failed: (sqlite3.IntegrityError) NOT NULL constraint failed: photos.filename
+[SQL: INSERT INTO photos
+                    (guest_id, guest_name, filename, original_filename, wish_message,
+                     uploaded_at, display_duration, file_size, file_type)
+                    VALUES (?, ?, ?, ?, ?,
+                            ?, ?, ?, ?)]
+[parameters: (25, 'Final Test', None, None, 'Testing that photo upload works after validation', datetime.datetime(2025, 9, 27, 14, 31, 15, 981110), 10, 0, 'wish')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+DEBUG: Starting submit_memory, edit_id=None, is_edit_mode=False
+
+=== SUBMISSION ATTEMPT ===
+Form keys: ['guest_name', 'wish_message', 'query', 'selected_song']
+Files keys: []
+guest_name: 'Working Validation Test'
+PASS: Guest name validation
+INFO: No file uploaded - proceeding with wish-only submission
+EDIT MODE: No new file uploaded, keeping existing
+DEBUG: About to commit to database
+Photo ID: None
+Guest name: Working Validation Test
+Wish: This should show validation and still allow photo clicks
+Filename: None
+File type: wish
+ERROR: Database commit failed: (sqlite3.IntegrityError) NOT NULL constraint failed: photos.filename
+[SQL: INSERT INTO photos (guest_id, guest_name, filename, original_filename, wish_message, uploaded_at, displayed_at, display_duration, file_size, file_type, duration, thumbnail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: (26, 'Working Validation Test', None, None, 'This should show validation and still allow photo clicks', '2025-09-27 14:32:15.646374', None, 10, 0, 'wish', None, None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+WORKAROUND: Trying raw SQL insert...
+ERROR: Raw SQL also failed: (sqlite3.IntegrityError) NOT NULL constraint failed: photos.filename
+[SQL: INSERT INTO photos
+                    (guest_id, guest_name, filename, original_filename, wish_message,
+                     uploaded_at, display_duration, file_size, file_type)
+                    VALUES (?, ?, ?, ?, ?,
+                            ?, ?, ?, ?)]
+[parameters: (26, 'Working Validation Test', None, None, 'This should show validation and still allow photo clicks', datetime.datetime(2025, 9, 27, 14, 32, 15, 647718), 10, 0, 'wish')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
