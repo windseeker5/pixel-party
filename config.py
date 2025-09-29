@@ -22,7 +22,7 @@ class Config:
     }
     
     # File upload settings
-    MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50MB max file size
+    MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB max file size
     UPLOAD_FOLDER = BASE_DIR / 'media' / 'photos'
     VIDEO_FOLDER = BASE_DIR / 'media' / 'videos'
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'mp4', 'mov', 'avi', 'mkv', 'webm'}

@@ -15,8 +15,8 @@ class FileHandler:
 
     UPLOAD_DIR = "media/photos"
     THUMBNAIL_DIR = "media/thumbnails"
-    MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
-    MAX_VIDEO_DURATION = 120  # seconds (2 minutes)
+    MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
+    MAX_VIDEO_DURATION = 300  # seconds (5 minutes)
     TARGET_WIDTH = 1920
     TARGET_HEIGHT = 1080
     ALLOWED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'}
@@ -64,7 +64,7 @@ class FileHandler:
                 duration = clip.duration
 
             if duration > self.MAX_VIDEO_DURATION:
-                return False, f"Video is {duration:.1f} seconds. Maximum allowed is {self.MAX_VIDEO_DURATION} seconds (2 minutes) for smooth party flow!", duration
+                return False, f"Video is {duration:.1f} seconds. Maximum allowed is {self.MAX_VIDEO_DURATION} seconds (5 minutes) for smooth party flow!", duration
 
             return True, f"Video duration: {duration:.1f} seconds", duration
 
