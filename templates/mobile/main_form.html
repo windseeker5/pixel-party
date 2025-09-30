@@ -7,6 +7,11 @@
 {% endblock %}
 
 {% block extra_head %}
+<!-- Cache busting for updates -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 <!-- Google Fonts for beautiful title -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -254,7 +259,7 @@
                 </div>
                 
                 <div class="label">
-                    <span class="label-text-alt">Taille max: 50MB • Vidéos: 2 minutes max pour un bon déroulement</span>
+                    <span class="label-text-alt">Taille max: 100MB • Vidéos: 5 minutes max pour un bon déroulement</span>
                 </div>
             </div>
             
