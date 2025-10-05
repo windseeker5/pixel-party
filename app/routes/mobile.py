@@ -643,6 +643,9 @@ def submit_memory():
                 thumbnail=thumbnail_filename
             )
             db.session.add(photo)
+
+        # Flush to get photo.id before creating music request
+        db.session.flush()
         
         # Handle selected song if provided
         if selected_song:
@@ -745,6 +748,7 @@ def submit_memory():
                         if existing_music:
                             # Update existing entry
                             music_request = existing_music
+                            music_request.photo_id = photo.id  # Link to current photo
                             music_request.album = song_data.get('album', '')
                             music_request.filename = copied_filename
                             music_request.source = song_data.get('source', 'request')
@@ -754,6 +758,7 @@ def submit_memory():
                             # Create new entry
                             music_request = MusicQueue(
                                 guest_id=guest.id,
+                                photo_id=photo.id,  # Link to photo
                                 song_title=song_data.get('title', ''),
                                 artist=song_data.get('artist', ''),
                                 album=song_data.get('album', ''),
@@ -766,6 +771,7 @@ def submit_memory():
                         # Create new entry for non-edit mode
                         music_request = MusicQueue(
                             guest_id=guest.id,
+                            photo_id=photo.id,  # Link to photo
                             song_title=song_data.get('title', ''),
                             artist=song_data.get('artist', ''),
                             album=song_data.get('album', ''),

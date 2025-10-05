@@ -37,13 +37,17 @@ class Photo(db.Model):
     duration = db.Column(db.Float, nullable=True)  # Video duration in seconds
     thumbnail = db.Column(db.String(255), nullable=True)  # Thumbnail filename for videos
 
+    # Relationship to associated music
+    music = db.relationship('MusicQueue', backref='photo', lazy=True, foreign_keys='MusicQueue.photo_id')
+
 
 class MusicQueue(db.Model):
     """Music submissions."""
     __tablename__ = 'music_queue'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     guest_id = db.Column(db.Integer, db.ForeignKey('guests.id'), nullable=True)
+    photo_id = db.Column(db.Integer, db.ForeignKey('photos.id'), nullable=True, index=True)  # Direct link to photo
     song_title = db.Column(db.String(200), nullable=True)
     artist = db.Column(db.String(200), nullable=True)
     album = db.Column(db.String(200), nullable=True)

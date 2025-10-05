@@ -197,18 +197,51 @@ def memory_book():
     """Display the memory book with all photos, wishes, and music."""
     # Get all photos with their associated music
     photos = Photo.query.order_by(Photo.uploaded_at.asc()).all()
-    
-    # For each photo, find the associated music from the same guest at similar time
+
+    # Track which music has been used (for fallback matching only)
+    used_music_ids = set()
+
+    # For each photo, find the associated music
     memories = []
     for photo in photos:
-        # Get music request from same guest (any time - support for edit mode)
         music = None
-        if photo.guest_id:
-            # Get the most recent music from this guest that's ready/completed
-            music = MusicQueue.query.filter_by(guest_id=photo.guest_id)\
+
+        # FIRST: Try direct photo_id link (new association method)
+        music = MusicQueue.query.filter_by(photo_id=photo.id)\
+            .filter(MusicQueue.status.in_(['ready', 'completed']))\
+            .first()
+
+        # FALLBACK: If no direct link, try guest-based matching (backward compatibility)
+        if not music and photo.guest_id:
+            # Find music from same guest submitted around the same time (within 5 minutes)
+            # Exclude music that's already been matched to avoid duplicates
+            from datetime import timedelta
+            from sqlalchemy import func
+            time_window_start = photo.uploaded_at - timedelta(minutes=5)
+            time_window_end = photo.uploaded_at + timedelta(minutes=5)
+
+            # Find all candidate music in time window, excluding already used ones
+            candidates = MusicQueue.query.filter_by(guest_id=photo.guest_id)\
                 .filter(MusicQueue.status.in_(['ready', 'completed']))\
-                .order_by(MusicQueue.submitted_at.desc())\
-                .first()
+                .filter(MusicQueue.submitted_at >= time_window_start)\
+                .filter(MusicQueue.submitted_at <= time_window_end)\
+                .filter(~MusicQueue.id.in_(used_music_ids) if used_music_ids else True)\
+                .all()
+
+            # Find the closest music by time
+            if candidates:
+                from datetime import datetime
+                best_match = None
+                min_diff = None
+                for candidate in candidates:
+                    time_diff = abs((candidate.submitted_at - photo.uploaded_at).total_seconds())
+                    if min_diff is None or time_diff < min_diff:
+                        min_diff = time_diff
+                        best_match = candidate
+
+                if best_match:
+                    music = best_match
+                    used_music_ids.add(music.id)
 
         # Get creation date from photo metadata
         photo_path = f'media/photos/{photo.filename}'
@@ -219,7 +252,7 @@ def memory_book():
             'music': music,
             'creation_date': creation_date or photo.uploaded_at
         })
-    
+
     return render_template('admin/memory_book.html', memories=memories)
 
 
@@ -417,6 +450,9 @@ def export_standalone():
     os.makedirs(f'{export_dir}/thumbnails', exist_ok=True)
     os.makedirs(f'{export_dir}/music', exist_ok=True)
     
+    # Track which music has been used (for fallback matching only)
+    used_music_ids = set()
+
     # Prepare memories data and copy files
     memories = []
     for photo in photos:
@@ -432,28 +468,57 @@ def export_standalone():
             thumb_dest = f'{export_dir}/thumbnails/{photo.thumbnail}'
             if os.path.exists(thumb_src):
                 shutil.copy2(thumb_src, thumb_dest)
-        
-        # Get associated music (any time - support for edit mode)
+
+        # Get associated music using same logic as memory_book()
         music = None
-        if photo.guest_id:
-            # Get the most recent music from this guest that's ready/completed
-            music = MusicQueue.query.filter_by(guest_id=photo.guest_id)\
+
+        # FIRST: Try direct photo_id link (new association method)
+        music = MusicQueue.query.filter_by(photo_id=photo.id)\
+            .filter(MusicQueue.status.in_(['ready', 'completed']))\
+            .first()
+
+        # FALLBACK: If no direct link, try guest-based matching (backward compatibility)
+        if not music and photo.guest_id:
+            # Find music from same guest submitted around the same time (within 5 minutes)
+            # Exclude music that's already been matched to avoid duplicates
+            from datetime import timedelta
+            time_window_start = photo.uploaded_at - timedelta(minutes=5)
+            time_window_end = photo.uploaded_at + timedelta(minutes=5)
+
+            # Find all candidate music in time window, excluding already used ones
+            candidates = MusicQueue.query.filter_by(guest_id=photo.guest_id)\
                 .filter(MusicQueue.status.in_(['ready', 'completed']))\
-                .order_by(MusicQueue.submitted_at.desc())\
-                .first()
+                .filter(MusicQueue.submitted_at >= time_window_start)\
+                .filter(MusicQueue.submitted_at <= time_window_end)\
+                .filter(~MusicQueue.id.in_(used_music_ids) if used_music_ids else True)\
+                .all()
 
-            # Copy music file if exists, but include music info even if file is missing
-            music_available = False
-            if music and music.filename:
-                music_src = f'media/music/{music.filename}'
-                music_dest = f'{export_dir}/music/{music.filename}'
-                if os.path.exists(music_src):
-                    shutil.copy2(music_src, music_dest)
-                    music_available = True
+            # Find the closest music by time
+            if candidates:
+                best_match = None
+                min_diff = None
+                for candidate in candidates:
+                    time_diff = abs((candidate.submitted_at - photo.uploaded_at).total_seconds())
+                    if min_diff is None or time_diff < min_diff:
+                        min_diff = time_diff
+                        best_match = candidate
 
-            # Add music availability info for template
-            if music:
-                music.file_available = music_available
+                if best_match:
+                    music = best_match
+                    used_music_ids.add(music.id)
+
+        # Copy music file if exists, but include music info even if file is missing
+        music_available = False
+        if music and music.filename:
+            music_src = f'media/music/{music.filename}'
+            music_dest = f'{export_dir}/music/{music.filename}'
+            if os.path.exists(music_src):
+                shutil.copy2(music_src, music_dest)
+                music_available = True
+
+        # Add music availability info for template
+        if music:
+            music.file_available = music_available
 
         # Get creation date from photo metadata
         photo_path = f'media/photos/{photo.filename}'
